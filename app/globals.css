@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+/* ---- Parlo · design tokens (dirección de arte primera pasada, validar con equipo visual) ---- */
+@theme inline {
+  --font-sans: var(--font-nunito);
+  --font-display: var(--font-montserrat);
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-card: var(--card);
+  --color-border: var(--border);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+
+  --color-primary: var(--primary);
+  --color-primary-fg: var(--primary-fg);
+  --color-primary-soft: var(--primary-soft);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-gem: var(--gem);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+
+  --radius-pill: 9999px;
+}
+
+:root {
+  --bg: #fff9f5;
+  --surface: #ffffff;
+  --card: #ffffff;
+  --border: #f1e7dd;
+  --fg: #1b1233;
+  --muted: #7a7290;
+
+  --primary: #ff6b4a; /* coral */
+  --primary-fg: #ffffff;
+  --primary-soft: #ffe9e2;
+  --accent: #00c2a8; /* teal pluma de loro */
+  --accent-soft: #d8f7f1;
+  --gem: #ffc94a; /* ámbar recompensas */
+  --success: #22b07d;
+  --danger: #e5484d;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #140e24;
+    --surface: #1c1436;
+    --card: #221a40;
+    --border: #2f2652;
+    --fg: #f4f0ff;
+    --muted: #a79fc4;
+
+    --primary: #ff7a5c;
+    --primary-fg: #1b1233;
+    --primary-soft: #3a2136;
+    --accent: #1bd6bb;
+    --accent-soft: #103a38;
+    --gem: #ffd166;
+    --success: #34c58b;
+    --danger: #ff6b6f;
+  }
+}
+
+* {
+  border-color: var(--color-border);
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-primary) 30%, transparent);
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+/* Respeta reduce-motion en todas las animaciones */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
