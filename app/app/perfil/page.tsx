@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import badgeLevel from "@/public/brand/badge-level.png";
+import mascotCelebrate from "@/public/brand/mascot-celebrate.png";
 import {
   IconFlame,
   IconLogout,
@@ -54,7 +55,7 @@ export default function PerfilPage() {
         <p className="mb-3 text-sm font-semibold text-muted">
           {t("perfil.badges_title")}
         </p>
-        <Card className="flex items-center gap-4 p-4">
+        <Card className="flex items-center gap-4 overflow-hidden p-4">
           <Image
             src={badgeLevel}
             alt=""
@@ -62,10 +63,17 @@ export default function PerfilPage() {
             width={Math.round((64 * badgeLevel.width) / badgeLevel.height)}
             className="shrink-0"
           />
-          <div>
+          <div className="flex-1">
             <p className="font-display font-bold">{t("perfil.badge_level")}</p>
             <p className="text-sm text-muted">A1</p>
           </div>
+          <Image
+            src={mascotCelebrate}
+            alt=""
+            height={76}
+            width={Math.round((76 * mascotCelebrate.width) / mascotCelebrate.height)}
+            className="-mb-4 shrink-0"
+          />
         </Card>
       </div>
 
