@@ -97,8 +97,8 @@ export default function PerfilPage() {
         variant="danger"
         fullWidth
         className="mt-4"
-        onClick={() => {
-          logout();
+        onClick={async () => {
+          await logout();
           router.replace("/");
         }}
       >

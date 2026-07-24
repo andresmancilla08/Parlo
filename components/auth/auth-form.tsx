@@ -20,12 +20,16 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const [pin, setPin] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [shake, setShake] = useState(false);
+  const [busy, setBusy] = useState(false);
 
   const isLogin = mode === "login";
-  const canSubmit = email.includes("@") && pin.length === 4;
+  const canSubmit = email.includes("@") && pin.length === 4 && !busy;
 
-  const submit = () => {
-    if (login(email, pin).ok) {
+  const submit = async () => {
+    setBusy(true);
+    const { ok } = await login(email, pin);
+    setBusy(false);
+    if (ok) {
       router.push("/app");
       return;
     }

@@ -1,16 +1,14 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-// ponytail: auth demo — un único usuario hardcodeado, sin backend.
-// TODO: reemplazar por Firebase Auth (email + PIN real) cuando toque.
-const DEMO_EMAIL = "andresmancilla08@gmail.com";
-const DEMO_PIN = "1111";
-
+// El email se guarda solo para la UI (saludo, avatar). La verdad de la sesión es
+// la cookie httpOnly firmada que valida el proxy. Las credenciales viven en el
+// servidor (/api/login), NO en este bundle.
 type AuthState = {
   email: string | null;
   hydrated: boolean;
-  login: (email: string, pin: string) => { ok: boolean };
-  logout: () => void;
+  login: (email: string, pin: string) => Promise<{ ok: boolean }>;
+  logout: () => Promise<void>;
   setHydrated: () => void;
 };
 
@@ -19,15 +17,28 @@ export const useAuth = create<AuthState>()(
     (set) => ({
       email: null,
       hydrated: false,
-      login: (email, pin) => {
-        const e = email.trim().toLowerCase();
-        if (e === DEMO_EMAIL && pin === DEMO_PIN) {
-          set({ email: e });
+      login: async (email, pin) => {
+        try {
+          const res = await fetch("/api/login", {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ email, pin }),
+          });
+          if (!res.ok) return { ok: false };
+          const data = (await res.json()) as { email: string };
+          set({ email: data.email });
           return { ok: true };
+        } catch {
+          return { ok: false };
         }
-        return { ok: false };
       },
-      logout: () => set({ email: null }),
+      logout: async () => {
+        try {
+          await fetch("/api/logout", { method: "POST" });
+        } finally {
+          set({ email: null });
+        }
+      },
       setHydrated: () => set({ hydrated: true }),
     }),
     {
