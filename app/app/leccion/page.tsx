@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { IconArrowLeft, IconMessageChatbot, IconTool } from "@tabler/icons-react";
+import { Button } from "@/components/ui/button";
+import { spring } from "@/lib/motion";
 
 export default function LeccionPage() {
   return (
@@ -10,7 +12,7 @@ export default function LeccionPage() {
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 320, damping: 24 }}
+        transition={spring}
       >
         <span className="mx-auto mb-5 inline-flex size-16 items-center justify-center rounded-3xl bg-accent-soft text-accent">
           <IconTool className="size-8" />
@@ -23,13 +25,10 @@ export default function LeccionPage() {
           Mientras tanto, practica hablando con el tutor.
         </p>
         <div className="mt-7 flex flex-col items-center gap-3">
-          <Link
-            href="/app/tutor"
-            className="inline-flex items-center gap-2 rounded-pill bg-primary px-6 py-3 font-display font-bold text-primary-fg shadow-lg shadow-primary/25"
-          >
+          <Button href="/app/tutor" shimmer>
             <IconMessageChatbot className="size-5" />
             Ir al tutor
-          </Link>
+          </Button>
           <Link
             href="/app"
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-muted"

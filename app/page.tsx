@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import {
   IconBolt,
   IconBrain,
@@ -8,25 +8,15 @@ import {
   IconFlame,
   IconMessageChatbot,
   IconPencil,
+  IconRoute,
   IconSparkles,
   IconTrophy,
-  IconVolume2,
 } from "@tabler/icons-react";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import { GradientText } from "@/components/ui/gradient-text";
-import { ShimmerButton } from "@/components/ui/shimmer-button";
-
-const spring = { type: "spring" as const, stiffness: 320, damping: 24 };
-
-const rise = {
-  hidden: { opacity: 0, y: 16 },
-  show: { opacity: 1, y: 0, transition: spring },
-};
-
-const stagger = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.02 } },
-};
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { rise, spring, stagger } from "@/lib/motion";
 
 export default function Home() {
   return (
@@ -57,12 +47,12 @@ function Nav() {
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5">
         <Wordmark />
         <div className="flex items-center gap-2">
-          <ShimmerButton href="/login" variant="ghost" className="px-5 py-2.5 text-sm">
+          <Button href="/login" variant="secondary" size="sm">
             Entrar
-          </ShimmerButton>
-          <ShimmerButton href="/registro" className="px-5 py-2.5 text-sm">
+          </Button>
+          <Button href="/registro" size="sm" shimmer>
             Empezar gratis
-          </ShimmerButton>
+          </Button>
         </div>
       </nav>
     </header>
@@ -70,12 +60,17 @@ function Nav() {
 }
 
 function Hero() {
+  const { scrollY } = useScroll();
+  const y = useTransform(scrollY, [0, 500], [0, 90]);
+  const opacity = useTransform(scrollY, [0, 420], [1, 0.35]);
+
   return (
     <AuroraBackground className="px-5 py-20 sm:py-28">
       <motion.div
         initial="hidden"
         animate="show"
         variants={stagger}
+        style={{ y, opacity }}
         className="mx-auto flex max-w-3xl flex-col items-center text-center"
       >
         <motion.span
@@ -90,27 +85,25 @@ function Hero() {
           variants={rise}
           className="font-display text-4xl font-extrabold leading-[1.05] tracking-tight sm:text-6xl"
         >
-          Aprende inglés <GradientText>como se debe</GradientText>, desde cero
-          hasta avanzado
+          Habla inglés <GradientText>con confianza</GradientText>, no de memoria.
         </motion.h1>
 
         <motion.p variants={rise} className="mt-5 max-w-xl text-lg text-muted">
-          Currículo por niveles A1 → C2, un tutor de IA que corrige tus errores y
-          te explica el porqué, repaso espaciado y retos diarios. Sin cuentas de
-          humo: práctica real.
+          Tu tutor de IA corrige tus errores, explica el porqué en español y te
+          guía paso a paso hasta alcanzar fluidez real.
         </motion.p>
 
         <motion.div
           variants={rise}
           className="mt-8 flex flex-col items-center gap-3 sm:flex-row"
         >
-          <ShimmerButton href="/registro">
+          <Button href="/registro" shimmer>
             <IconBolt className="size-5" />
-            Empezar gratis
-          </ShimmerButton>
-          <ShimmerButton href="#metodo" variant="ghost">
+            Empieza gratis
+          </Button>
+          <Button href="#metodo" variant="secondary">
             Cómo funciona
-          </ShimmerButton>
+          </Button>
         </motion.div>
 
         <motion.p variants={rise} className="mt-5 text-sm text-muted">
@@ -123,24 +116,24 @@ function Hero() {
 
 const features = [
   {
+    icon: IconRoute,
+    title: "Aprende por niveles",
+    body: "Desde A1 hasta C2 con un camino claro, sin perderte ni saltarte pasos.",
+  },
+  {
     icon: IconMessageChatbot,
-    title: "Conversa de verdad",
-    body: "Habla con un tutor de IA en situaciones reales (viaje, trabajo, café). Te responde a tu nivel y corrige al final del turno.",
+    title: "Conversa desde el primer día",
+    body: "Practica con IA como si hablaras con una persona real, a tu nivel.",
   },
   {
     icon: IconPencil,
-    title: "Corrección que explica",
-    body: "Escribe y recibe la versión correcta con el porqué de cada error, en español. Aprendes la regla, no solo el resultado.",
+    title: "Entiende tus errores",
+    body: "Cada corrección incluye una explicación sencilla en español del porqué.",
   },
   {
     icon: IconBrain,
-    title: "Repaso espaciado",
-    body: "El vocabulario vuelve justo antes de que lo olvides. Es lo que de verdad fija las palabras a largo plazo.",
-  },
-  {
-    icon: IconVolume2,
-    title: "Pronunciación",
-    body: "Practica en voz alta y recibe feedback con el reconocimiento de voz del navegador. Sin instalar nada.",
+    title: "Nunca olvides lo aprendido",
+    body: "El repaso espaciado aparece justo cuando tu memoria lo necesita.",
   },
 ];
 
@@ -160,19 +153,15 @@ function Method() {
         className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4"
       >
         {features.map((f) => (
-          <motion.article
-            key={f.title}
-            variants={rise}
-            whileHover={{ y: -6 }}
-            transition={spring}
-            className="group rounded-3xl border border-border bg-card p-6 shadow-sm"
-          >
-            <div className="mb-4 inline-flex size-12 items-center justify-center rounded-2xl bg-primary-soft text-primary transition-transform group-hover:scale-110">
-              <f.icon className="size-6" />
-            </div>
-            <h3 className="font-display text-lg font-bold">{f.title}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-muted">{f.body}</p>
-          </motion.article>
+          <motion.div key={f.title} variants={rise} whileHover={{ y: -6 }} transition={spring}>
+            <Card className="group h-full p-6">
+              <div className="mb-4 inline-flex size-12 items-center justify-center rounded-2xl bg-primary-soft text-primary transition-transform group-hover:scale-110">
+                <f.icon className="size-6" />
+              </div>
+              <h3 className="font-display text-lg font-bold">{f.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted">{f.body}</p>
+            </Card>
+          </motion.div>
         ))}
       </motion.div>
     </section>
@@ -235,19 +224,15 @@ function Rewards() {
         className="mt-12 grid gap-5 sm:grid-cols-3"
       >
         {rewards.map((r) => (
-          <motion.article
-            key={r.title}
-            variants={rise}
-            whileHover={{ y: -6 }}
-            transition={spring}
-            className="rounded-3xl border border-border bg-card p-6 text-center shadow-sm"
-          >
-            <div className="mx-auto mb-4 inline-flex size-14 items-center justify-center rounded-2xl bg-gem/15 text-gem">
-              <r.icon className="size-7" />
-            </div>
-            <h3 className="font-display text-lg font-bold">{r.title}</h3>
-            <p className="mt-2 text-sm text-muted">{r.body}</p>
-          </motion.article>
+          <motion.div key={r.title} variants={rise} whileHover={{ y: -6 }} transition={spring}>
+            <Card className="h-full p-6 text-center">
+              <div className="mx-auto mb-4 inline-flex size-14 items-center justify-center rounded-2xl bg-gem/15 text-gem">
+                <r.icon className="size-7" />
+              </div>
+              <h3 className="font-display text-lg font-bold">{r.title}</h3>
+              <p className="mt-2 text-sm text-muted">{r.body}</p>
+            </Card>
+          </motion.div>
         ))}
       </motion.div>
     </section>
@@ -265,16 +250,16 @@ function FinalCta() {
         className="mx-auto max-w-3xl rounded-[2rem] bg-fg px-8 py-14 text-center text-bg"
       >
         <h2 className="font-display text-3xl font-extrabold sm:text-4xl">
-          Empieza hoy. Habla inglés antes de lo que crees.
+          Empieza hoy. Tu inglés del futuro comienza con la primera conversación.
         </h2>
         <p className="mx-auto mt-4 max-w-lg text-base opacity-80">
           Gratis para arrancar. Instálalo como app y practica 10 minutos al día.
         </p>
         <div className="mt-8 flex justify-center">
-          <ShimmerButton href="/registro">
+          <Button href="/registro" shimmer>
             <IconBolt className="size-5" />
-            Crear mi cuenta
-          </ShimmerButton>
+            Crear cuenta gratis
+          </Button>
         </div>
       </motion.div>
     </section>

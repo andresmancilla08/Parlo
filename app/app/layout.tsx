@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { IconFeather } from "@tabler/icons-react";
 import { useAuth } from "@/lib/auth";
 import { BottomNav } from "@/components/app/bottom-nav";
+import { Sidebar } from "@/components/app/sidebar";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -24,8 +25,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-lg flex-col">
-      <main className="flex-1 pb-24">{children}</main>
+    <div className="mx-auto flex min-h-dvh w-full max-w-6xl">
+      <Sidebar />
+      <main className="flex-1 pb-24 md:pb-12">
+        <div className="mx-auto w-full max-w-2xl">{children}</div>
+      </main>
       <BottomNav />
     </div>
   );

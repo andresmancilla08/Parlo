@@ -62,7 +62,7 @@ export default function TutorPage() {
         <div ref={bottomRef} />
       </div>
 
-      <div className="sticky bottom-24 z-30 mt-4 pb-2">
+      <div className="sticky bottom-24 z-30 mt-4 pb-2 md:bottom-4">
         <form
           onSubmit={(e) => {
             e.preventDefault();

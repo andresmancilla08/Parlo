@@ -9,8 +9,9 @@ import {
   IconTrophy,
 } from "@tabler/icons-react";
 import { useAuth } from "@/lib/auth";
-
-const spring = { type: "spring" as const, stiffness: 320, damping: 24 };
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { spring } from "@/lib/motion";
 
 export default function PerfilPage() {
   const router = useRouter();
@@ -43,16 +44,18 @@ export default function PerfilPage() {
         <StatCard icon={IconTrophy} value="4" label="Logros" tint="text-accent" />
       </div>
 
-      <button
+      <Button
+        variant="danger"
+        fullWidth
+        className="mt-10"
         onClick={() => {
           logout();
           router.replace("/");
         }}
-        className="mt-10 flex w-full items-center justify-center gap-2 rounded-pill border border-border bg-surface py-3.5 font-display font-bold text-danger"
       >
         <IconLogout className="size-5" />
         Cerrar sesión
-      </button>
+      </Button>
     </div>
   );
 }
@@ -69,10 +72,10 @@ function StatCard({
   tint: string;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-4 text-center">
+    <Card className="p-4 text-center">
       <Icon className={`mx-auto mb-1 size-6 ${tint}`} />
       <p className="font-display text-lg font-extrabold">{value}</p>
       <p className="text-xs text-muted">{label}</p>
-    </div>
+    </Card>
   );
 }

@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* ---- Parlo · design tokens (dirección de arte primera pasada, validar con equipo visual) ---- */
+/* ---- Parlo · design tokens (paleta definitiva de marca) ---- */
 @theme inline {
   --font-sans: var(--font-nunito);
   --font-display: var(--font-montserrat);
@@ -14,11 +14,14 @@
 
   --color-primary: var(--primary);
   --color-primary-fg: var(--primary-fg);
+  --color-primary-hover: var(--primary-hover);
   --color-primary-soft: var(--primary-soft);
+  --color-secondary: var(--secondary);
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-gem: var(--gem);
   --color-success: var(--success);
+  --color-warning: var(--warning);
   --color-danger: var(--danger);
 
   --radius-pill: 9999px;
@@ -28,37 +31,52 @@
   --bg: #fff9f5;
   --surface: #ffffff;
   --card: #ffffff;
-  --border: #f1e7dd;
+  --border: #e7e2f1;
   --fg: #1b1233;
   --muted: #7a7290;
 
-  --primary: #ff6b4a; /* coral */
+  --primary: #ff6b4a;
   --primary-fg: #ffffff;
+  --primary-hover: #f55a37;
   --primary-soft: #ffe9e2;
-  --accent: #00c2a8; /* teal pluma de loro */
+  --secondary: #ff9a7b;
+  --accent: #27c7a8; /* mint pluma de loro */
   --accent-soft: #d8f7f1;
-  --gem: #ffc94a; /* ámbar recompensas */
-  --success: #22b07d;
+  --gem: #ffc94a;
+  --success: #2cb67d;
+  --warning: #ffb547;
   --danger: #e5484d;
+
+  /* gradientes de marca */
+  --gradient-primary: linear-gradient(90deg, #ff6b4a, #ff9a7b);
+  --gradient-ai: linear-gradient(135deg, #27c7a8, #6de6d0);
+  --gradient-gem: linear-gradient(120deg, #ffc94a, #ffe58a);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #140e24;
     --surface: #1c1436;
-    --card: #221a40;
-    --border: #2f2652;
-    --fg: #f4f0ff;
-    --muted: #a79fc4;
+    --card: #251b45;
+    --border: #322657;
+    --fg: #ffffff;
+    --muted: #b3acc8;
 
     --primary: #ff7a5c;
     --primary-fg: #1b1233;
+    --primary-hover: #ff8f75;
     --primary-soft: #3a2136;
-    --accent: #1bd6bb;
+    --secondary: #ff9a7b;
+    --accent: #39d8ba;
     --accent-soft: #103a38;
-    --gem: #ffd166;
+    --gem: #ffd567;
     --success: #34c58b;
-    --danger: #ff6b6f;
+    --warning: #ffc061;
+    --danger: #ff7076;
+
+    --gradient-primary: linear-gradient(90deg, #ff7a5c, #ff9a7b);
+    --gradient-ai: linear-gradient(135deg, #39d8ba, #6de6d0);
+    --gradient-gem: linear-gradient(120deg, #ffd567, #ffe58a);
   }
 }
 
@@ -81,16 +99,17 @@ body {
   background: color-mix(in srgb, var(--color-primary) 30%, transparent);
 }
 
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(200%);
-  }
+/* utilidades de gradiente de marca */
+.bg-gradient-brand {
+  background-image: var(--gradient-primary);
+}
+.bg-gradient-ai {
+  background-image: var(--gradient-ai);
+}
+.bg-gradient-gem {
+  background-image: var(--gradient-gem);
 }
 
-/* Respeta reduce-motion en todas las animaciones */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

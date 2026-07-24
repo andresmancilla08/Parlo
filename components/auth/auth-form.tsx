@@ -6,10 +6,9 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { IconArrowRight, IconFeather, IconMail } from "@tabler/icons-react";
 import { useAuth } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
+import { spring } from "@/lib/motion";
 import { PinInput } from "./pin-input";
-import { cn } from "@/lib/utils";
-
-const spring = { type: "spring" as const, stiffness: 320, damping: 24 };
 
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const router = useRouter();
@@ -99,19 +98,10 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           </motion.p>
         )}
 
-        <motion.button
-          type="submit"
-          disabled={!canSubmit}
-          whileTap={canSubmit ? { scale: 0.97 } : undefined}
-          className={cn(
-            "mt-6 flex w-full items-center justify-center gap-2 rounded-pill px-6 py-3.5 font-display text-base font-bold transition-opacity",
-            "bg-primary text-primary-fg shadow-lg shadow-primary/25",
-            !canSubmit && "cursor-not-allowed opacity-40",
-          )}
-        >
+        <Button type="submit" fullWidth shimmer disabled={!canSubmit} className="mt-6">
           {isLogin ? "Entrar" : "Crear cuenta"}
           <IconArrowRight className="size-5" />
-        </motion.button>
+        </Button>
 
         <button
           type="button"

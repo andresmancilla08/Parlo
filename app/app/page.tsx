@@ -12,8 +12,7 @@ import {
   type Icon,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
-
-const spring = { type: "spring" as const, stiffness: 320, damping: 24 };
+import { spring } from "@/lib/motion";
 
 // ponytail: datos mock hasta cablear el currículo real en Firestore.
 type NodeState = "done" | "current" | "locked";
@@ -87,7 +86,7 @@ function DailyChallenge() {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ ...spring, delay: 0.05 }}
-      className="mt-6 overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-[#ff9472] p-5 text-primary-fg shadow-lg shadow-primary/20"
+      className="mt-6 overflow-hidden rounded-3xl bg-gradient-brand p-5 text-primary-fg shadow-lg shadow-primary/20"
     >
       <div className="flex items-center justify-between">
         <div>
