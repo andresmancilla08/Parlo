@@ -93,6 +93,8 @@
     "streak": "Streak",
     "gems": "Gems",
     "achievements": "Achievements",
+    "badges_title": "Your achievements",
+    "badge_level": "Level completed",
     "appearance": "Appearance",
     "logout": "Log out"
   },

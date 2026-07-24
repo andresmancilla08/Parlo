@@ -1,8 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import badgeLevel from "@/public/brand/badge-level.png";
 import {
   IconFlame,
   IconLogout,
@@ -46,6 +48,25 @@ export default function PerfilPage() {
         <StatCard icon={IconFlame} value="3" label={t("perfil.streak")} tint="text-primary" />
         <StatCard icon={IconSparkles} value="120" label={t("perfil.gems")} tint="text-gem" />
         <StatCard icon={IconTrophy} value="4" label={t("perfil.achievements")} tint="text-accent" />
+      </div>
+
+      <div className="mt-8">
+        <p className="mb-3 text-sm font-semibold text-muted">
+          {t("perfil.badges_title")}
+        </p>
+        <Card className="flex items-center gap-4 p-4">
+          <Image
+            src={badgeLevel}
+            alt=""
+            height={64}
+            width={Math.round((64 * badgeLevel.width) / badgeLevel.height)}
+            className="shrink-0"
+          />
+          <div>
+            <p className="font-display font-bold">{t("perfil.badge_level")}</p>
+            <p className="text-sm text-muted">A1</p>
+          </div>
+        </Card>
       </div>
 
       <div className="mt-8">

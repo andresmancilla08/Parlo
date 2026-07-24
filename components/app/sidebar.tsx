@@ -5,12 +5,12 @@ import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import {
-  IconFeather,
   IconHome2,
   IconMessageChatbot,
   IconUser,
   type Icon,
 } from "@tabler/icons-react";
+import { Logo } from "@/components/ui/logo";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { LangToggle } from "@/components/ui/lang-toggle";
 import { cn } from "@/lib/utils";
@@ -28,11 +28,8 @@ export function Sidebar() {
 
   return (
     <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-border bg-surface/60 px-4 py-6 md:flex">
-      <Link href="/app" className="mb-8 flex items-center gap-2 px-2">
-        <IconFeather className="size-6 text-primary" />
-        <span className="font-display text-xl font-extrabold tracking-tight">
-          Parlo
-        </span>
+      <Link href="/app" className="mb-8 flex items-center px-2">
+        <Logo height={30} />
       </Link>
 
       <nav className="flex flex-col gap-1">

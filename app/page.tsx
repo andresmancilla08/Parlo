@@ -5,7 +5,6 @@ import { useTranslation } from "react-i18next";
 import {
   IconBolt,
   IconBrain,
-  IconFeather,
   IconFlame,
   IconMessageChatbot,
   IconPencil,
@@ -16,6 +15,7 @@ import {
 } from "@tabler/icons-react";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import { GradientText } from "@/components/ui/gradient-text";
+import { Logo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Mascot } from "@/components/ui/mascot";
@@ -38,12 +38,7 @@ export default function Home() {
 }
 
 function Wordmark() {
-  return (
-    <span className="inline-flex items-center gap-1.5 font-display text-xl font-extrabold tracking-tight">
-      <IconFeather className="size-5 text-primary" />
-      Parlo
-    </span>
-  );
+  return <Logo height={32} priority />;
 }
 
 function Nav() {

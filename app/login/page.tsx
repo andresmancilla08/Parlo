@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { AuthForm } from "@/components/auth/auth-form";
-import { AuroraBackground } from "@/components/ui/aurora-background";
+import { AuthShell } from "@/components/auth/auth-shell";
 
 export const metadata: Metadata = { title: "Entrar" };
 
 export default function LoginPage() {
   return (
-    <AuroraBackground className="grid min-h-dvh place-items-center px-5 py-12">
+    <AuthShell>
       <AuthForm mode="login" />
-    </AuroraBackground>
+    </AuthShell>
   );
 }

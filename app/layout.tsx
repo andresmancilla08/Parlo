@@ -27,7 +27,6 @@ export const metadata: Metadata = {
     "Aprende inglés desde cero hasta avanzado con un tutor de IA que corrige y conversa en español, currículo por niveles, repaso espaciado y retos.",
   manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/icon-192.png",
     apple: "/apple-icon.png",
   },
   appleWebApp: {

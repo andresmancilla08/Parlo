@@ -93,6 +93,8 @@
     "streak": "Racha",
     "gems": "Gemas",
     "achievements": "Logros",
+    "badges_title": "Tus logros",
+    "badge_level": "Nivel completado",
     "appearance": "Apariencia",
     "logout": "Cerrar sesión"
   },
