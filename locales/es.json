@@ -87,7 +87,10 @@
     "subtitle": "Sigamos aprendiendo",
     "daily_label": "Reto diario",
     "daily_title": "Completa 1 lección hoy",
-    "daily_note": "Vas por buen camino · +50 XP al terminar",
+    "daily_note": "Completa una lección · +XP al terminar",
+    "daily_done": "¡Reto de hoy completado! 🎉",
+    "review_title": "Repaso listo",
+    "review_body": "{{n}} palabras para repasar hoy",
     "route_title": "Tu ruta",
     "route_subtitle": "Sigue el camino. Cada lección te acerca a hablar inglés.",
     "unit_greetings": "Saludos y presentaciones",
@@ -120,10 +123,22 @@
     "logout": "Cerrar sesión"
   },
   "leccion": {
-    "title": "Motor de lecciones en camino",
-    "body": "Los ejercicios interactivos y el repaso espaciado llegan muy pronto. Mientras tanto, practica hablando con el tutor.",
-    "go_tutor": "Ir al tutor",
+    "check": "Comprobar",
+    "continue": "Continuar",
+    "correct": "¡Correcto!",
+    "incorrect": "No exactamente",
+    "answer_was": "Respuesta:",
+    "done_title": "¡Lección completada!",
+    "done_score": "{{correct}} de {{total}} correctas",
+    "gems": "Gemas",
+    "finish": "Terminar",
+    "not_found": "No encontramos esa lección.",
     "back": "Volver a la ruta"
+  },
+  "repaso": {
+    "title": "Repaso",
+    "empty_title": "Nada que repasar",
+    "empty_body": "Completa lecciones y tu repaso espaciado aparecerá aquí cuando toque."
   },
   "theme": {
     "light": "Claro",

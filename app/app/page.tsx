@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -9,6 +10,7 @@ import {
   IconCheck,
   IconFlame,
   IconLock,
+  IconRefresh,
   IconStar,
   type Icon,
 } from "@tabler/icons-react";
@@ -16,17 +18,26 @@ import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Mascot } from "@/components/ui/mascot";
 import { spring } from "@/lib/motion";
+import { curriculum, lessonState, type NodeState } from "@/lib/curriculum";
+import { dailyGoalDone, dueCardKeys, useProgress } from "@/lib/progress";
+import { useHydrated } from "@/lib/use-hydrated";
 import mascotCelebrate from "@/public/brand/mascot-celebrate.png";
-
-// ponytail: datos mock hasta cablear el currículo real en Firestore.
-type NodeState = "done" | "current" | "locked";
-const units: { level: string; titleKey: string; nodes: NodeState[] }[] = [
-  { level: "A1", titleKey: "unit_greetings", nodes: ["done", "done", "current", "locked"] },
-  { level: "A1", titleKey: "unit_numbers", nodes: ["locked", "locked", "locked"] },
-];
 
 export default function HomePage() {
   const { t } = useTranslation();
+  const hydrated = useHydrated();
+  const completed = useProgress((s) => s.completed);
+  const cards = useProgress((s) => s.cards);
+  const lastActiveDay = useProgress((s) => s.lastActiveDay);
+
+  // El layout monta esta página solo en cliente (tras auth), así que el timestamp
+  // se lee una vez en el inicializador perezoso, no en cada render.
+  const [now] = useState(() => Date.now());
+
+  const completedSet = new Set(hydrated ? completed : []);
+  const dueCount = dueCardKeys(cards, now).length;
+  const dailyDone = hydrated && dailyGoalDone(lastActiveDay);
+
   return (
     <div className="mx-auto w-full max-w-6xl px-5 pt-6">
       <Header />
@@ -36,13 +47,14 @@ export default function HomePage() {
             {t("home.route_title")}
           </h2>
           <p className="mb-6 text-sm text-muted">{t("home.route_subtitle")}</p>
-          {units.map((unit, i) => (
-            <Unit key={i} unit={unit} index={i} />
+          {curriculum.map((unit, i) => (
+            <Unit key={unit.id} unit={unit} unitIndex={i} completed={completedSet} />
           ))}
         </section>
 
         <aside className="order-1 space-y-4 lg:order-2 lg:sticky lg:top-24 lg:self-start">
-          <DailyChallenge />
+          <DailyChallenge done={dailyDone} />
+          {dueCount > 0 && <ReviewCard count={dueCount} />}
           <StreakCard />
         </aside>
       </div>
@@ -52,12 +64,14 @@ export default function HomePage() {
 
 function StreakCard() {
   const { t } = useTranslation();
+  const hydrated = useHydrated();
+  const streak = useProgress((s) => s.streak);
   return (
     <Card className="relative overflow-hidden p-5">
       <div className="flex items-center gap-2">
         <IconFlame className="size-6 text-primary" />
         <span className="font-display text-lg font-extrabold">
-          {t("home.streak_title", { n: 3 })}
+          {t("home.streak_title", { n: hydrated ? streak : 0 })}
         </span>
       </div>
       <p className="mt-1 max-w-[62%] text-sm text-muted">{t("home.streak_cta")}</p>
@@ -92,7 +106,7 @@ function Header() {
   );
 }
 
-function DailyChallenge() {
+function DailyChallenge({ done }: { done: boolean }) {
   const { t } = useTranslation();
   return (
     <motion.div
@@ -104,46 +118,74 @@ function DailyChallenge() {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm/relaxed opacity-90">{t("home.daily_label")}</p>
-          <p className="font-display text-lg font-extrabold">
-            {t("home.daily_title")}
-          </p>
+          <p className="font-display text-lg font-extrabold">{t("home.daily_title")}</p>
         </div>
         <span className="grid size-12 place-items-center rounded-2xl bg-white/20">
-          <IconBolt className="size-6" />
+          {done ? <IconCheck className="size-6" /> : <IconBolt className="size-6" />}
         </span>
       </div>
       <div className="mt-4 h-2 overflow-hidden rounded-pill bg-white/25">
         <motion.div
           initial={{ width: 0 }}
-          animate={{ width: "35%" }}
+          animate={{ width: done ? "100%" : "0%" }}
           transition={{ duration: 0.6, ease: "easeOut" }}
           className="h-full rounded-pill bg-white"
         />
       </div>
-      <p className="mt-2 text-xs opacity-90">{t("home.daily_note")}</p>
+      <p className="mt-2 text-xs opacity-90">
+        {done ? t("home.daily_done") : t("home.daily_note")}
+      </p>
     </motion.div>
+  );
+}
+
+function ReviewCard({ count }: { count: number }) {
+  const { t } = useTranslation();
+  return (
+    <Link href="/app/repaso">
+      <motion.div
+        whileHover={{ y: -3 }}
+        transition={spring}
+        className="flex items-center gap-3 rounded-3xl border border-accent/40 bg-accent-soft p-5"
+      >
+        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-accent text-white">
+          <IconRefresh className="size-6" />
+        </span>
+        <div>
+          <p className="font-display font-extrabold text-accent">{t("home.review_title")}</p>
+          <p className="text-sm text-accent/80">{t("home.review_body", { n: count })}</p>
+        </div>
+      </motion.div>
+    </Link>
   );
 }
 
 function Unit({
   unit,
-  index,
+  unitIndex,
+  completed,
 }: {
-  unit: (typeof units)[number];
-  index: number;
+  unit: (typeof curriculum)[number];
+  unitIndex: number;
+  completed: Set<string>;
 }) {
-  const { t } = useTranslation();
   return (
     <div className="mb-8">
       <div className="mb-4 flex items-center gap-2">
         <span className="grid size-9 place-items-center rounded-xl bg-accent-soft font-display text-sm font-extrabold text-accent">
           {unit.level}
         </span>
-        <h3 className="font-display font-bold">{t(`home.${unit.titleKey}`)}</h3>
+        <h3 className="font-display font-bold">{unit.titleEs}</h3>
       </div>
       <div className="flex flex-col items-center gap-4">
-        {unit.nodes.map((state, i) => (
-          <LessonNode key={i} state={state} offset={i % 2 === 0 ? -1 : 1} order={index * 4 + i} />
+        {unit.lessons.map((lesson, i) => (
+          <LessonNode
+            key={lesson.id}
+            id={lesson.id}
+            state={lessonState(lesson.id, completed)}
+            offset={i % 2 === 0 ? -1 : 1}
+            order={unitIndex * 4 + i}
+          />
         ))}
       </div>
     </div>
@@ -157,10 +199,12 @@ const nodeIcon: Record<NodeState, Icon> = {
 };
 
 function LessonNode({
+  id,
   state,
   offset,
   order,
 }: {
+  id: string;
   state: NodeState;
   offset: number;
   order: number;
@@ -191,7 +235,7 @@ function LessonNode({
 
   if (!clickable) return node;
   return (
-    <Link href="/app/leccion" aria-label={t("a11y.open_lesson")}>
+    <Link href={`/app/leccion?id=${id}`} aria-label={t("a11y.open_lesson")}>
       {node}
     </Link>
   );

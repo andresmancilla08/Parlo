@@ -13,6 +13,8 @@ import {
   IconTrophy,
 } from "@tabler/icons-react";
 import { useAuth } from "@/lib/auth";
+import { useProgress } from "@/lib/progress";
+import { useHydrated } from "@/lib/use-hydrated";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -25,6 +27,10 @@ export default function PerfilPage() {
   const router = useRouter();
   const email = useAuth((s) => s.email);
   const logout = useAuth((s) => s.logout);
+  const hydrated = useHydrated();
+  const streak = useProgress((s) => s.streak);
+  const gems = useProgress((s) => s.gems);
+  const completed = useProgress((s) => s.completed);
 
   const name = email?.split("@")[0] ?? "";
 
@@ -47,9 +53,9 @@ export default function PerfilPage() {
       </motion.div>
 
       <div className="mt-8 grid grid-cols-3 gap-3">
-        <StatCard icon={IconFlame} value="3" label={t("perfil.streak")} tint="text-primary" />
-        <StatCard icon={IconSparkles} value="120" label={t("perfil.gems")} tint="text-gem" />
-        <StatCard icon={IconTrophy} value="4" label={t("perfil.achievements")} tint="text-accent" />
+        <StatCard icon={IconFlame} value={String(hydrated ? streak : 0)} label={t("perfil.streak")} tint="text-primary" />
+        <StatCard icon={IconSparkles} value={String(hydrated ? gems : 0)} label={t("perfil.gems")} tint="text-gem" />
+        <StatCard icon={IconTrophy} value={String(hydrated ? completed.length : 0)} label={t("perfil.achievements")} tint="text-accent" />
       </div>
 
       <div className="mt-8">

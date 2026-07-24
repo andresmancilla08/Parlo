@@ -87,7 +87,10 @@
     "subtitle": "Let's keep learning",
     "daily_label": "Daily challenge",
     "daily_title": "Complete 1 lesson today",
-    "daily_note": "You're on track · +50 XP when you finish",
+    "daily_note": "Complete one lesson · +XP when you finish",
+    "daily_done": "Today's challenge done! 🎉",
+    "review_title": "Review ready",
+    "review_body": "{{n}} words to review today",
     "route_title": "Your path",
     "route_subtitle": "Follow the path. Every lesson gets you closer to speaking English.",
     "unit_greetings": "Greetings and introductions",
@@ -120,10 +123,22 @@
     "logout": "Log out"
   },
   "leccion": {
-    "title": "Lesson engine on the way",
-    "body": "Interactive exercises and spaced repetition are coming very soon. Meanwhile, practice by talking with the tutor.",
-    "go_tutor": "Go to tutor",
+    "check": "Check",
+    "continue": "Continue",
+    "correct": "Correct!",
+    "incorrect": "Not quite",
+    "answer_was": "Answer:",
+    "done_title": "Lesson complete!",
+    "done_score": "{{correct}} of {{total}} correct",
+    "gems": "Gems",
+    "finish": "Finish",
+    "not_found": "We couldn't find that lesson.",
     "back": "Back to path"
+  },
+  "repaso": {
+    "title": "Review",
+    "empty_title": "Nothing to review",
+    "empty_body": "Complete lessons and your spaced review will show up here when it's due."
   },
   "theme": {
     "light": "Light",
