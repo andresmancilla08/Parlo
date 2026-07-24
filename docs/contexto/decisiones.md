@@ -41,3 +41,21 @@
 - **Qué:** toggle claro/oscuro/sistema; paleta por clase `.dark` en globals.css; store `lib/theme.ts` + `ThemeProvider` + script anti-flash en layout.
 - **Por qué:** el dueño quiere elegir el modo, no solo seguir el SO.
 - **Estado:** vigente.
+
+## Currículo + progreso local-first (SM-2)
+- **Qué:** contenido curado en `lib/curriculum/` (A1); motor de lección `components/lesson/lesson-runner.tsx` (ejercicios choose/bank/type); repaso espaciado SM-2 en `lib/srs.ts`; progreso (xp/gemas/racha/estrellas/cartas SRS) en `lib/progress.ts` (zustand persist en localStorage).
+- **Por qué:** entregar el core de aprendizaje funcional YA, sin depender de crear el proyecto Firebase. Runnable y deployable hoy.
+- **Descartado (por ahora):** Firestore como store primario — se difiere a una capa de sync futura.
+- **Estado:** vigente; migrar/duplicar a Firestore cuando exista proyecto.
+
+## Auth: sesión server-side con cookie httpOnly + proxy.ts
+- **Qué:** creds del usuario demo en env server (`DEMO_EMAIL`/`DEMO_PIN`); `/api/login` valida y setea cookie `parlo_session` httpOnly firmada HMAC-SHA256 (`lib/session.ts`, `AUTH_SECRET`); `proxy.ts` (Next 16, runtime Node) protege `/app` server-side. El store cliente solo guarda el email para la UI.
+- **Por qué:** sacar las credenciales del bundle del cliente y proteger rutas en servidor (la auditoría lo marcó crítico). `proxy.ts` reemplaza a `middleware.ts` en Next 16.
+- **Descartado:** validar en cliente (inseguro); Firebase Auth real (pendiente de crear proyecto → registro multi-usuario aún no).
+- **Estado:** vigente para demo single-user; Firebase Auth real = próximo.
+
+## Tokens accesibles (AA) — "inks"
+- **Qué:** además de los colores de marca, tokens `--primary-ink/--accent-ink/--success-ink/--danger-ink` (variantes legibles como TEXTO) y `--primary-fg` navy sobre coral. `--muted` oscurecido a ≥4.5:1 sobre bg claro. `--gradient-panel` (panel premium legible en claro y oscuro).
+- **Por qué:** auditoría de contraste (hex→ratio) encontró pares <4.5 (blanco sobre coral 2.8, mint sobre mint-soft 1.9, etc.). Regla dura: todo texto ≥4.5:1.
+- **Cómo:** usar `text-*-ink` para TEXTO sobre fondos "soft"/tint; el color base (`text-accent`, etc.) queda para íconos/gráficos (≥3:1).
+- **Estado:** vigente.
