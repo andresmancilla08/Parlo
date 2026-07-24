@@ -200,7 +200,7 @@ function ExerciseView({
               transition={spring}
               className={cn(
                 "mb-3 rounded-2xl p-4",
-                ok ? "bg-success/12 text-success" : "bg-danger/12 text-danger",
+                ok ? "bg-success/12 text-success-ink" : "bg-danger/12 text-danger-ink",
               )}
             >
               <p className="font-display font-extrabold">
@@ -257,8 +257,8 @@ function ChooseView({
               "rounded-2xl border-2 px-5 py-4 text-left font-semibold transition-colors",
               !checked && selected && "border-primary bg-primary-soft",
               !checked && !selected && "border-border bg-card hover:border-primary/40",
-              checked && isAnswer && "border-success bg-success/12 text-success",
-              checked && selected && !isAnswer && "border-danger bg-danger/12 text-danger",
+              checked && isAnswer && "border-success bg-success/12 text-success-ink",
+              checked && selected && !isAnswer && "border-danger bg-danger/12 text-danger-ink",
               checked && !isAnswer && !selected && "border-border bg-card opacity-60",
             )}
           >

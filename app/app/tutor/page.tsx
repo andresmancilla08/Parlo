@@ -59,7 +59,7 @@ export default function TutorPage() {
 
         {error && (
           <div className="flex flex-col items-center gap-3 rounded-3xl border border-danger/30 bg-danger/10 p-5 text-center">
-            <p className="text-sm font-medium text-danger">{t("tutor.error")}</p>
+            <p className="text-sm font-medium text-danger-ink">{t("tutor.error")}</p>
             <button
               onClick={() => regenerate()}
               className="rounded-pill border border-border bg-surface px-5 py-2 text-sm font-bold text-fg transition-colors hover:border-primary"

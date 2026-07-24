@@ -16,13 +16,17 @@
   --color-primary-fg: var(--primary-fg);
   --color-primary-hover: var(--primary-hover);
   --color-primary-soft: var(--primary-soft);
+  --color-primary-ink: var(--primary-ink);
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
   --color-gem: var(--gem);
   --color-success: var(--success);
+  --color-success-ink: var(--success-ink);
   --color-warning: var(--warning);
   --color-danger: var(--danger);
+  --color-danger-ink: var(--danger-ink);
 
   --radius-pill: 9999px;
 }
@@ -33,24 +37,30 @@
   --card: #ffffff;
   --border: #e7e2f1;
   --fg: #1b1233;
-  --muted: #7a7290;
+  --muted: #6f6785; /* AA ≥4.5 sobre bg claro */
 
   --primary: #ff6b4a;
-  --primary-fg: #ffffff;
+  --primary-fg: #1b1233; /* navy sobre coral: AA (blanco fallaba 2.8:1) */
   --primary-hover: #f55a37;
   --primary-soft: #ffe9e2;
+  --primary-ink: #c93c17; /* coral legible como TEXTO sobre claro */
   --secondary: #ff9a7b;
   --accent: #27c7a8; /* mint pluma de loro */
   --accent-soft: #d8f7f1;
+  --accent-ink: #0c6f5d; /* teal legible como TEXTO sobre accent-soft */
   --gem: #ffc94a;
   --success: #2cb67d;
+  --success-ink: #177a51;
   --warning: #ffb547;
   --danger: #e5484d;
+  --danger-ink: #c93034;
 
   /* gradientes de marca */
   --gradient-primary: linear-gradient(90deg, #ff6b4a, #ff9a7b);
   --gradient-ai: linear-gradient(135deg, #27c7a8, #6de6d0);
   --gradient-gem: linear-gradient(120deg, #ffc94a, #ffe58a);
+  /* panel premium siempre oscuro (home): legible en claro y oscuro */
+  --gradient-panel: linear-gradient(135deg, #2a1c54 0%, #171033 100%);
 }
 
 .dark {
@@ -65,13 +75,17 @@
   --primary-fg: #1b1233;
   --primary-hover: #ff8f75;
   --primary-soft: #3a2136;
+  --primary-ink: #ff7a5c; /* coral brillante como TEXTO sobre oscuro */
   --secondary: #ff9a7b;
   --accent: #39d8ba;
   --accent-soft: #103a38;
+  --accent-ink: #39d8ba; /* mint brillante como TEXTO sobre accent-soft oscuro */
   --gem: #ffd567;
   --success: #34c58b;
+  --success-ink: #7ee0b4;
   --warning: #ffc061;
   --danger: #ff7076;
+  --danger-ink: #ff9ea1;
 
   --gradient-primary: linear-gradient(90deg, #ff7a5c, #ff9a7b);
   --gradient-ai: linear-gradient(135deg, #39d8ba, #6de6d0);
@@ -106,6 +120,9 @@ body {
 }
 .bg-gradient-gem {
   background-image: var(--gradient-gem);
+}
+.bg-gradient-panel {
+  background-image: var(--gradient-panel);
 }
 
 @media (prefers-reduced-motion: reduce) {

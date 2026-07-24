@@ -5,238 +5,330 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import {
-  IconBolt,
-  IconCheck,
-  IconFlame,
-  IconLock,
-  IconRefresh,
-  IconStar,
-  type Icon,
-} from "@tabler/icons-react";
+import { IconArrowRight } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
-import { Card } from "@/components/ui/card";
-import { Mascot } from "@/components/ui/mascot";
 import { spring } from "@/lib/motion";
-import { curriculum, lessonState, type NodeState } from "@/lib/curriculum";
-import { dailyGoalDone, dueCardKeys, useProgress } from "@/lib/progress";
+import { allLessons, curriculum, unitOfLesson } from "@/lib/curriculum";
+import { dueCardKeys, useProgress } from "@/lib/progress";
+import { useAuth } from "@/lib/auth";
 import { useHydrated } from "@/lib/use-hydrated";
 import mascotCelebrate from "@/public/brand/mascot-celebrate.png";
 
 export default function HomePage() {
   const { t } = useTranslation();
   const hydrated = useHydrated();
-  const completed = useProgress((s) => s.completed);
-  const cards = useProgress((s) => s.cards);
-  const lastActiveDay = useProgress((s) => s.lastActiveDay);
+  const [now] = useState(() => Date.now()); // cliente-only (el layout monta tras auth)
 
-  // El layout monta esta página solo en cliente (tras auth), así que el timestamp
-  // se lee una vez en el inicializador perezoso, no en cada render.
-  const [now] = useState(() => Date.now());
-
-  const completedSet = new Set(hydrated ? completed : []);
-  const dueCount = dueCardKeys(cards, now).length;
-  const dailyDone = hydrated && dailyGoalDone(lastActiveDay);
-
-  return (
-    <div className="mx-auto w-full max-w-6xl px-5 pt-6">
-      <Header />
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">
-        <section className="order-2 lg:order-1">
-          <h2 className="mb-1 font-display text-xl font-extrabold tracking-tight">
-            {t("home.route_title")}
-          </h2>
-          <p className="mb-6 text-sm text-muted">{t("home.route_subtitle")}</p>
-          {curriculum.map((unit, i) => (
-            <Unit key={unit.id} unit={unit} unitIndex={i} completed={completedSet} />
-          ))}
-        </section>
-
-        <aside className="order-1 space-y-4 lg:order-2 lg:sticky lg:top-24 lg:self-start">
-          <DailyChallenge done={dailyDone} />
-          {dueCount > 0 && <ReviewCard count={dueCount} />}
-          <StreakCard />
-        </aside>
-      </div>
-    </div>
-  );
-}
-
-function StreakCard() {
-  const { t } = useTranslation();
-  const hydrated = useHydrated();
+  const email = useAuth((s) => s.email);
+  const xp = useProgress((s) => s.xp);
+  const gems = useProgress((s) => s.gems);
   const streak = useProgress((s) => s.streak);
-  return (
-    <Card className="relative overflow-hidden p-5">
-      <div className="flex items-center gap-2">
-        <IconFlame className="size-6 text-primary" />
-        <span className="font-display text-lg font-extrabold">
-          {t("home.streak_title", { n: hydrated ? streak : 0 })}
-        </span>
-      </div>
-      <p className="mt-1 max-w-[62%] text-sm text-muted">{t("home.streak_cta")}</p>
-      <Image
-        src={mascotCelebrate}
-        alt=""
-        height={104}
-        width={Math.round((104 * mascotCelebrate.width) / mascotCelebrate.height)}
-        className="pointer-events-none absolute -bottom-2 -right-1 select-none"
-      />
-    </Card>
-  );
-}
+  const completedArr = useProgress((s) => s.completed);
+  const cards = useProgress((s) => s.cards);
 
-function Header() {
-  const { t } = useTranslation();
-  return (
-    <motion.header
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={spring}
-      className="flex items-center gap-3"
-    >
-      <Mascot height={56} />
-      <div>
-        <p className="text-sm text-muted">{t("home.greeting")}</p>
-        <h1 className="font-display text-2xl font-extrabold tracking-tight">
-          {t("home.subtitle")}
-        </h1>
-      </div>
-    </motion.header>
-  );
-}
+  const completed = new Set(hydrated ? completedArr : []);
+  const dueCount = hydrated ? dueCardKeys(cards, now).length : 0;
 
-function DailyChallenge({ done }: { done: boolean }) {
-  const { t } = useTranslation();
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ ...spring, delay: 0.05 }}
-      className="overflow-hidden rounded-3xl bg-gradient-brand p-5 text-primary-fg shadow-lg shadow-primary/20"
-    >
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm/relaxed opacity-90">{t("home.daily_label")}</p>
-          <p className="font-display text-lg font-extrabold">{t("home.daily_title")}</p>
-        </div>
-        <span className="grid size-12 place-items-center rounded-2xl bg-white/20">
-          {done ? <IconCheck className="size-6" /> : <IconBolt className="size-6" />}
-        </span>
-      </div>
-      <div className="mt-4 h-2 overflow-hidden rounded-pill bg-white/25">
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: done ? "100%" : "0%" }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="h-full rounded-pill bg-white"
-        />
-      </div>
-      <p className="mt-2 text-xs opacity-90">
-        {done ? t("home.daily_done") : t("home.daily_note")}
-      </p>
-    </motion.div>
-  );
-}
+  // Lección actual = primera no completada (o ninguna si todo A1 está hecho).
+  const current = allLessons.find((l) => !completed.has(l.id)) ?? null;
+  const currentUnit = current ? unitOfLesson(current.id) : null;
 
-function ReviewCard({ count }: { count: number }) {
-  const { t } = useTranslation();
+  const name = hydrated && email ? cap(email.split("@")[0]) : "";
+  const slotWord = t(`home.slot_${slot(new Date(now).getHours())}`);
+  const greet = name ? `${slotWord}, ${name}` : slotWord;
+
   return (
-    <Link href="/app/repaso">
-      <motion.div
-        whileHover={{ y: -3 }}
+    <div className="mx-auto w-full max-w-2xl px-5 pb-8 pt-5">
+      {/* saludo + titular editorial */}
+      <motion.header
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={spring}
-        className="flex items-center gap-3 rounded-3xl border border-accent/40 bg-accent-soft p-5"
       >
-        <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-accent text-white">
-          <IconRefresh className="size-6" />
-        </span>
-        <div>
-          <p className="font-display font-extrabold text-accent">{t("home.review_title")}</p>
-          <p className="text-sm text-accent/80">{t("home.review_body", { n: count })}</p>
-        </div>
-      </motion.div>
-    </Link>
-  );
-}
+        <p className="font-display text-xs font-extrabold uppercase tracking-[0.13em] text-primary-ink">
+          {greet}
+        </p>
+        <h1 className="mt-2 font-display text-[2.6rem] font-extrabold leading-[0.98] tracking-tight sm:text-6xl">
+          {t("home.hero_line1")}
+          <br />
+          <span className="text-muted">{t("home.hero_line2")}</span>
+        </h1>
+      </motion.header>
 
-function Unit({
-  unit,
-  unitIndex,
-  completed,
-}: {
-  unit: (typeof curriculum)[number];
-  unitIndex: number;
-  completed: Set<string>;
-}) {
-  return (
-    <div className="mb-8">
-      <div className="mb-4 flex items-center gap-2">
-        <span className="grid size-9 place-items-center rounded-xl bg-accent-soft font-display text-sm font-extrabold text-accent">
-          {unit.level}
-        </span>
-        <h3 className="font-display font-bold">{unit.titleEs}</h3>
-      </div>
-      <div className="flex flex-col items-center gap-4">
-        {unit.lessons.map((lesson, i) => (
-          <LessonNode
-            key={lesson.id}
-            id={lesson.id}
-            state={lessonState(lesson.id, completed)}
-            offset={i % 2 === 0 ? -1 : 1}
-            order={unitIndex * 4 + i}
-          />
+      {/* panel: lección de hoy */}
+      {current && currentUnit ? (
+        <FeaturePanel
+          kicker={t("home.feature_kicker")}
+          title={current.titleEs}
+          subtitle={`${currentUnit.level} · ${currentUnit.titleEs}`}
+          href={`/app/leccion?id=${current.id}`}
+          cta={t("home.feature_continue")}
+          progress={unitFraction(currentUnit.id, completed)}
+        />
+      ) : (
+        <FeaturePanel
+          kicker={t("home.feature_kicker")}
+          title={t("home.all_done_title")}
+          subtitle={t("home.all_done_sub")}
+          href="/app/repaso"
+          cta={t("home.all_done_cta")}
+          progress={1}
+        />
+      )}
+
+      {/* stats: XP, racha, repaso/gemas */}
+      <StatRow
+        xp={hydrated ? xp : 0}
+        streak={hydrated ? streak : 0}
+        due={dueCount}
+        gems={hydrated ? gems : 0}
+      />
+
+      {/* ruta editorial (lista numerada) */}
+      <p className="mt-8 mb-1 font-display text-xs font-extrabold uppercase tracking-[0.14em] text-muted">
+        {t("home.route_kicker")}
+      </p>
+      <div>
+        {curriculum.map((unit, i) => (
+          <UnitRow key={unit.id} unit={unit} index={i} completed={completed} />
         ))}
       </div>
     </div>
   );
 }
 
-const nodeIcon: Record<NodeState, Icon> = {
-  done: IconCheck,
-  current: IconStar,
-  locked: IconLock,
-};
+/* ---------------- panel lección de hoy ---------------- */
 
-function LessonNode({
-  id,
-  state,
-  offset,
-  order,
+function FeaturePanel({
+  kicker,
+  title,
+  subtitle,
+  href,
+  cta,
+  progress,
 }: {
-  id: string;
-  state: NodeState;
-  offset: number;
-  order: number;
+  kicker: string;
+  title: string;
+  subtitle: string;
+  href: string;
+  cta: string;
+  progress: number;
 }) {
-  const { t } = useTranslation();
-  const Icon = nodeIcon[state];
-  const clickable = state !== "locked";
-
-  const node = (
+  return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.8 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true }}
-      transition={{ ...spring, delay: Math.min(order * 0.02, 0.2) }}
-      whileTap={clickable ? { scale: 0.92 } : undefined}
-      style={{ marginLeft: offset * 56 }}
-      className={cn(
-        "grid size-16 place-items-center rounded-full border-4 shadow-md",
-        state === "done" && "border-success/30 bg-success text-white",
-        state === "current" &&
-          "border-primary/30 bg-primary text-primary-fg ring-4 ring-primary/15",
-        state === "locked" && "border-border bg-card text-muted",
-      )}
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ ...spring, delay: 0.04 }}
+      className="relative mt-6 overflow-hidden rounded-[26px] bg-gradient-panel p-6 text-white shadow-2xl shadow-[#171033]/40"
     >
-      <Icon className="size-7" />
+      <p className="font-display text-xs font-extrabold uppercase tracking-[0.14em] text-gem">
+        {kicker}
+      </p>
+      <h2 className="mt-2.5 max-w-[66%] font-display text-3xl font-extrabold leading-[1.02] tracking-tight">
+        {title}
+      </h2>
+      <p className="mt-2 max-w-[64%] text-sm font-semibold text-white/70">{subtitle}</p>
+
+      <Link
+        href={href}
+        className="mt-5 inline-flex items-center gap-2 rounded-pill bg-primary px-6 py-3.5 font-display text-base font-extrabold text-primary-fg shadow-lg shadow-primary/40 transition-transform active:scale-95"
+      >
+        {cta}
+        <IconArrowRight className="size-5" />
+      </Link>
+
+      <div className="mt-5 h-1.5 max-w-[64%] overflow-hidden rounded-pill bg-white/20">
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${Math.round(progress * 100)}%` }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="h-full rounded-pill bg-gem"
+        />
+      </div>
+
+      <Image
+        src={mascotCelebrate}
+        alt=""
+        height={158}
+        width={Math.round((158 * mascotCelebrate.width) / mascotCelebrate.height)}
+        className="pointer-events-none absolute -bottom-1.5 -right-2 select-none drop-shadow-xl"
+        priority
+      />
     </motion.div>
   );
+}
 
-  if (!clickable) return node;
+/* ---------------- fila de stats ---------------- */
+
+function StatRow({
+  xp,
+  streak,
+  due,
+  gems,
+}: {
+  xp: number;
+  streak: number;
+  due: number;
+  gems: number;
+}) {
+  const { t } = useTranslation();
   return (
-    <Link href={`/app/leccion?id=${id}`} aria-label={t("a11y.open_lesson")}>
-      {node}
+    <div className="mt-4 grid grid-cols-3 gap-2.5">
+      <StatTile value={xp} label="XP" />
+      <StatTile value={streak} label={t("perfil.streak")} />
+      {due > 0 ? (
+        <Link href="/app/repaso" className="active:scale-[0.98]">
+          <StatTile value={due} label={t("home.review_label")} accent />
+        </Link>
+      ) : (
+        <StatTile value={gems} label={t("perfil.gems")} gem />
+      )}
+    </div>
+  );
+}
+
+function StatTile({
+  value,
+  label,
+  accent,
+  gem,
+}: {
+  value: number;
+  label: string;
+  accent?: boolean;
+  gem?: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "rounded-2xl border p-3.5 text-center",
+        accent ? "border-accent bg-accent-soft" : "border-border bg-card",
+      )}
+    >
+      <p
+        className={cn(
+          "font-display text-2xl font-extrabold leading-none",
+          accent && "text-accent-ink",
+          gem && "text-gem",
+        )}
+      >
+        {value}
+      </p>
+      <p className={cn("mt-1 text-xs font-bold", accent ? "text-accent-ink" : "text-muted")}>
+        {label}
+      </p>
+    </div>
+  );
+}
+
+/* ---------------- fila de unidad (ruta editorial) ---------------- */
+
+function UnitRow({
+  unit,
+  index,
+  completed,
+}: {
+  unit: (typeof curriculum)[number];
+  index: number;
+  completed: Set<string>;
+}) {
+  const { t } = useTranslation();
+
+  const firstPendingUnitIdx = curriculum.findIndex((u) =>
+    u.lessons.some((l) => !completed.has(l.id)),
+  );
+  const currentUnitIdx = firstPendingUnitIdx === -1 ? curriculum.length - 1 : firstPendingUnitIdx;
+
+  const state: "done" | "current" | "locked" =
+    index < currentUnitIdx ? "done" : index === currentUnitIdx ? "current" : "locked";
+  const clickable = state !== "locked";
+
+  const doneCount = unit.lessons.filter((l) => completed.has(l.id)).length;
+  const fraction = doneCount / unit.lessons.length;
+  const target = unit.lessons.find((l) => !completed.has(l.id)) ?? unit.lessons[0];
+
+  const status =
+    state === "done"
+      ? t("home.unit_done")
+      : state === "current"
+        ? t("home.unit_progress", { done: doneCount, total: unit.lessons.length })
+        : t("home.unit_locked");
+
+  const row = (
+    <div className="flex items-center gap-4 border-b border-border py-4">
+      <span
+        className={cn(
+          "w-11 shrink-0 font-display text-[2.1rem] font-extrabold leading-none",
+          state === "current" ? "text-primary" : "text-border",
+        )}
+      >
+        {String(index + 1).padStart(2, "0")}
+      </span>
+      <div className="min-w-0 flex-1">
+        <h3
+          className={cn(
+            "truncate font-display text-lg font-extrabold",
+            state === "locked" && "text-muted",
+          )}
+        >
+          {unit.titleEs}
+        </h3>
+        <p className="text-sm font-bold text-muted">{status}</p>
+      </div>
+      <Ring
+        fraction={state === "done" ? 1 : fraction}
+        color={state === "done" ? "var(--color-success)" : "var(--color-primary)"}
+      />
+    </div>
+  );
+
+  if (!clickable) return row;
+  return (
+    <Link href={`/app/leccion?id=${target.id}`} aria-label={unit.titleEs}>
+      <motion.div whileTap={{ scale: 0.99 }}>{row}</motion.div>
     </Link>
   );
+}
+
+function Ring({ fraction, color }: { fraction: number; color: string }) {
+  const r = 19;
+  const circ = 2 * Math.PI * r;
+  return (
+    <svg width={44} height={44} viewBox="0 0 44 44" className="shrink-0" aria-hidden>
+      <circle cx="22" cy="22" r={r} fill="none" stroke="var(--color-border)" strokeWidth="5" />
+      {fraction > 0 && (
+        <circle
+          cx="22"
+          cy="22"
+          r={r}
+          fill="none"
+          stroke={color}
+          strokeWidth="5"
+          strokeLinecap="round"
+          strokeDasharray={circ}
+          strokeDashoffset={circ * (1 - fraction)}
+          transform="rotate(-90 22 22)"
+        />
+      )}
+    </svg>
+  );
+}
+
+/* ---------------- helpers ---------------- */
+
+function unitFraction(unitId: string, completed: Set<string>): number {
+  const unit = curriculum.find((u) => u.id === unitId);
+  if (!unit) return 0;
+  const done = unit.lessons.filter((l) => completed.has(l.id)).length;
+  return done / unit.lessons.length;
+}
+
+function slot(hour: number): "morning" | "afternoon" | "evening" {
+  if (hour < 12) return "morning";
+  if (hour < 20) return "afternoon";
+  return "evening";
+}
+
+function cap(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }

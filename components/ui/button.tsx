@@ -15,7 +15,7 @@ const variants: Record<Variant, string> = {
   primary: "bg-primary text-primary-fg shadow-lg shadow-primary/25 hover:bg-primary-hover",
   secondary: "border border-border bg-surface text-fg",
   ghost: "text-fg hover:bg-primary-soft",
-  danger: "border border-border bg-surface text-danger",
+  danger: "border border-border bg-surface text-danger-ink",
 };
 
 const sizes: Record<Size, string> = {

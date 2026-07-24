@@ -49,7 +49,7 @@ export default function PerfilPage() {
         </span>
         <h1 className="mt-4 font-display text-xl font-extrabold">{name}</h1>
         <p className="text-sm text-muted">{email}</p>
-        <span className="mt-3 rounded-pill bg-accent-soft px-3 py-1 text-sm font-bold text-accent">
+        <span className="mt-3 rounded-pill bg-accent-soft px-3 py-1 text-sm font-bold text-accent-ink">
           {t("perfil.level")}
         </span>
       </motion.div>

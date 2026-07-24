@@ -100,7 +100,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="mt-4 text-center text-sm font-medium text-danger"
+            className="mt-4 text-center text-sm font-medium text-danger-ink"
           >
             {error}
           </motion.p>
