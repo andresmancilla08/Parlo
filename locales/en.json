@@ -1,6 +1,17 @@
 {
   "common": {
-    "back": "Back"
+    "back": "Back",
+    "retry": "Retry",
+    "loading": "Loading…"
+  },
+  "error": {
+    "title": "Something went wrong",
+    "body": "An unexpected error occurred. Please try again."
+  },
+  "notfound": {
+    "title": "Page not found",
+    "body": "The page you're looking for doesn't exist or was moved.",
+    "home": "Go home"
   },
   "nav": {
     "login": "Log in",
@@ -64,7 +75,6 @@
     "email_ph": "you@email.com",
     "pin": "4-digit PIN",
     "invalid": "Wrong email or PIN.",
-    "generic_error": "Something went wrong.",
     "login_btn": "Log in",
     "signup_btn": "Create account",
     "no_account": "Don't have an account? ",
@@ -88,7 +98,14 @@
     "subtitle": "Speak, write and learn with AI",
     "empty_title": "Let's practice English!",
     "empty_body": "Write anything or pick a situation. I'll correct you and explain in Spanish.",
-    "placeholder": "Write in English…"
+    "placeholder": "Write in English…",
+    "error": "Something went wrong with the tutor. Please try again.",
+    "retry": "Retry",
+    "starters": [
+      "Hi! I want to practice ordering coffee ☕",
+      "Let's do a job interview in English 💼",
+      "Help me introduce myself 🙋"
+    ]
   },
   "perfil": {
     "level": "Level A1 · Beginner",
@@ -112,10 +129,12 @@
     "system": "System"
   },
   "a11y": {
-    "mascot": "Parlo, the mascot",
     "open_lesson": "Open lesson",
     "send": "Send",
     "change_theme": "Change theme",
-    "change_lang": "Change language"
+    "change_lang": "Change language",
+    "home": "Home",
+    "pin_group": "4-digit PIN",
+    "pin_digit": "Digit {{n}}"
   }
 }

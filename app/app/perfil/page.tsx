@@ -18,6 +18,7 @@ import { Card } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { LangToggle } from "@/components/ui/lang-toggle";
 import { spring } from "@/lib/motion";
+import { cn } from "@/lib/utils";
 
 export default function PerfilPage() {
   const { t } = useTranslation();
@@ -116,7 +117,7 @@ function StatCard({
 }) {
   return (
     <Card className="p-4 text-center">
-      <Icon className={`mx-auto mb-1 size-6 ${tint}`} />
+      <Icon className={cn("mx-auto mb-1 size-6", tint)} />
       <p className="font-display text-lg font-extrabold">{value}</p>
       <p className="text-xs text-muted">{label}</p>
     </Card>

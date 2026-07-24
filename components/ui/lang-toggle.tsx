@@ -23,7 +23,9 @@ export function LangToggle({ className }: { className?: string }) {
         i18n.changeLanguage(next);
         try {
           localStorage.setItem(LANG_KEY, next);
-        } catch {}
+        } catch {
+          /* localStorage no disponible: la preferencia no persiste */
+        }
       }}
       aria-label={t("a11y.change_lang")}
       className={cn(

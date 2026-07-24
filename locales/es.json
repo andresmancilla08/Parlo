@@ -1,6 +1,17 @@
 {
   "common": {
-    "back": "Volver"
+    "back": "Volver",
+    "retry": "Reintentar",
+    "loading": "Cargando…"
+  },
+  "error": {
+    "title": "Algo salió mal",
+    "body": "Ocurrió un error inesperado. Inténtalo de nuevo."
+  },
+  "notfound": {
+    "title": "Página no encontrada",
+    "body": "La página que buscas no existe o se movió.",
+    "home": "Ir al inicio"
   },
   "nav": {
     "login": "Entrar",
@@ -64,7 +75,6 @@
     "email_ph": "tu@correo.com",
     "pin": "PIN de 4 dígitos",
     "invalid": "Correo o PIN incorrecto.",
-    "generic_error": "Algo salió mal.",
     "login_btn": "Entrar",
     "signup_btn": "Crear cuenta",
     "no_account": "¿No tienes cuenta? ",
@@ -88,7 +98,14 @@
     "subtitle": "Habla, escribe y aprende con IA",
     "empty_title": "¡Practiquemos inglés!",
     "empty_body": "Escribe lo que quieras o elige una situación. Te corrijo y te explico en español.",
-    "placeholder": "Escribe en inglés…"
+    "placeholder": "Escribe en inglés…",
+    "error": "Algo salió mal con el tutor. Inténtalo de nuevo.",
+    "retry": "Reintentar",
+    "starters": [
+      "Hi! I want to practice ordering coffee ☕",
+      "Let's do a job interview in English 💼",
+      "Help me introduce myself 🙋"
+    ]
   },
   "perfil": {
     "level": "Nivel A1 · Principiante",
@@ -112,10 +129,12 @@
     "system": "Sistema"
   },
   "a11y": {
-    "mascot": "Parlo, la mascota",
     "open_lesson": "Abrir lección",
     "send": "Enviar",
     "change_theme": "Cambiar tema",
-    "change_lang": "Cambiar idioma"
+    "change_lang": "Cambiar idioma",
+    "home": "Inicio",
+    "pin_group": "PIN de 4 dígitos",
+    "pin_digit": "Dígito {{n}}"
   }
 }

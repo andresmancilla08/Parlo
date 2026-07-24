@@ -4,19 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import {
-  IconHome2,
-  IconMessageChatbot,
-  IconUser,
-  type Icon,
-} from "@tabler/icons-react";
+import { navItems } from "@/lib/nav-items";
 import { cn } from "@/lib/utils";
-
-const items: { href: string; labelKey: string; icon: Icon }[] = [
-  { href: "/app", labelKey: "nav.ruta", icon: IconHome2 },
-  { href: "/app/tutor", labelKey: "nav.tutor", icon: IconMessageChatbot },
-  { href: "/app/perfil", labelKey: "nav.perfil", icon: IconUser },
-];
 
 export function BottomNav() {
   const { t } = useTranslation();
@@ -25,7 +14,7 @@ export function BottomNav() {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-bg/90 backdrop-blur-md md:hidden">
       <div className="mx-auto flex max-w-lg items-stretch justify-around px-4 pb-[env(safe-area-inset-bottom)] pt-2">
-        {items.map(({ href, labelKey, icon: Icon }) => {
+        {navItems.map(({ href, labelKey, icon: Icon }) => {
           const active = href === "/app" ? pathname === "/app" : pathname.startsWith(href);
           return (
             <Link

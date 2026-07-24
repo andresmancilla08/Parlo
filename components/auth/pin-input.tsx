@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 /** Input de PIN de 4 dígitos con avance automático, backspace y pegado. */
@@ -13,6 +14,7 @@ export function PinInput({
   onChange: (v: string) => void;
   autoFocus?: boolean;
 }) {
+  const { t } = useTranslation();
   const refs = useRef<Array<HTMLInputElement | null>>([]);
   const digits = value.padEnd(4, " ").slice(0, 4).split("");
 
@@ -26,7 +28,7 @@ export function PinInput({
   };
 
   return (
-    <div className="flex justify-center gap-3" role="group" aria-label="PIN de 4 dígitos">
+    <div className="flex justify-center gap-3" role="group" aria-label={t("a11y.pin_group")}>
       {[0, 1, 2, 3].map((i) => (
         <input
           key={i}
@@ -38,7 +40,7 @@ export function PinInput({
           maxLength={1}
           autoFocus={autoFocus && i === 0}
           value={digits[i]?.trim() ?? ""}
-          aria-label={`Dígito ${i + 1}`}
+          aria-label={t("a11y.pin_digit", { n: i + 1 })}
           onChange={(e) => setDigit(i, e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Backspace" && !digits[i]?.trim() && i > 0) {

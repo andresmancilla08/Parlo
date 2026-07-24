@@ -9,15 +9,9 @@ import { IconFeather, IconSend2 } from "@tabler/icons-react";
 import { Mascot } from "@/components/ui/mascot";
 import { cn } from "@/lib/utils";
 
-const starters = [
-  "Hi! I want to practice ordering coffee ☕",
-  "Let's do a job interview in English 💼",
-  "Help me introduce myself 🙋",
-];
-
 export default function TutorPage() {
   const { t } = useTranslation();
-  const { messages, sendMessage, status } = useChat({
+  const { messages, sendMessage, status, error, regenerate } = useChat({
     transport: new DefaultChatTransport({ api: "/api/tutor" }),
   });
   const [input, setInput] = useState("");
@@ -62,6 +56,19 @@ export default function TutorPage() {
         ))}
 
         {status === "submitted" && <Typing />}
+
+        {error && (
+          <div className="flex flex-col items-center gap-3 rounded-3xl border border-danger/30 bg-danger/10 p-5 text-center">
+            <p className="text-sm font-medium text-danger">{t("tutor.error")}</p>
+            <button
+              onClick={() => regenerate()}
+              className="rounded-pill border border-border bg-surface px-5 py-2 text-sm font-bold text-fg transition-colors hover:border-primary"
+            >
+              {t("tutor.retry")}
+            </button>
+          </div>
+        )}
+
         <div ref={bottomRef} />
       </div>
 
@@ -106,6 +113,7 @@ export default function TutorPage() {
 
 function EmptyState({ onPick }: { onPick: (text: string) => void }) {
   const { t } = useTranslation();
+  const starters = t("tutor.starters", { returnObjects: true }) as string[];
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}

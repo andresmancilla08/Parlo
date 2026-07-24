@@ -4,22 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import {
-  IconHome2,
-  IconMessageChatbot,
-  IconUser,
-  type Icon,
-} from "@tabler/icons-react";
 import { Logo } from "@/components/ui/logo";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { LangToggle } from "@/components/ui/lang-toggle";
+import { navItems } from "@/lib/nav-items";
 import { cn } from "@/lib/utils";
-
-const items: { href: string; labelKey: string; icon: Icon }[] = [
-  { href: "/app", labelKey: "nav.ruta", icon: IconHome2 },
-  { href: "/app/tutor", labelKey: "nav.tutor", icon: IconMessageChatbot },
-  { href: "/app/perfil", labelKey: "nav.perfil", icon: IconUser },
-];
 
 /** Navegación lateral para desktop (md+). En móvil se usa BottomNav. */
 export function Sidebar() {
@@ -33,7 +22,7 @@ export function Sidebar() {
       </Link>
 
       <nav className="flex flex-col gap-1">
-        {items.map(({ href, labelKey, icon: Icon }) => {
+        {navItems.map(({ href, labelKey, icon: Icon }) => {
           const active =
             href === "/app" ? pathname === "/app" : pathname.startsWith(href);
           return (
