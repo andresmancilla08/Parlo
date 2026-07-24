@@ -91,7 +91,9 @@
     "route_title": "Your path",
     "route_subtitle": "Follow the path. Every lesson gets you closer to speaking English.",
     "unit_greetings": "Greetings and introductions",
-    "unit_numbers": "Numbers and time"
+    "unit_numbers": "Numbers and time",
+    "streak_title": "{{n}}-day streak",
+    "streak_cta": "Keep it up, don't break it!"
   },
   "tutor": {
     "title": "Parlo Tutor",

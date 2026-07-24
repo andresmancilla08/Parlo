@@ -30,9 +30,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <Sidebar />
       <div className="flex min-h-dvh flex-1 flex-col">
         <AppBar />
-        <main className="flex-1 pb-24 md:pb-10">
-          <div className="mx-auto w-full max-w-3xl">{children}</div>
-        </main>
+        <main className="flex-1 pb-24 md:pb-10">{children}</main>
       </div>
       <BottomNav />
     </div>

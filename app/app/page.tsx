@@ -1,18 +1,22 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import {
   IconBolt,
   IconCheck,
+  IconFlame,
   IconLock,
   IconStar,
   type Icon,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
+import { Card } from "@/components/ui/card";
 import { Mascot } from "@/components/ui/mascot";
 import { spring } from "@/lib/motion";
+import mascotCelebrate from "@/public/brand/mascot-celebrate.png";
 
 // ponytail: datos mock hasta cablear el currículo real en Firestore.
 type NodeState = "done" | "current" | "locked";
@@ -24,19 +28,47 @@ const units: { level: string; titleKey: string; nodes: NodeState[] }[] = [
 export default function HomePage() {
   const { t } = useTranslation();
   return (
-    <div className="px-5 pt-6">
+    <div className="mx-auto w-full max-w-6xl px-5 pt-6">
       <Header />
-      <DailyChallenge />
-      <section className="mt-8">
-        <h2 className="mb-1 font-display text-xl font-extrabold tracking-tight">
-          {t("home.route_title")}
-        </h2>
-        <p className="mb-6 text-sm text-muted">{t("home.route_subtitle")}</p>
-        {units.map((unit, i) => (
-          <Unit key={i} unit={unit} index={i} />
-        ))}
-      </section>
+      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">
+        <section className="order-2 lg:order-1">
+          <h2 className="mb-1 font-display text-xl font-extrabold tracking-tight">
+            {t("home.route_title")}
+          </h2>
+          <p className="mb-6 text-sm text-muted">{t("home.route_subtitle")}</p>
+          {units.map((unit, i) => (
+            <Unit key={i} unit={unit} index={i} />
+          ))}
+        </section>
+
+        <aside className="order-1 space-y-4 lg:order-2 lg:sticky lg:top-24 lg:self-start">
+          <DailyChallenge />
+          <StreakCard />
+        </aside>
+      </div>
     </div>
+  );
+}
+
+function StreakCard() {
+  const { t } = useTranslation();
+  return (
+    <Card className="relative overflow-hidden p-5">
+      <div className="flex items-center gap-2">
+        <IconFlame className="size-6 text-primary" />
+        <span className="font-display text-lg font-extrabold">
+          {t("home.streak_title", { n: 3 })}
+        </span>
+      </div>
+      <p className="mt-1 max-w-[62%] text-sm text-muted">{t("home.streak_cta")}</p>
+      <Image
+        src={mascotCelebrate}
+        alt=""
+        height={104}
+        width={Math.round((104 * mascotCelebrate.width) / mascotCelebrate.height)}
+        className="pointer-events-none absolute -bottom-2 -right-1 select-none"
+      />
+    </Card>
   );
 }
 
@@ -67,7 +99,7 @@ function DailyChallenge() {
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ ...spring, delay: 0.05 }}
-      className="mt-6 overflow-hidden rounded-3xl bg-gradient-brand p-5 text-primary-fg shadow-lg shadow-primary/20"
+      className="overflow-hidden rounded-3xl bg-gradient-brand p-5 text-primary-fg shadow-lg shadow-primary/20"
     >
       <div className="flex items-center justify-between">
         <div>

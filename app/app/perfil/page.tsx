@@ -29,7 +29,7 @@ export default function PerfilPage() {
   const name = email?.split("@")[0] ?? "";
 
   return (
-    <div className="px-5 pt-8">
+    <div className="mx-auto w-full max-w-2xl px-5 pt-8">
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}

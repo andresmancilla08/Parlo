@@ -91,7 +91,9 @@
     "route_title": "Tu ruta",
     "route_subtitle": "Sigue el camino. Cada lección te acerca a hablar inglés.",
     "unit_greetings": "Saludos y presentaciones",
-    "unit_numbers": "Números y la hora"
+    "unit_numbers": "Números y la hora",
+    "streak_title": "Racha de {{n}} días",
+    "streak_cta": "¡Sigue así, no la rompas!"
   },
   "tutor": {
     "title": "Tutor Parlo",

@@ -29,7 +29,7 @@ export default function TutorPage() {
   };
 
   return (
-    <div className="flex min-h-dvh flex-col px-5 pt-6">
+    <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col px-5 pt-6">
       <header className="mb-4 flex items-center gap-3">
         <span className="grid size-11 place-items-center rounded-2xl bg-primary text-primary-fg shadow-md shadow-primary/25">
           <IconFeather className="size-6" />
