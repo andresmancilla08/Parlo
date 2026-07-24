@@ -16,7 +16,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-border bg-surface/60 px-4 py-6 md:flex">
+    <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col overflow-y-auto border-r border-border bg-surface/60 px-4 pb-8 pt-6 md:flex">
       <Link href="/app" className="mb-8 flex items-center px-2">
         <Logo height={30} />
       </Link>
@@ -57,7 +57,7 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className="mt-auto flex flex-col gap-2">
+      <div className="mt-auto flex flex-col gap-2 pt-6">
         <ThemeToggle showLabel className="w-full justify-start" />
         <LangToggle className="w-full justify-start" />
       </div>
