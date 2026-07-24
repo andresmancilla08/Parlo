@@ -6,9 +6,7 @@ import { useTranslation } from "react-i18next";
 import {
   IconBolt,
   IconCheck,
-  IconFlame,
   IconLock,
-  IconSparkles,
   IconStar,
   type Icon,
 } from "@tabler/icons-react";
@@ -49,39 +47,16 @@ function Header() {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={spring}
-      className="flex items-center justify-between"
+      className="flex items-center gap-3"
     >
-      <div className="flex items-center gap-3">
-        <Mascot height={54} />
-        <div>
-          <p className="text-sm text-muted">{t("home.greeting")}</p>
-          <h1 className="font-display text-2xl font-extrabold tracking-tight">
-            {t("home.subtitle")}
-          </h1>
-        </div>
-      </div>
-      <div className="flex items-center gap-2">
-        <Stat icon={IconFlame} value="3" className="text-primary" />
-        <Stat icon={IconSparkles} value="120" className="text-gem" />
+      <Mascot height={56} />
+      <div>
+        <p className="text-sm text-muted">{t("home.greeting")}</p>
+        <h1 className="font-display text-2xl font-extrabold tracking-tight">
+          {t("home.subtitle")}
+        </h1>
       </div>
     </motion.header>
-  );
-}
-
-function Stat({
-  icon: Icon,
-  value,
-  className,
-}: {
-  icon: Icon;
-  value: string;
-  className?: string;
-}) {
-  return (
-    <span className="inline-flex items-center gap-1 rounded-pill border border-border bg-card px-3 py-1.5 text-sm font-bold">
-      <Icon className={cn("size-4", className)} />
-      {value}
-    </span>
   );
 }
 
