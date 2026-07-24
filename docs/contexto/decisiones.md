@@ -31,8 +31,13 @@
 - **Descartado:** `@serwist/turbopack` (experimental) — reevaluar cuando estabilice.
 - **Estado:** vigente.
 
-## i18n diferido
-- **Qué:** v1 solo en español, sin librería i18n.
-- **Por qué:** YAGNI; público v1 es hispanohablante.
-- **Cómo:** strings centralizados para extraer con i18next (no next-intl) al internacionalizar.
+## i18n con i18next (ES/EN)
+- **Qué:** i18next + react-i18next; recursos en `locales/es.json` y `locales/en.json`; todos los textos vía `t()`. Selector `LangToggle` (persiste en localStorage `parlo-lang`).
+- **Por qué:** requisito del dueño (como Spendia/Bowlify); NUNCA next-intl.
+- **Cómo (SSR):** `lng` fijo 'es' en el primer render; el `I18nProvider` cambia el idioma en cliente tras montar → evita mismatch de hidratación.
+- **Estado:** vigente (implementado).
+
+## Tema dark/light manual
+- **Qué:** toggle claro/oscuro/sistema; paleta por clase `.dark` en globals.css; store `lib/theme.ts` + `ThemeProvider` + script anti-flash en layout.
+- **Por qué:** el dueño quiere elegir el modo, no solo seguir el SO.
 - **Estado:** vigente.
