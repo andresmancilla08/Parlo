@@ -1,4 +1,7 @@
 {
+  "common": {
+    "back": "Volver"
+  },
   "nav": {
     "login": "Entrar",
     "signup": "Empezar gratis",
