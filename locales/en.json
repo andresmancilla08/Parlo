@@ -118,7 +118,9 @@
     "gems": "Gems",
     "achievements": "Achievements",
     "badges_title": "Your achievements",
-    "badge_level": "Level completed",
+    "badge_level": "First level",
+    "badge_streak": "3-day streak",
+    "badge_words": "10 words",
     "appearance": "Appearance",
     "logout": "Log out"
   },

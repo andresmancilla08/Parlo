@@ -1,5 +1,6 @@
 "use client";
 
+import Image, { type StaticImageData } from "next/image";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import {
@@ -22,6 +23,10 @@ import { Mascot } from "@/components/ui/mascot";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { LangToggle } from "@/components/ui/lang-toggle";
 import { rise, spring, stagger } from "@/lib/motion";
+import decoCloud from "@/public/brand/deco-cloud.png";
+import decoFeather from "@/public/brand/deco-feather.png";
+import decoSparkles from "@/public/brand/deco-sparkles.png";
+import decoBubble from "@/public/brand/deco-bubble.png";
 
 export default function Home() {
   return (
@@ -69,8 +74,13 @@ function Hero() {
   const opacity = useTransform(scrollY, [0, 420], [1, 0.35]);
 
   return (
-    <AuroraBackground className="relative px-5 pb-16 pt-6 sm:pb-24 sm:pt-10">
-      <div className="pointer-events-none absolute inset-x-0 top-2 z-0 flex justify-center sm:top-0">
+    <AuroraBackground className="relative overflow-hidden px-5 pb-16 pt-6 sm:pb-24 sm:pt-10">
+      <Deco src={decoCloud} width={130} speed={40} className="left-2 top-8 sm:left-12" />
+      <Deco src={decoFeather} width={54} speed={-34} className="right-4 top-24 sm:right-20" />
+      <Deco src={decoSparkles} width={92} speed={72} className="bottom-10 left-6 hidden sm:block" />
+      <Deco src={decoBubble} width={110} speed={-52} className="bottom-16 right-4 hidden sm:block" />
+
+      <div className="pointer-events-none absolute inset-x-0 top-2 z-[1] flex justify-center sm:top-0">
         <Mascot
           height={340}
           glow
@@ -125,6 +135,32 @@ function Hero() {
         </motion.p>
       </motion.div>
     </AuroraBackground>
+  );
+}
+
+/** Capa decorativa con parallax ligado al scroll (detrás del texto del hero). */
+function Deco({
+  src,
+  width,
+  speed,
+  className,
+}: {
+  src: StaticImageData;
+  width: number;
+  speed: number;
+  className: string;
+}) {
+  const { scrollY } = useScroll();
+  const y = useTransform(scrollY, [0, 600], [0, speed]);
+  const height = Math.round((width * src.height) / src.width);
+  return (
+    <motion.div
+      aria-hidden
+      style={{ y }}
+      className={`pointer-events-none absolute z-0 select-none opacity-70 ${className}`}
+    >
+      <Image src={src} alt="" width={width} height={height} className="h-auto w-full" />
+    </motion.div>
   );
 }
 

@@ -1,11 +1,12 @@
 "use client";
 
-import Image from "next/image";
+import Image, { type StaticImageData } from "next/image";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import badgeLevel from "@/public/brand/badge-level.png";
-import mascotCelebrate from "@/public/brand/mascot-celebrate.png";
+import badgeStreak from "@/public/brand/badge-streak.png";
+import badgeWords from "@/public/brand/badge-words.png";
 import {
   IconFlame,
   IconLogout,
@@ -15,6 +16,7 @@ import {
 import { useAuth } from "@/lib/auth";
 import { useProgress } from "@/lib/progress";
 import { useHydrated } from "@/lib/use-hydrated";
+import { learnedVocab } from "@/lib/curriculum";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -62,26 +64,23 @@ export default function PerfilPage() {
         <p className="mb-3 text-sm font-semibold text-muted">
           {t("perfil.badges_title")}
         </p>
-        <Card className="flex items-center gap-4 overflow-hidden p-4">
-          <Image
+        <div className="grid grid-cols-3 gap-3">
+          <BadgeTile
             src={badgeLevel}
-            alt=""
-            height={64}
-            width={Math.round((64 * badgeLevel.width) / badgeLevel.height)}
-            className="shrink-0"
+            title={t("perfil.badge_level")}
+            earned={hydrated && completed.length >= 1}
           />
-          <div className="flex-1">
-            <p className="font-display font-bold">{t("perfil.badge_level")}</p>
-            <p className="text-sm text-muted">A1</p>
-          </div>
-          <Image
-            src={mascotCelebrate}
-            alt=""
-            height={76}
-            width={Math.round((76 * mascotCelebrate.width) / mascotCelebrate.height)}
-            className="-mb-4 shrink-0"
+          <BadgeTile
+            src={badgeStreak}
+            title={t("perfil.badge_streak")}
+            earned={hydrated && streak >= 3}
           />
-        </Card>
+          <BadgeTile
+            src={badgeWords}
+            title={t("perfil.badge_words")}
+            earned={hydrated && learnedVocab(new Set(completed)).length >= 10}
+          />
+        </div>
       </div>
 
       <div className="mt-8">
@@ -126,6 +125,29 @@ function StatCard({
       <Icon className={cn("mx-auto mb-1 size-6", tint)} />
       <p className="font-display text-lg font-extrabold">{value}</p>
       <p className="text-xs text-muted">{label}</p>
+    </Card>
+  );
+}
+
+function BadgeTile({
+  src,
+  title,
+  earned,
+}: {
+  src: StaticImageData;
+  title: string;
+  earned: boolean;
+}) {
+  return (
+    <Card className={cn("flex flex-col items-center gap-2 p-4 text-center", !earned && "opacity-90")}>
+      <Image
+        src={src}
+        alt=""
+        height={72}
+        width={Math.round((72 * src.width) / src.height)}
+        className={cn("transition", !earned && "opacity-25 grayscale")}
+      />
+      <p className="text-xs font-bold leading-tight">{title}</p>
     </Card>
   );
 }
