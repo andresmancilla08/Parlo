@@ -106,18 +106,6 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           {isLogin ? t("auth.login_btn") : t("auth.signup_btn")}
           <IconArrowRight className="size-5" />
         </Button>
-
-        <button
-          type="button"
-          onClick={() => {
-            setEmail("andresmancilla08@gmail.com");
-            setPin("1111");
-            setError(null);
-          }}
-          className="mt-4 w-full text-center text-xs text-muted underline-offset-4 hover:underline"
-        >
-          {t("auth.demo")}
-        </button>
       </motion.form>
 
       <p className="mt-6 text-center text-sm text-muted">
