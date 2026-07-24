@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   IconHome2,
   IconMessageChatbot,
@@ -11,19 +12,20 @@ import {
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 
-const items: { href: string; label: string; icon: Icon }[] = [
-  { href: "/app", label: "Ruta", icon: IconHome2 },
-  { href: "/app/tutor", label: "Tutor", icon: IconMessageChatbot },
-  { href: "/app/perfil", label: "Perfil", icon: IconUser },
+const items: { href: string; labelKey: string; icon: Icon }[] = [
+  { href: "/app", labelKey: "nav.ruta", icon: IconHome2 },
+  { href: "/app/tutor", labelKey: "nav.tutor", icon: IconMessageChatbot },
+  { href: "/app/perfil", labelKey: "nav.perfil", icon: IconUser },
 ];
 
 export function BottomNav() {
+  const { t } = useTranslation();
   const pathname = usePathname();
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-bg/90 backdrop-blur-md md:hidden">
       <div className="mx-auto flex max-w-lg items-stretch justify-around px-4 pb-[env(safe-area-inset-bottom)] pt-2">
-        {items.map(({ href, label, icon: Icon }) => {
+        {items.map(({ href, labelKey, icon: Icon }) => {
           const active = href === "/app" ? pathname === "/app" : pathname.startsWith(href);
           return (
             <Link
@@ -50,7 +52,7 @@ export function BottomNav() {
                   active ? "text-primary" : "text-muted",
                 )}
               >
-                {label}
+                {t(labelKey)}
               </span>
             </Link>
           );

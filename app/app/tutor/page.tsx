@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { IconFeather, IconSend2 } from "@tabler/icons-react";
 import { Mascot } from "@/components/ui/mascot";
 import { cn } from "@/lib/utils";
@@ -15,6 +16,7 @@ const starters = [
 ];
 
 export default function TutorPage() {
+  const { t } = useTranslation();
   const { messages, sendMessage, status } = useChat({
     transport: new DefaultChatTransport({ api: "/api/tutor" }),
   });
@@ -40,9 +42,9 @@ export default function TutorPage() {
         </span>
         <div>
           <h1 className="font-display text-lg font-extrabold leading-tight">
-            Tutor Parlo
+            {t("tutor.title")}
           </h1>
-          <p className="text-xs text-muted">Habla, escribe y aprende con IA</p>
+          <p className="text-xs text-muted">{t("tutor.subtitle")}</p>
         </div>
       </header>
 
@@ -81,7 +83,7 @@ export default function TutorPage() {
               }
             }}
             rows={1}
-            placeholder="Escribe en inglés…"
+            placeholder={t("tutor.placeholder")}
             className="max-h-32 flex-1 resize-none bg-transparent px-3 py-2 text-fg outline-none placeholder:text-muted/60"
           />
           <motion.button
@@ -92,7 +94,7 @@ export default function TutorPage() {
               "grid size-11 shrink-0 place-items-center rounded-2xl bg-primary text-primary-fg transition-opacity",
               (!input.trim() || busy) && "opacity-40",
             )}
-            aria-label="Enviar"
+            aria-label={t("a11y.send")}
           >
             <IconSend2 className="size-5" />
           </motion.button>
@@ -102,7 +104,8 @@ export default function TutorPage() {
   );
 }
 
-function EmptyState({ onPick }: { onPick: (t: string) => void }) {
+function EmptyState({ onPick }: { onPick: (text: string) => void }) {
+  const { t } = useTranslation();
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -114,11 +117,10 @@ function EmptyState({ onPick }: { onPick: (t: string) => void }) {
         <Mascot height={116} />
       </div>
       <h2 className="mt-2 font-display text-lg font-bold">
-        ¡Practiquemos inglés!
+        {t("tutor.empty_title")}
       </h2>
       <p className="mx-auto mt-1 max-w-xs text-sm text-muted">
-        Escribe lo que quieras o elige una situación. Te corrijo y te explico en
-        español.
+        {t("tutor.empty_body")}
       </p>
       <div className="mt-5 flex flex-col gap-2">
         {starters.map((s) => (

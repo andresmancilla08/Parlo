@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   IconFlame,
   IconLogout,
@@ -12,9 +13,11 @@ import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { LangToggle } from "@/components/ui/lang-toggle";
 import { spring } from "@/lib/motion";
 
 export default function PerfilPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const email = useAuth((s) => s.email);
   const logout = useAuth((s) => s.logout);
@@ -35,19 +38,24 @@ export default function PerfilPage() {
         <h1 className="mt-4 font-display text-xl font-extrabold">{name}</h1>
         <p className="text-sm text-muted">{email}</p>
         <span className="mt-3 rounded-pill bg-accent-soft px-3 py-1 text-sm font-bold text-accent">
-          Nivel A1 · Principiante
+          {t("perfil.level")}
         </span>
       </motion.div>
 
       <div className="mt-8 grid grid-cols-3 gap-3">
-        <StatCard icon={IconFlame} value="3" label="Racha" tint="text-primary" />
-        <StatCard icon={IconSparkles} value="120" label="Gemas" tint="text-gem" />
-        <StatCard icon={IconTrophy} value="4" label="Logros" tint="text-accent" />
+        <StatCard icon={IconFlame} value="3" label={t("perfil.streak")} tint="text-primary" />
+        <StatCard icon={IconSparkles} value="120" label={t("perfil.gems")} tint="text-gem" />
+        <StatCard icon={IconTrophy} value="4" label={t("perfil.achievements")} tint="text-accent" />
       </div>
 
       <div className="mt-8">
-        <p className="mb-2 text-sm font-semibold text-muted">Apariencia</p>
-        <ThemeToggle showLabel className="w-full justify-center" />
+        <p className="mb-2 text-sm font-semibold text-muted">
+          {t("perfil.appearance")}
+        </p>
+        <div className="flex gap-2">
+          <ThemeToggle showLabel className="flex-1 justify-center" />
+          <LangToggle className="justify-center" />
+        </div>
       </div>
 
       <Button
@@ -60,7 +68,7 @@ export default function PerfilPage() {
         }}
       >
         <IconLogout className="size-5" />
-        Cerrar sesión
+        {t("perfil.logout")}
       </Button>
     </div>
   );

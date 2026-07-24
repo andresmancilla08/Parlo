@@ -3,6 +3,7 @@ import { Montserrat, Nunito } from "next/font/google";
 import "./globals.css";
 import RegisterPWA from "./register-pwa";
 import { ThemeProvider } from "@/components/theme-provider";
+import { I18nProvider } from "@/components/i18n-provider";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -64,7 +65,7 @@ export default function RootLayout({
         />
         <RegisterPWA />
         <ThemeProvider />
-        {children}
+        <I18nProvider>{children}</I18nProvider>
       </body>
     </html>
   );

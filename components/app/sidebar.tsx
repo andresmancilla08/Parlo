@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   IconFeather,
   IconHome2,
@@ -11,16 +12,18 @@ import {
   type Icon,
 } from "@tabler/icons-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { LangToggle } from "@/components/ui/lang-toggle";
 import { cn } from "@/lib/utils";
 
-const items: { href: string; label: string; icon: Icon }[] = [
-  { href: "/app", label: "Ruta", icon: IconHome2 },
-  { href: "/app/tutor", label: "Tutor", icon: IconMessageChatbot },
-  { href: "/app/perfil", label: "Perfil", icon: IconUser },
+const items: { href: string; labelKey: string; icon: Icon }[] = [
+  { href: "/app", labelKey: "nav.ruta", icon: IconHome2 },
+  { href: "/app/tutor", labelKey: "nav.tutor", icon: IconMessageChatbot },
+  { href: "/app/perfil", labelKey: "nav.perfil", icon: IconUser },
 ];
 
 /** Navegación lateral para desktop (md+). En móvil se usa BottomNav. */
 export function Sidebar() {
+  const { t } = useTranslation();
   const pathname = usePathname();
 
   return (
@@ -33,7 +36,7 @@ export function Sidebar() {
       </Link>
 
       <nav className="flex flex-col gap-1">
-        {items.map(({ href, label, icon: Icon }) => {
+        {items.map(({ href, labelKey, icon: Icon }) => {
           const active =
             href === "/app" ? pathname === "/app" : pathname.startsWith(href);
           return (
@@ -61,15 +64,16 @@ export function Sidebar() {
                   active ? "text-primary" : "text-muted",
                 )}
               >
-                {label}
+                {t(labelKey)}
               </span>
             </Link>
           );
         })}
       </nav>
 
-      <div className="mt-auto">
+      <div className="mt-auto flex flex-col gap-2">
         <ThemeToggle showLabel className="w-full justify-start" />
+        <LangToggle className="w-full justify-start" />
       </div>
     </aside>
   );

@@ -1,0 +1,117 @@
+{
+  "nav": {
+    "login": "Log in",
+    "signup": "Get started",
+    "ruta": "Path",
+    "tutor": "Tutor",
+    "perfil": "Profile"
+  },
+  "landing": {
+    "badge": "Your AI English tutor, explained in Spanish",
+    "hero_pre": "Speak English ",
+    "hero_hl": "with confidence",
+    "hero_post": ", not from memorization.",
+    "hero_subtitle": "Your AI tutor fixes your mistakes, explains the why in Spanish and guides you step by step to real fluency.",
+    "hero_cta": "Start free",
+    "hero_cta2": "How it works",
+    "hero_note": "Free to start · Installable as an app · No card",
+    "method_kicker": "The method",
+    "method_title": "Not just another tap-the-buttons app",
+    "method_subtitle": "Every feature exists for a pedagogical reason: comprehensible input, active production and instant feedback.",
+    "features": {
+      "levels": {
+        "title": "Learn by levels",
+        "body": "From A1 to C2 with a clear path — never lost, never skipping steps."
+      },
+      "converse": {
+        "title": "Talk from day one",
+        "body": "Practice with AI as if you were talking to a real person, at your level."
+      },
+      "errors": {
+        "title": "Understand your mistakes",
+        "body": "Every correction comes with a simple explanation of the why."
+      },
+      "memory": {
+        "title": "Never forget what you learn",
+        "body": "Spaced repetition shows up exactly when your memory needs it."
+      }
+    },
+    "levels_kicker": "Your path",
+    "levels_title": "From beginner to fluent, step by step",
+    "levels_subtitle": "Start with a test that places you at your real level. From there, a clear path.",
+    "rewards_kicker": "Progress feels good",
+    "rewards_title": "Challenges and rewards that hook you",
+    "rewards_subtitle": "Gamification in service of learning, not a replacement for it.",
+    "rewards": {
+      "streak": { "title": "Streak", "body": "Day after day. Your streak protects the habit." },
+      "achievements": { "title": "Achievements", "body": "Milestones that celebrate real progress." },
+      "gems": { "title": "Gems", "body": "Earn gems and unlock themes and perks." }
+    },
+    "cta_title": "Start today. Your future English begins with the first conversation.",
+    "cta_subtitle": "Free to start. Install it as an app and practice 10 minutes a day.",
+    "cta_button": "Create free account",
+    "footer": "© 2026 Parlo · Learn English the right way"
+  },
+  "auth": {
+    "login_title": "Welcome back",
+    "login_subtitle": "Log in with your email and PIN",
+    "signup_title": "Create your account",
+    "signup_subtitle": "Start learning English in minutes",
+    "email": "Email",
+    "email_ph": "you@email.com",
+    "pin": "4-digit PIN",
+    "invalid": "Wrong email or PIN.",
+    "generic_error": "Something went wrong.",
+    "login_btn": "Log in",
+    "signup_btn": "Create account",
+    "demo": "Use demo account (andresmancilla08@gmail.com · 1111)",
+    "no_account": "Don't have an account? ",
+    "have_account": "Already have an account? ",
+    "go_signup": "Sign up",
+    "go_login": "Log in"
+  },
+  "home": {
+    "greeting": "Hi again!",
+    "subtitle": "Let's keep learning",
+    "daily_label": "Daily challenge",
+    "daily_title": "Complete 1 lesson today",
+    "daily_note": "You're on track · +50 XP when you finish",
+    "route_title": "Your path",
+    "route_subtitle": "Follow the path. Every lesson gets you closer to speaking English.",
+    "unit_greetings": "Greetings and introductions",
+    "unit_numbers": "Numbers and time"
+  },
+  "tutor": {
+    "title": "Parlo Tutor",
+    "subtitle": "Speak, write and learn with AI",
+    "empty_title": "Let's practice English!",
+    "empty_body": "Write anything or pick a situation. I'll correct you and explain in Spanish.",
+    "placeholder": "Write in English…"
+  },
+  "perfil": {
+    "level": "Level A1 · Beginner",
+    "streak": "Streak",
+    "gems": "Gems",
+    "achievements": "Achievements",
+    "appearance": "Appearance",
+    "logout": "Log out"
+  },
+  "leccion": {
+    "title": "Lesson engine on the way",
+    "body": "Interactive exercises and spaced repetition are coming very soon. Meanwhile, practice by talking with the tutor.",
+    "go_tutor": "Go to tutor",
+    "back": "Back to path"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "a11y": {
+    "mascot": "Parlo, the mascot",
+    "open_lesson": "Open lesson",
+    "send": "Send",
+    "change_theme": "Change theme",
+    "change_lang": "Change language"
+  }
+}

@@ -9,7 +9,7 @@ const DEMO_PIN = "1111";
 type AuthState = {
   email: string | null;
   hydrated: boolean;
-  login: (email: string, pin: string) => { ok: boolean; error?: string };
+  login: (email: string, pin: string) => { ok: boolean };
   logout: () => void;
   setHydrated: () => void;
 };
@@ -25,7 +25,7 @@ export const useAuth = create<AuthState>()(
           set({ email: e });
           return { ok: true };
         }
-        return { ok: false, error: "Correo o PIN incorrecto." };
+        return { ok: false };
       },
       logout: () => set({ email: null }),
       setHydrated: () => set({ hydrated: true }),

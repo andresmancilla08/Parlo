@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import { IconArrowRight, IconMail } from "@tabler/icons-react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { spring } from "@/lib/motion";
 import { PinInput } from "./pin-input";
 
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
+  const { t } = useTranslation();
   const router = useRouter();
   const login = useAuth((s) => s.login);
   const [email, setEmail] = useState("");
@@ -23,12 +25,11 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const canSubmit = email.includes("@") && pin.length === 4;
 
   const submit = () => {
-    const res = login(email, pin);
-    if (res.ok) {
+    if (login(email, pin).ok) {
       router.push("/app");
       return;
     }
-    setError(res.error ?? "Algo salió mal.");
+    setError(t("auth.invalid"));
     setShake(true);
     setPin("");
     setTimeout(() => setShake(false), 400);
@@ -46,12 +47,10 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           <Mascot height={108} />
         </div>
         <h1 className="font-display text-2xl font-extrabold tracking-tight">
-          {isLogin ? "Bienvenido de vuelta" : "Crea tu cuenta"}
+          {isLogin ? t("auth.login_title") : t("auth.signup_title")}
         </h1>
         <p className="mt-1 text-sm text-muted">
-          {isLogin
-            ? "Entra con tu correo y PIN"
-            : "Empieza a aprender inglés en minutos"}
+          {isLogin ? t("auth.login_subtitle") : t("auth.signup_subtitle")}
         </p>
       </div>
 
@@ -64,7 +63,9 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         }}
         className="rounded-3xl border border-border bg-card p-6 shadow-sm"
       >
-        <label className="mb-1.5 block text-sm font-semibold text-fg">Correo</label>
+        <label className="mb-1.5 block text-sm font-semibold text-fg">
+          {t("auth.email")}
+        </label>
         <div className="relative mb-5">
           <IconMail className="pointer-events-none absolute left-3.5 top-1/2 size-5 -translate-y-1/2 text-muted" />
           <input
@@ -75,12 +76,14 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
               setEmail(e.target.value);
               setError(null);
             }}
-            placeholder="tu@correo.com"
+            placeholder={t("auth.email_ph")}
             className="w-full rounded-2xl border-2 border-border bg-surface py-3 pl-11 pr-4 text-fg outline-none transition-colors placeholder:text-muted/60 focus:border-primary focus:ring-4 focus:ring-primary/15"
           />
         </div>
 
-        <label className="mb-2.5 block text-sm font-semibold text-fg">PIN de 4 dígitos</label>
+        <label className="mb-2.5 block text-sm font-semibold text-fg">
+          {t("auth.pin")}
+        </label>
         <PinInput
           value={pin}
           onChange={(v) => {
@@ -100,7 +103,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         )}
 
         <Button type="submit" fullWidth shimmer disabled={!canSubmit} className="mt-6">
-          {isLogin ? "Entrar" : "Crear cuenta"}
+          {isLogin ? t("auth.login_btn") : t("auth.signup_btn")}
           <IconArrowRight className="size-5" />
         </Button>
 
@@ -113,17 +116,17 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
           }}
           className="mt-4 w-full text-center text-xs text-muted underline-offset-4 hover:underline"
         >
-          Usar cuenta demo (andresmancilla08@gmail.com · 1111)
+          {t("auth.demo")}
         </button>
       </motion.form>
 
       <p className="mt-6 text-center text-sm text-muted">
-        {isLogin ? "¿No tienes cuenta? " : "¿Ya tienes cuenta? "}
+        {isLogin ? t("auth.no_account") : t("auth.have_account")}
         <Link
           href={isLogin ? "/registro" : "/login"}
           className="font-semibold text-primary underline-offset-4 hover:underline"
         >
-          {isLogin ? "Regístrate" : "Entra"}
+          {isLogin ? t("auth.go_signup") : t("auth.go_login")}
         </Link>
       </p>
     </motion.div>

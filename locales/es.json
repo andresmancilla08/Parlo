@@ -1,0 +1,117 @@
+{
+  "nav": {
+    "login": "Entrar",
+    "signup": "Empezar gratis",
+    "ruta": "Ruta",
+    "tutor": "Tutor",
+    "perfil": "Perfil"
+  },
+  "landing": {
+    "badge": "Tu tutor de inglés con IA, en español",
+    "hero_pre": "Habla inglés ",
+    "hero_hl": "con confianza",
+    "hero_post": ", no de memoria.",
+    "hero_subtitle": "Tu tutor de IA corrige tus errores, explica el porqué en español y te guía paso a paso hasta alcanzar fluidez real.",
+    "hero_cta": "Empieza gratis",
+    "hero_cta2": "Cómo funciona",
+    "hero_note": "Gratis para empezar · Instalable como app · Sin tarjeta",
+    "method_kicker": "El método",
+    "method_title": "No es otra app de tocar botones",
+    "method_subtitle": "Cada función existe por una razón pedagógica: input comprensible, producción activa y feedback inmediato.",
+    "features": {
+      "levels": {
+        "title": "Aprende por niveles",
+        "body": "Desde A1 hasta C2 con un camino claro, sin perderte ni saltarte pasos."
+      },
+      "converse": {
+        "title": "Conversa desde el primer día",
+        "body": "Practica con IA como si hablaras con una persona real, a tu nivel."
+      },
+      "errors": {
+        "title": "Entiende tus errores",
+        "body": "Cada corrección incluye una explicación sencilla en español del porqué."
+      },
+      "memory": {
+        "title": "Nunca olvides lo aprendido",
+        "body": "El repaso espaciado aparece justo cuando tu memoria lo necesita."
+      }
+    },
+    "levels_kicker": "Tu ruta",
+    "levels_title": "De principiante a fluido, paso a paso",
+    "levels_subtitle": "Empiezas con un test que te sitúa en tu nivel real. A partir de ahí, un camino claro.",
+    "rewards_kicker": "Se siente bien avanzar",
+    "rewards_title": "Retos y recompensas que enganchan",
+    "rewards_subtitle": "La gamificación al servicio del aprendizaje, no para reemplazarlo.",
+    "rewards": {
+      "streak": { "title": "Racha", "body": "Un día tras otro. La racha protege el hábito." },
+      "achievements": { "title": "Logros", "body": "Hitos que celebran tu progreso real." },
+      "gems": { "title": "Gemas", "body": "Gana gemas y desbloquea temas y ventajas." }
+    },
+    "cta_title": "Empieza hoy. Tu inglés del futuro comienza con la primera conversación.",
+    "cta_subtitle": "Gratis para arrancar. Instálalo como app y practica 10 minutos al día.",
+    "cta_button": "Crear cuenta gratis",
+    "footer": "© 2026 Parlo · Aprende inglés como se debe"
+  },
+  "auth": {
+    "login_title": "Bienvenido de vuelta",
+    "login_subtitle": "Entra con tu correo y PIN",
+    "signup_title": "Crea tu cuenta",
+    "signup_subtitle": "Empieza a aprender inglés en minutos",
+    "email": "Correo",
+    "email_ph": "tu@correo.com",
+    "pin": "PIN de 4 dígitos",
+    "invalid": "Correo o PIN incorrecto.",
+    "generic_error": "Algo salió mal.",
+    "login_btn": "Entrar",
+    "signup_btn": "Crear cuenta",
+    "demo": "Usar cuenta demo (andresmancilla08@gmail.com · 1111)",
+    "no_account": "¿No tienes cuenta? ",
+    "have_account": "¿Ya tienes cuenta? ",
+    "go_signup": "Regístrate",
+    "go_login": "Entra"
+  },
+  "home": {
+    "greeting": "¡Hola de nuevo!",
+    "subtitle": "Sigamos aprendiendo",
+    "daily_label": "Reto diario",
+    "daily_title": "Completa 1 lección hoy",
+    "daily_note": "Vas por buen camino · +50 XP al terminar",
+    "route_title": "Tu ruta",
+    "route_subtitle": "Sigue el camino. Cada lección te acerca a hablar inglés.",
+    "unit_greetings": "Saludos y presentaciones",
+    "unit_numbers": "Números y la hora"
+  },
+  "tutor": {
+    "title": "Tutor Parlo",
+    "subtitle": "Habla, escribe y aprende con IA",
+    "empty_title": "¡Practiquemos inglés!",
+    "empty_body": "Escribe lo que quieras o elige una situación. Te corrijo y te explico en español.",
+    "placeholder": "Escribe en inglés…"
+  },
+  "perfil": {
+    "level": "Nivel A1 · Principiante",
+    "streak": "Racha",
+    "gems": "Gemas",
+    "achievements": "Logros",
+    "appearance": "Apariencia",
+    "logout": "Cerrar sesión"
+  },
+  "leccion": {
+    "title": "Motor de lecciones en camino",
+    "body": "Los ejercicios interactivos y el repaso espaciado llegan muy pronto. Mientras tanto, practica hablando con el tutor.",
+    "go_tutor": "Ir al tutor",
+    "back": "Volver a la ruta"
+  },
+  "theme": {
+    "light": "Claro",
+    "dark": "Oscuro",
+    "system": "Sistema"
+  },
+  "a11y": {
+    "mascot": "Parlo, la mascota",
+    "open_lesson": "Abrir lección",
+    "send": "Enviar",
+    "change_theme": "Cambiar tema",
+    "change_lang": "Cambiar idioma"
+  }
+}

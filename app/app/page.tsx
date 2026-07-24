@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import {
   IconBolt,
   IconCheck,
@@ -17,23 +18,22 @@ import { spring } from "@/lib/motion";
 
 // ponytail: datos mock hasta cablear el currículo real en Firestore.
 type NodeState = "done" | "current" | "locked";
-const units: { level: string; title: string; nodes: NodeState[] }[] = [
-  { level: "A1", title: "Saludos y presentaciones", nodes: ["done", "done", "current", "locked"] },
-  { level: "A1", title: "Números y la hora", nodes: ["locked", "locked", "locked"] },
+const units: { level: string; titleKey: string; nodes: NodeState[] }[] = [
+  { level: "A1", titleKey: "unit_greetings", nodes: ["done", "done", "current", "locked"] },
+  { level: "A1", titleKey: "unit_numbers", nodes: ["locked", "locked", "locked"] },
 ];
 
 export default function HomePage() {
+  const { t } = useTranslation();
   return (
     <div className="px-5 pt-6">
       <Header />
       <DailyChallenge />
       <section className="mt-8">
         <h2 className="mb-1 font-display text-xl font-extrabold tracking-tight">
-          Tu ruta
+          {t("home.route_title")}
         </h2>
-        <p className="mb-6 text-sm text-muted">
-          Sigue el camino. Cada lección te acerca a hablar inglés.
-        </p>
+        <p className="mb-6 text-sm text-muted">{t("home.route_subtitle")}</p>
         {units.map((unit, i) => (
           <Unit key={i} unit={unit} index={i} />
         ))}
@@ -43,6 +43,7 @@ export default function HomePage() {
 }
 
 function Header() {
+  const { t } = useTranslation();
   return (
     <motion.header
       initial={{ opacity: 0, y: 12 }}
@@ -53,9 +54,9 @@ function Header() {
       <div className="flex items-center gap-3">
         <Mascot height={54} />
         <div>
-          <p className="text-sm text-muted">¡Hola de nuevo!</p>
+          <p className="text-sm text-muted">{t("home.greeting")}</p>
           <h1 className="font-display text-2xl font-extrabold tracking-tight">
-            Sigamos aprendiendo
+            {t("home.subtitle")}
           </h1>
         </div>
       </div>
@@ -85,6 +86,7 @@ function Stat({
 }
 
 function DailyChallenge() {
+  const { t } = useTranslation();
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -94,9 +96,9 @@ function DailyChallenge() {
     >
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm/relaxed opacity-90">Reto diario</p>
+          <p className="text-sm/relaxed opacity-90">{t("home.daily_label")}</p>
           <p className="font-display text-lg font-extrabold">
-            Completa 1 lección hoy
+            {t("home.daily_title")}
           </p>
         </div>
         <span className="grid size-12 place-items-center rounded-2xl bg-white/20">
@@ -111,7 +113,7 @@ function DailyChallenge() {
           className="h-full rounded-pill bg-white"
         />
       </div>
-      <p className="mt-2 text-xs opacity-90">Vas por buen camino · +50 XP al terminar</p>
+      <p className="mt-2 text-xs opacity-90">{t("home.daily_note")}</p>
     </motion.div>
   );
 }
@@ -123,13 +125,14 @@ function Unit({
   unit: (typeof units)[number];
   index: number;
 }) {
+  const { t } = useTranslation();
   return (
     <div className="mb-8">
       <div className="mb-4 flex items-center gap-2">
         <span className="grid size-9 place-items-center rounded-xl bg-accent-soft font-display text-sm font-extrabold text-accent">
           {unit.level}
         </span>
-        <h3 className="font-display font-bold">{unit.title}</h3>
+        <h3 className="font-display font-bold">{t(`home.${unit.titleKey}`)}</h3>
       </div>
       <div className="flex flex-col items-center gap-4">
         {unit.nodes.map((state, i) => (
@@ -155,6 +158,7 @@ function LessonNode({
   offset: number;
   order: number;
 }) {
+  const { t } = useTranslation();
   const Icon = nodeIcon[state];
   const clickable = state !== "locked";
 
@@ -180,7 +184,7 @@ function LessonNode({
 
   if (!clickable) return node;
   return (
-    <Link href="/app/leccion" aria-label="Abrir lección">
+    <Link href="/app/leccion" aria-label={t("a11y.open_lesson")}>
       {node}
     </Link>
   );

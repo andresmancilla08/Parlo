@@ -33,7 +33,7 @@ export function Mascot({
       )}
       <Image
         src={mascot}
-        alt="Parlo, la mascota"
+        alt="Parlo"
         height={height}
         width={Math.round(height * RATIO)}
         priority={priority}
