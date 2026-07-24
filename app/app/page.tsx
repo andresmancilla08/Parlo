@@ -12,6 +12,7 @@ import {
   type Icon,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
+import { Mascot } from "@/components/ui/mascot";
 import { spring } from "@/lib/motion";
 
 // ponytail: datos mock hasta cablear el currículo real en Firestore.
@@ -49,11 +50,14 @@ function Header() {
       transition={spring}
       className="flex items-center justify-between"
     >
-      <div>
-        <p className="text-sm text-muted">¡Hola de nuevo! 🦜</p>
-        <h1 className="font-display text-2xl font-extrabold tracking-tight">
-          Sigamos aprendiendo
-        </h1>
+      <div className="flex items-center gap-3">
+        <Mascot height={54} />
+        <div>
+          <p className="text-sm text-muted">¡Hola de nuevo!</p>
+          <h1 className="font-display text-2xl font-extrabold tracking-tight">
+            Sigamos aprendiendo
+          </h1>
+        </div>
       </div>
       <div className="flex items-center gap-2">
         <Stat icon={IconFlame} value="3" className="text-primary" />

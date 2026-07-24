@@ -16,6 +16,7 @@ import { AuroraBackground } from "@/components/ui/aurora-background";
 import { GradientText } from "@/components/ui/gradient-text";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Mascot } from "@/components/ui/mascot";
 import { rise, spring, stagger } from "@/lib/motion";
 
 export default function Home() {
@@ -73,6 +74,10 @@ function Hero() {
         style={{ y, opacity }}
         className="mx-auto flex max-w-3xl flex-col items-center text-center"
       >
+        <motion.div variants={rise}>
+          <Mascot height={168} float glow priority className="mb-3" />
+        </motion.div>
+
         <motion.span
           variants={rise}
           className="mb-6 inline-flex items-center gap-2 rounded-pill border border-border bg-surface/70 px-4 py-1.5 text-sm font-semibold text-muted backdrop-blur"

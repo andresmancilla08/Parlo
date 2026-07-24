@@ -4,9 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { IconArrowRight, IconFeather, IconMail } from "@tabler/icons-react";
+import { IconArrowRight, IconMail } from "@tabler/icons-react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
+import { Mascot } from "@/components/ui/mascot";
 import { spring } from "@/lib/motion";
 import { PinInput } from "./pin-input";
 
@@ -41,9 +42,9 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
       className="w-full max-w-sm"
     >
       <div className="mb-8 text-center">
-        <span className="mx-auto mb-4 inline-flex size-14 items-center justify-center rounded-2xl bg-primary text-primary-fg shadow-lg shadow-primary/25">
-          <IconFeather className="size-7" />
-        </span>
+        <div className="mb-3 flex justify-center">
+          <Mascot height={108} float />
+        </div>
         <h1 className="font-display text-2xl font-extrabold tracking-tight">
           {isLogin ? "Bienvenido de vuelta" : "Crea tu cuenta"}
         </h1>

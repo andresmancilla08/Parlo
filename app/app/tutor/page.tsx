@@ -5,6 +5,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { motion } from "framer-motion";
 import { IconFeather, IconSend2 } from "@tabler/icons-react";
+import { Mascot } from "@/components/ui/mascot";
 import { cn } from "@/lib/utils";
 
 const starters = [
@@ -109,7 +110,9 @@ function EmptyState({ onPick }: { onPick: (t: string) => void }) {
       transition={{ type: "spring", stiffness: 320, damping: 24 }}
       className="rounded-3xl border border-border bg-card p-6 text-center"
     >
-      <p className="text-4xl">🦜</p>
+      <div className="mb-1 flex justify-center">
+        <Mascot height={116} float />
+      </div>
       <h2 className="mt-2 font-display text-lg font-bold">
         ¡Practiquemos inglés!
       </h2>
