@@ -53,31 +53,29 @@
   --gradient-gem: linear-gradient(120deg, #ffc94a, #ffe58a);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #140e24;
-    --surface: #1c1436;
-    --card: #251b45;
-    --border: #322657;
-    --fg: #ffffff;
-    --muted: #b3acc8;
+.dark {
+  --bg: #140e24;
+  --surface: #1c1436;
+  --card: #251b45;
+  --border: #322657;
+  --fg: #ffffff;
+  --muted: #b3acc8;
 
-    --primary: #ff7a5c;
-    --primary-fg: #1b1233;
-    --primary-hover: #ff8f75;
-    --primary-soft: #3a2136;
-    --secondary: #ff9a7b;
-    --accent: #39d8ba;
-    --accent-soft: #103a38;
-    --gem: #ffd567;
-    --success: #34c58b;
-    --warning: #ffc061;
-    --danger: #ff7076;
+  --primary: #ff7a5c;
+  --primary-fg: #1b1233;
+  --primary-hover: #ff8f75;
+  --primary-soft: #3a2136;
+  --secondary: #ff9a7b;
+  --accent: #39d8ba;
+  --accent-soft: #103a38;
+  --gem: #ffd567;
+  --success: #34c58b;
+  --warning: #ffc061;
+  --danger: #ff7076;
 
-    --gradient-primary: linear-gradient(90deg, #ff7a5c, #ff9a7b);
-    --gradient-ai: linear-gradient(135deg, #39d8ba, #6de6d0);
-    --gradient-gem: linear-gradient(120deg, #ffd567, #ffe58a);
-  }
+  --gradient-primary: linear-gradient(90deg, #ff7a5c, #ff9a7b);
+  --gradient-ai: linear-gradient(135deg, #39d8ba, #6de6d0);
+  --gradient-gem: linear-gradient(120deg, #ffd567, #ffe58a);
 }
 
 * {

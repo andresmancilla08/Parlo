@@ -17,6 +17,7 @@ import { GradientText } from "@/components/ui/gradient-text";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Mascot } from "@/components/ui/mascot";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { rise, spring, stagger } from "@/lib/motion";
 
 export default function Home() {
@@ -48,7 +49,8 @@ function Nav() {
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5">
         <Wordmark />
         <div className="flex items-center gap-2">
-          <Button href="/login" variant="secondary" size="sm">
+          <ThemeToggle className="px-2.5" />
+          <Button href="/login" variant="secondary" size="sm" className="hidden sm:inline-flex">
             Entrar
           </Button>
           <Button href="/registro" size="sm" shimmer>
@@ -66,18 +68,24 @@ function Hero() {
   const opacity = useTransform(scrollY, [0, 420], [1, 0.35]);
 
   return (
-    <AuroraBackground className="px-5 py-20 sm:py-28">
+    <AuroraBackground className="relative px-5 pb-16 pt-6 sm:pb-24 sm:pt-10">
+      {/* Mascota grande, detrás del texto (capas + escala) */}
+      <div className="pointer-events-none absolute inset-x-0 top-2 z-0 flex justify-center sm:top-0">
+        <Mascot
+          height={340}
+          glow
+          priority
+          imgClassName="h-[190px] w-auto drop-shadow-xl sm:h-[300px]"
+        />
+      </div>
+
       <motion.div
         initial="hidden"
         animate="show"
         variants={stagger}
         style={{ y, opacity }}
-        className="mx-auto flex max-w-3xl flex-col items-center text-center"
+        className="relative z-10 mx-auto flex max-w-3xl flex-col items-center pt-40 text-center sm:pt-56"
       >
-        <motion.div variants={rise}>
-          <Mascot height={168} float glow priority className="mb-3" />
-        </motion.div>
-
         <motion.span
           variants={rise}
           className="mb-6 inline-flex items-center gap-2 rounded-pill border border-border bg-surface/70 px-4 py-1.5 text-sm font-semibold text-muted backdrop-blur"

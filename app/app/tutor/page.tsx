@@ -111,7 +111,7 @@ function EmptyState({ onPick }: { onPick: (t: string) => void }) {
       className="rounded-3xl border border-border bg-card p-6 text-center"
     >
       <div className="mb-1 flex justify-center">
-        <Mascot height={116} float />
+        <Mascot height={116} />
       </div>
       <h2 className="mt-2 font-display text-lg font-bold">
         ¡Practiquemos inglés!

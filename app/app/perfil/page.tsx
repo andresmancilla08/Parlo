@@ -11,6 +11,7 @@ import {
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { spring } from "@/lib/motion";
 
 export default function PerfilPage() {
@@ -44,10 +45,15 @@ export default function PerfilPage() {
         <StatCard icon={IconTrophy} value="4" label="Logros" tint="text-accent" />
       </div>
 
+      <div className="mt-8">
+        <p className="mb-2 text-sm font-semibold text-muted">Apariencia</p>
+        <ThemeToggle showLabel className="w-full justify-center" />
+      </div>
+
       <Button
         variant="danger"
         fullWidth
-        className="mt-10"
+        className="mt-4"
         onClick={() => {
           logout();
           router.replace("/");

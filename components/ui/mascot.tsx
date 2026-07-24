@@ -1,28 +1,29 @@
-"use client";
-
 import Image from "next/image";
-import { motion } from "framer-motion";
 import mascot from "@/public/brand/mascot.png";
 import { cn } from "@/lib/utils";
 
 const RATIO = mascot.width / mascot.height;
 
-/** Loro mascota de Parlo. `float` le da un flotado suave; `glow` un halo detrás. */
+/**
+ * Loro mascota de Parlo (estática). `glow` pinta un halo detrás.
+ * `height` fija la relación de aspecto; usa `imgClassName` (ej. h-[200px] w-auto sm:h-[320px])
+ * para tamaños responsive.
+ */
 export function Mascot({
   height = 160,
-  float = false,
   glow = false,
   priority = false,
   className,
+  imgClassName,
 }: {
   height?: number;
-  float?: boolean;
   glow?: boolean;
   priority?: boolean;
   className?: string;
+  imgClassName?: string;
 }) {
-  const img = (
-    <div className="relative">
+  return (
+    <div className={cn("relative", className)}>
       {glow && (
         <div
           aria-hidden
@@ -37,20 +38,8 @@ export function Mascot({
         width={Math.round(height * RATIO)}
         priority={priority}
         draggable={false}
-        className="select-none"
+        className={cn("select-none", imgClassName)}
       />
     </div>
-  );
-
-  if (!float) return <div className={className}>{img}</div>;
-
-  return (
-    <motion.div
-      className={cn("will-change-transform", className)}
-      animate={{ y: [0, -12, 0] }}
-      transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-    >
-      {img}
-    </motion.div>
   );
 }

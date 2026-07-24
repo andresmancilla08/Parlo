@@ -43,7 +43,7 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
     >
       <div className="mb-8 text-center">
         <div className="mb-3 flex justify-center">
-          <Mascot height={108} float />
+          <Mascot height={108} />
         </div>
         <h1 className="font-display text-2xl font-extrabold tracking-tight">
           {isLogin ? "Bienvenido de vuelta" : "Crea tu cuenta"}

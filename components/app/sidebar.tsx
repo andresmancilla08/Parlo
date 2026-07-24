@@ -10,6 +10,7 @@ import {
   IconUser,
   type Icon,
 } from "@tabler/icons-react";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { cn } from "@/lib/utils";
 
 const items: { href: string; label: string; icon: Icon }[] = [
@@ -66,6 +67,10 @@ export function Sidebar() {
           );
         })}
       </nav>
+
+      <div className="mt-auto">
+        <ThemeToggle showLabel className="w-full justify-start" />
+      </div>
     </aside>
   );
 }
