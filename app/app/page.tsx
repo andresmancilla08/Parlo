@@ -3,9 +3,14 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { IconArrowRight } from "@tabler/icons-react";
+import {
+  IconArrowRight,
+  IconChevronDown,
+  IconCircleCheck,
+  IconLock,
+} from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { spring } from "@/lib/motion";
 import { allLessons, curriculum, localTitle, unitOfLesson } from "@/lib/curriculum";
@@ -51,7 +56,7 @@ export default function HomePage() {
   const greet = name ? `${slotWord}, ${name}` : slotWord;
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-5 pb-8 pt-5">
+    <div className="mx-auto w-full max-w-2xl px-5 pb-8 pt-5 xl:max-w-6xl">
       {/* saludo + titular editorial */}
       <motion.header
         initial={{ opacity: 0, y: 12 }}
@@ -68,48 +73,181 @@ export default function HomePage() {
         </h1>
       </motion.header>
 
-      {/* panel: lección de hoy */}
-      {current && currentUnit ? (
-        <FeaturePanel
-          kicker={t("home.feature_kicker")}
-          title={localTitle(current, i18n.language)}
-          subtitle={`${currentUnit.level} · ${localTitle(currentUnit, i18n.language)}`}
-          href={`/app/leccion?id=${current.id}`}
-          cta={t("home.feature_continue")}
-          progress={unitFraction(currentUnit.id, completed)}
-        />
-      ) : (
-        <FeaturePanel
-          kicker={t("home.feature_kicker")}
-          title={t("home.all_done_title")}
-          subtitle={t("home.all_done_sub")}
-          href="/app/repaso"
-          cta={t("home.all_done_cta")}
-          progress={1}
-        />
-      )}
-
-      {/* stats: XP, racha, repaso/gemas */}
-      <StatRow
-        xp={hydrated ? xp : 0}
-        streak={hydrated ? streak : 0}
-        due={dueCount}
-        gems={hydrated ? gems : 0}
-      />
-
-      <GoalCard done={goalXpDone} goal={goalXp} claimable={claimable} />
-
-      <PwaInstall className="mt-6 md:hidden" />
-
-      {/* ruta editorial (lista numerada) */}
-      <p className="mt-8 mb-1 font-display text-xs font-extrabold uppercase tracking-[0.14em] text-muted">
-        {t("home.route_kicker")}
-      </p>
-      <div>
-        {curriculum.map((unit, i) => (
-          <UnitRow key={unit.id} unit={unit} index={i} completed={completed} />
-        ))}
+      {/* En desktop la pantalla se parte: ruta a la izquierda, «hoy» a la derecha.
+          En móvil sigue siendo una sola columna en el orden de siempre. */}
+      <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_20rem] xl:items-start xl:gap-8">
+      {/* panel: lección de hoy (col. 1, fila 1) */}
+      <div className="min-w-0 xl:col-start-1 xl:row-start-1">
+        {current && currentUnit ? (
+          <FeaturePanel
+            kicker={t("home.feature_kicker")}
+            title={localTitle(current, i18n.language)}
+            subtitle={`${currentUnit.level} · ${localTitle(currentUnit, i18n.language)}`}
+            href={`/app/leccion?id=${current.id}`}
+            cta={t("home.feature_continue")}
+            progress={unitFraction(currentUnit.id, completed)}
+          />
+        ) : (
+          <FeaturePanel
+            kicker={t("home.feature_kicker")}
+            title={t("home.all_done_title")}
+            subtitle={t("home.all_done_sub")}
+            href="/app/repaso"
+            cta={t("home.all_done_cta")}
+            progress={1}
+          />
+        )}
       </div>
+
+      {/* «hoy»: stats, objetivo e instalación (columna derecha en desktop) */}
+      <aside className="min-w-0 xl:col-start-2 xl:row-span-2 xl:row-start-1 xl:sticky xl:top-6">
+        <StatRow
+          xp={hydrated ? xp : 0}
+          streak={hydrated ? streak : 0}
+          due={dueCount}
+          gems={hydrated ? gems : 0}
+        />
+
+        <GoalCard done={goalXpDone} goal={goalXp} claimable={claimable} />
+
+        <PwaInstall className="mt-4 md:hidden" />
+      </aside>
+
+      {/* ruta por niveles (col. 1, fila 2 en desktop) */}
+      <section className="mt-8 min-w-0 xl:col-start-1 xl:row-start-2 xl:mt-6">
+        <p className="mb-1 font-display text-xs font-extrabold uppercase tracking-[0.14em] text-muted">
+          {t("home.route_kicker")}
+        </p>
+        <LevelPath completed={completed} />
+      </section>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------- ruta agrupada por nivel ---------------- */
+
+/** Unidades agrupadas por nivel, en el orden de la ruta. */
+function levelGroups() {
+  const out: { level: string; units: typeof curriculum; from: number }[] = [];
+  curriculum.forEach((unit, i) => {
+    const last = out.at(-1);
+    if (last && last.level === unit.level) last.units.push(unit);
+    else out.push({ level: unit.level, units: [unit], from: i });
+  });
+  return out;
+}
+
+function LevelPath({ completed }: { completed: Set<string> }) {
+  const { t } = useTranslation();
+  const groups = levelGroups();
+
+  // Nivel en curso = el primero con alguna lección pendiente.
+  const currentLevel =
+    groups.find((g) => g.units.some((u) => u.lessons.some((l) => !completed.has(l.id))))?.level ??
+    groups.at(-1)!.level;
+
+  const [open, setOpen] = useState<Record<string, boolean>>({ [currentLevel]: true });
+
+  return (
+    <div className="space-y-3">
+      {groups.map((g, gi) => {
+        const lessons = g.units.flatMap((u) => u.lessons);
+        const done = lessons.filter((l) => completed.has(l.id)).length;
+        const unitsDone = g.units.filter((u) =>
+          u.lessons.every((l) => completed.has(l.id)),
+        ).length;
+        const state =
+          done === lessons.length ? "done" : g.level === currentLevel ? "current" : "locked";
+        const isOpen = open[g.level] ?? false;
+
+        return (
+          <div
+            key={g.level}
+            className={cn(
+              "overflow-hidden rounded-2xl border",
+              state === "current" ? "border-primary/40 bg-card" : "border-border bg-card",
+            )}
+          >
+            <button
+              type="button"
+              onClick={() => setOpen((o) => ({ ...o, [g.level]: !isOpen }))}
+              aria-expanded={isOpen}
+              aria-label={t("a11y.toggle_level", { level: g.level })}
+              className="flex w-full items-center gap-3.5 p-4 text-left transition-colors hover:bg-primary-soft/40"
+            >
+              <span
+                className={cn(
+                  "grid size-11 shrink-0 place-items-center rounded-xl font-display text-base font-extrabold",
+                  state === "current"
+                    ? "bg-primary text-primary-fg"
+                    : state === "done"
+                      ? "bg-accent-soft text-accent-ink"
+                      : "bg-bg text-muted",
+                )}
+              >
+                {g.level}
+              </span>
+
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-display text-base font-extrabold">
+                  {t(`home.level_${g.level.toLowerCase()}`)}
+                </span>
+                <span className="block text-xs font-bold text-muted">
+                  {state === "locked"
+                    ? t("home.level_locked", { prev: groups[gi - 1]?.level ?? "" })
+                    : t("home.level_units", { done: unitsDone, total: g.units.length })}
+                </span>
+                <span className="mt-2 block h-1 overflow-hidden rounded-pill bg-border">
+                  <span
+                    className={cn(
+                      "block h-full rounded-pill transition-[width] duration-500",
+                      state === "done" ? "bg-accent" : "bg-primary",
+                    )}
+                    style={{ width: `${Math.round((done / lessons.length) * 100)}%` }}
+                  />
+                </span>
+              </span>
+
+              {state === "done" ? (
+                <IconCircleCheck className="size-5 shrink-0 text-accent-ink" />
+              ) : state === "locked" ? (
+                <IconLock className="size-4 shrink-0 text-muted" />
+              ) : null}
+              <IconChevronDown
+                className={cn(
+                  "size-5 shrink-0 text-muted transition-transform duration-150",
+                  isOpen && "rotate-180",
+                )}
+              />
+            </button>
+
+            <AnimatePresence initial={false}>
+              {isOpen && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.15, ease: "easeOut" }}
+                  className="overflow-hidden"
+                >
+                  <div className="border-t border-border px-4 pb-1">
+                    {g.units.map((unit, i) => (
+                      <UnitRow
+                        key={unit.id}
+                        unit={unit}
+                        index={g.from + i}
+                        label={String(i + 1).padStart(2, "0")}
+                        completed={completed}
+                      />
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -298,10 +436,13 @@ function GoalCard({
 function UnitRow({
   unit,
   index,
+  label,
   completed,
 }: {
   unit: (typeof curriculum)[number];
   index: number;
+  /** Número visible (dentro del nivel, no global). */
+  label?: string;
   completed: Set<string>;
 }) {
   const { t, i18n } = useTranslation();
@@ -328,14 +469,14 @@ function UnitRow({
         : t("home.unit_locked");
 
   const row = (
-    <div className="flex items-center gap-4 border-b border-border py-4">
+    <div className="flex items-center gap-4 border-b border-border py-4 last:border-b-0">
       <span
         className={cn(
-          "w-11 shrink-0 font-display text-[2.1rem] font-extrabold leading-none",
+          "w-9 shrink-0 font-display text-[1.75rem] font-extrabold leading-none",
           state === "current" ? "text-primary" : "text-border",
         )}
       >
-        {String(index + 1).padStart(2, "0")}
+        {label ?? String(index + 1).padStart(2, "0")}
       </span>
       <div className="min-w-0 flex-1">
         <h3

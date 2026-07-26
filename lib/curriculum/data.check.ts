@@ -7,8 +7,11 @@ import assert from "node:assert";
 import { a1 } from "./levels/a1.ts";
 import { a2 } from "./levels/a2.ts";
 import { b1 } from "./levels/b1.ts";
+import { optionsSpeakable } from "./speech.ts";
 
 const curriculum = [...a1, ...a2, ...b1];
+const SPANISH_CHARS = /[áéíóúñüÁÉÍÓÚÑ¿¡]/;
+let mute = 0;
 
 function normalize(s: string): string {
   return s
@@ -37,6 +40,17 @@ for (const unit of curriculum) {
       if (ex.kind === "choose") {
         assert.ok(ex.options.includes(ex.answer), `${at}: la respuesta no está entre las opciones`);
         assert.equal(new Set(ex.options).size, ex.options.length, `${at}: opciones repetidas`);
+        // Si se ofrece escuchar las opciones, deben estar en inglés.
+        if (optionsSpeakable(ex)) {
+          for (const opt of ex.options) {
+            assert.ok(
+              !SPANISH_CHARS.test(opt),
+              `${at}: «${opt}» parece español pero se ofrecería escucharla`,
+            );
+          }
+        } else {
+          mute++;
+        }
       }
 
       if (ex.kind === "bank") {
@@ -58,4 +72,7 @@ for (const unit of curriculum) {
   }
 }
 
-console.log(`OK — ${curriculum.length} unidades, ${lessonIds.size} lecciones, ${exercises} ejercicios.`);
+console.log(
+  `OK — ${curriculum.length} unidades, ${lessonIds.size} lecciones, ${exercises} ejercicios ` +
+    `(${mute} de opción múltiple con opciones en español: sin audio).`,
+);

@@ -45,6 +45,17 @@ export default function PerfilPage() {
   const name = email?.split("@")[0] ?? "";
   const rank = levelFromXp(hydrated ? xp : 0);
 
+  // «Logros» = insignias ganadas (antes mostraba el nº de lecciones: engañoso).
+  const badgesEarned = [
+    completed.length >= 1,
+    streak >= 3,
+    learnedVocab(new Set(completed)).length >= 10,
+    streak >= 30,
+    tutorMessages >= 1,
+    listens >= 20,
+  ];
+  const earnedBadges = badgesEarned.filter(Boolean).length;
+
   // Nivel actual = el de la unidad en curso (ya no es un texto fijo A1).
   const done = new Set(completed);
   const nextLesson = allLessons.find((l) => !done.has(l.id)) ?? allLessons[allLessons.length - 1];
@@ -98,7 +109,7 @@ export default function PerfilPage() {
       <div className="mt-6 grid grid-cols-3 gap-3">
         <StatCard icon={IconFlame} value={String(hydrated ? streak : 0)} label={t("perfil.streak")} tint="text-primary" />
         <StatCard icon={IconSparkles} value={String(hydrated ? gems : 0)} label={t("perfil.gems")} tint="text-gem" />
-        <StatCard icon={IconTrophy} value={String(hydrated ? completed.length : 0)} label={t("perfil.achievements")} tint="text-accent" />
+        <StatCard icon={IconTrophy} value={String(hydrated ? earnedBadges : 0)} label={t("perfil.achievements")} tint="text-accent" />
       </div>
 
       <div className="mt-8">

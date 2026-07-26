@@ -1,6 +1,8 @@
 import { curriculum } from "./data";
 import type { Exercise, Lesson, Unit, Vocab } from "./types";
 
+export { optionsSpeakable } from "./speech";
+
 export { curriculum };
 export type { Exercise, Lesson, Unit, Vocab };
 

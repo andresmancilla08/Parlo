@@ -16,11 +16,14 @@ type ExerciseBase = { prompt: string; explain: string; srsKey?: string };
 
 export type Exercise =
   // Opción múltiple. `speak` (opcional) = texto en inglés que se pronuncia (Web Speech).
+  // `optionsLang: "es"` marca los ejercicios cuyas OPCIONES están en español
+  // («¿qué significa…?»): ahí no se ofrece escucharlas con voz inglesa.
   | (ExerciseBase & {
       kind: "choose";
       options: string[];
       answer: string;
       speak?: string;
+      optionsLang?: "en" | "es";
     })
   // Ordenar palabras del banco hasta formar `answer`.
   | (ExerciseBase & {

@@ -101,8 +101,11 @@ export default function TutorPage() {
             disabled={!input.trim() || busy}
             whileTap={{ scale: 0.9 }}
             className={cn(
-              "grid size-11 shrink-0 place-items-center rounded-2xl bg-primary text-primary-fg transition-opacity",
-              (!input.trim() || busy) && "opacity-40",
+              "grid size-11 shrink-0 place-items-center rounded-2xl transition-colors",
+              // Deshabilitado NEUTRO: con el coral atenuado parecía un error.
+              !input.trim() || busy
+                ? "border border-border bg-surface text-muted"
+                : "bg-primary text-primary-fg",
             )}
             aria-label={t("a11y.send")}
           >

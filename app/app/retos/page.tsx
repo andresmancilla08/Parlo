@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import {
   IconBolt,
@@ -20,6 +20,7 @@ import {
   challengesFor,
   GOAL_OPTIONS,
   levelFromXp,
+  REWARD,
   SHIELD_COST,
   type Challenge,
   type Metric,
@@ -89,7 +90,7 @@ export default function RetosPage() {
             <p className="font-display text-xs font-extrabold uppercase tracking-[0.14em] text-gem">
               {t("retos.goal_title")}
             </p>
-            <p className="mt-1.5 font-display text-2xl font-extrabold leading-tight">
+            <p className="mt-1.5 font-display text-xl font-extrabold leading-tight sm:text-2xl">
               {goalFraction >= 1
                 ? t("retos.goal_done")
                 : t("retos.goal_left", { n: goalXp - done })}
@@ -164,7 +165,7 @@ export default function RetosPage() {
           ))}
       </Section>
 
-      <Section title={t("retos.weekly")}>
+      <Section title={t("retos.weekly")} hint={t("retos.reward", { n: REWARD.weekly })}>
         {challenges
           .filter((c) => c.period === "weekly")
           .map((c) => (
@@ -215,12 +216,25 @@ export default function RetosPage() {
 
 /* ---------------- piezas ---------------- */
 
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
+function Section({
+  title,
+  hint,
+  children,
+}: {
+  title: string;
+  hint?: string;
+  children: React.ReactNode;
+}) {
   return (
     <section className="mt-8">
-      <p className="mb-3 font-display text-xs font-extrabold uppercase tracking-[0.14em] text-muted">
-        {title}
-      </p>
+      <div className="mb-3 flex items-baseline justify-between gap-3">
+        <p className="font-display text-xs font-extrabold uppercase tracking-[0.14em] text-muted">
+          {title}
+        </p>
+        {hint && (
+          <p className="shrink-0 text-xs font-extrabold text-gem">{hint}</p>
+        )}
+      </div>
       <div className="space-y-2.5">{children}</div>
     </section>
   );
@@ -238,11 +252,35 @@ function ChallengeRow({
   onClaim: () => void;
 }) {
   const { t } = useTranslation();
+  const reduced = useReducedMotion();
+  const [reward, setReward] = useState(false);
   const Icon = METRIC_ICON[challenge.metric];
   const complete = progress >= challenge.target;
+  const weekly = challenge.period === "weekly";
 
   return (
-    <Card className={cn("p-4", complete && !claimed && "border-accent bg-accent-soft")}>
+    <Card
+      className={cn(
+        "relative p-4",
+        // El semanal se distingue por una banda gem: vale más y se ve.
+        weekly && "border-l-4 border-l-gem",
+        complete && !claimed && "border-accent bg-accent-soft",
+      )}
+    >
+      <AnimatePresence>
+        {reward && !reduced && (
+          <motion.span
+            initial={{ opacity: 0, y: 4 }}
+            animate={{ opacity: 1, y: -26 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.45, ease: "easeOut" }}
+            onAnimationComplete={() => setReward(false)}
+            className="pointer-events-none absolute right-5 top-4 font-display text-sm font-extrabold text-gem"
+          >
+            +{challenge.reward}
+          </motion.span>
+        )}
+      </AnimatePresence>
       <div className="flex items-center gap-3.5">
         <span
           className={cn(
@@ -261,8 +299,16 @@ function ChallengeRow({
         </span>
 
         <div className="min-w-0 flex-1">
-          <p className="truncate font-display text-sm font-extrabold">
-            {t(`retos.metric_${challenge.metric}`, { n: challenge.target })}
+          <p className="flex items-center gap-2 font-display text-sm font-extrabold">
+            <span className="truncate">
+              {t(`retos.metric_${challenge.metric}`, { n: challenge.target })}
+            </span>
+            {/* el periodo se dice con texto, no solo con el color de la banda */}
+            {weekly && (
+              <span className="shrink-0 rounded-pill bg-bg px-2 py-0.5 text-[0.6rem] font-extrabold uppercase tracking-wide text-muted">
+                {t("retos.badge_weekly")}
+              </span>
+            )}
           </p>
           <p className="text-xs font-bold text-muted">
             {progress} / {challenge.target} · {t("retos.reward", { n: challenge.reward })}
@@ -270,7 +316,13 @@ function ChallengeRow({
         </div>
 
         {complete && !claimed ? (
-          <Button className="shrink-0 px-4 py-2 text-sm" onClick={onClaim}>
+          <Button
+            className="shrink-0 px-4 py-2 text-sm"
+            onClick={() => {
+              onClaim();
+              setReward(true);
+            }}
+          >
             {t("retos.claim")}
           </Button>
         ) : claimed ? (

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { IconFeather } from "@tabler/icons-react";
 import { useAuth, watchAuth } from "@/lib/auth";
 import { useProgressSync } from "@/lib/sync";
@@ -9,8 +9,17 @@ import { AppBar } from "@/components/app/app-bar";
 import { BottomNav } from "@/components/app/bottom-nav";
 import { Sidebar } from "@/components/app/sidebar";
 
+/**
+ * Rutas en MODO FOCO: mientras practicas no hay barras ni pestañas. La única
+ * salida es la «X» del propio ejercicio (si no, se compite con la navegación
+ * y se abandona la lección a medias).
+ */
+const FOCUS_ROUTES = ["/app/leccion", "/app/repaso"];
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const focus = FOCUS_ROUTES.some((r) => pathname.startsWith(r));
   const uid = useAuth((s) => s.uid);
   const hydrated = useAuth((s) => s.hydrated);
 
@@ -28,6 +37,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       </div>
     );
   }
+
+  if (focus) return <main className="min-h-dvh">{children}</main>;
 
   return (
     <div className="flex min-h-dvh">

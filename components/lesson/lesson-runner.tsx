@@ -12,7 +12,7 @@ import {
   IconVolume,
   IconX,
 } from "@tabler/icons-react";
-import type { Exercise } from "@/lib/curriculum";
+import { optionsSpeakable, type Exercise } from "@/lib/curriculum";
 import { useProgress, type GradedItem, type LessonResult } from "@/lib/progress";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -189,7 +189,8 @@ function ExerciseView({
         )}
       </div>
 
-      <div className="mt-8 flex-1">
+      {/* el contenido se centra en el alto libre: antes quedaba media pantalla muerta */}
+      <div className="mt-8 flex flex-1 flex-col justify-center pb-2">
         {ex.kind === "choose" && (
           <ChooseView ex={ex} choice={choice} checked={checked} onPick={setChoice} />
         )}
@@ -218,9 +219,24 @@ function ExerciseView({
                 {ok ? t("leccion.correct") : t("leccion.incorrect")}
               </p>
               {!ok && (
-                <p className="mt-0.5 text-sm font-semibold text-fg">
-                  {t("leccion.answer_was")}{" "}
-                  <span className="font-extrabold">{correctText}</span>
+                <p className="mt-0.5 flex flex-wrap items-center gap-2 text-sm font-semibold text-fg">
+                  <span>
+                    {t("leccion.answer_was")}{" "}
+                    <span className="font-extrabold">{correctText}</span>
+                  </span>
+                  {(ex.kind !== "choose" || optionsSpeakable(ex)) && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        speak(correctText);
+                        noteListen();
+                      }}
+                      aria-label={t("a11y.listen_option", { text: correctText })}
+                      className="grid size-9 place-items-center rounded-full bg-accent-soft text-accent-ink transition-transform active:scale-95"
+                    >
+                      <IconVolume className="size-4" />
+                    </button>
+                  )}
                 </p>
               )}
               <p className="mt-1 text-sm leading-relaxed text-fg/80">{ex.explain}</p>
@@ -254,27 +270,46 @@ function ChooseView({
   checked: boolean;
   onPick: (v: string) => void;
 }) {
+  const { t } = useTranslation();
+  const noteListen = useProgress((s) => s.noteListen);
+  // Sólo se ofrece escuchar si las opciones están en inglés (ver `optionsSpeakable`).
+  const speakable = optionsSpeakable(ex);
+
   return (
     <div className="grid gap-3">
       {ex.options.map((opt) => {
         const selected = choice === opt;
         const isAnswer = opt === ex.answer;
         return (
-          <button
-            key={opt}
-            disabled={checked}
-            onClick={() => onPick(opt)}
-            className={cn(
-              "rounded-2xl border-2 px-5 py-4 text-left font-semibold transition-colors",
-              !checked && selected && "border-primary bg-primary-soft",
-              !checked && !selected && "border-border bg-card hover:border-primary/40",
-              checked && isAnswer && "border-success bg-success/12 text-success-ink",
-              checked && selected && !isAnswer && "border-danger bg-danger/12 text-danger-ink",
-              checked && !isAnswer && !selected && "border-border bg-card opacity-60",
+          <div key={opt} className="flex items-stretch gap-2">
+            <button
+              disabled={checked}
+              onClick={() => onPick(opt)}
+              className={cn(
+                "flex-1 rounded-2xl border-2 px-5 py-4 text-left font-semibold transition-colors",
+                !checked && selected && "border-primary bg-primary-soft",
+                !checked && !selected && "border-border bg-card hover:border-primary/40",
+                checked && isAnswer && "border-success bg-success/12 text-success-ink",
+                checked && selected && !isAnswer && "border-danger bg-danger/12 text-danger-ink",
+                checked && !isAnswer && !selected && "border-border bg-card opacity-60",
+              )}
+            >
+              {opt}
+            </button>
+            {speakable && (
+              <button
+                type="button"
+                onClick={() => {
+                  speak(opt);
+                  noteListen();
+                }}
+                aria-label={t("a11y.listen_option", { text: opt })}
+                className="grid w-14 shrink-0 place-items-center rounded-2xl border-2 border-border bg-card text-accent-ink transition-colors hover:border-accent active:scale-95"
+              >
+                <IconVolume className="size-5" />
+              </button>
             )}
-          >
-            {opt}
-          </button>
+          </div>
         );
       })}
     </div>

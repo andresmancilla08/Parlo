@@ -122,7 +122,12 @@
     "goal_left": "{{n}} XP to go",
     "goal_done": "Goal reached",
     "goal_cta": "See challenges",
-    "claimable": "{{n}} to claim"
+    "claimable": "{{n}} to claim",
+    "level_a1": "Foundations",
+    "level_a2": "Solid basics",
+    "level_b1": "Intermediate",
+    "level_units": "{{done}} of {{total}} units",
+    "level_locked": "Unlocks after {{prev}}"
   },
   "retos": {
     "kicker": "Your progress",
@@ -155,7 +160,8 @@
     "rank_aprendiz": "Apprentice",
     "rank_charlatan": "Chatterbox",
     "rank_elocuente": "Eloquent",
-    "rank_maestro": "Master"
+    "rank_maestro": "Master",
+    "badge_weekly": "Week"
   },
   "tutor": {
     "title": "Parlo Tutor",
@@ -218,7 +224,9 @@
     "pin_group": "4-digit PIN",
     "pin_digit": "Digit {{n}}",
     "exit_lesson": "Exit lesson",
-    "listen": "Listen"
+    "listen": "Listen",
+    "listen_option": "Listen to “{{text}}”",
+    "toggle_level": "Show or hide level {{level}}"
   },
   "pwa": {
     "title": "Install Parlo on your phone",
