@@ -9,13 +9,15 @@ type Variant = "primary" | "secondary" | "ghost" | "danger";
 type Size = "sm" | "md" | "lg";
 
 const base =
-  "relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-pill font-display font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-40";
+  "relative inline-flex items-center justify-center gap-2 overflow-hidden rounded-pill font-display font-bold transition-colors disabled:cursor-not-allowed disabled:shadow-none";
 
 const variants: Record<Variant, string> = {
-  primary: "bg-primary text-primary-fg shadow-lg shadow-primary/25 hover:bg-primary-hover",
-  secondary: "border border-border bg-surface text-fg",
-  ghost: "text-fg hover:bg-primary-soft",
-  danger: "border border-border bg-surface text-danger-ink",
+  // Deshabilitado: inerte pero LEGIBLE. Con opacidad el coral caía a 1.5:1.
+  primary:
+    "bg-primary text-primary-fg shadow-lg shadow-primary/25 hover:bg-primary-hover disabled:border disabled:border-border disabled:bg-surface disabled:text-muted",
+  secondary: "border border-border bg-surface text-fg disabled:text-muted",
+  ghost: "text-fg hover:bg-primary-soft disabled:text-muted",
+  danger: "border border-border bg-surface text-danger-ink disabled:text-muted",
 };
 
 const sizes: Record<Size, string> = {
