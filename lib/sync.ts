@@ -3,12 +3,37 @@
 import { useEffect, useRef } from "react";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db, firebaseReady } from "@/lib/firebase";
+import { DEFAULT_GOAL_XP } from "@/lib/gamification";
 import { useProgress, type ProgressSnapshot } from "@/lib/progress";
 
 // Sincroniza el progreso local (zustand persist) con `users/{uid}` en Firestore.
 // Local-first: la app funciona sin red; Firestore es la copia entre dispositivos.
 
 const WRITE_DEBOUNCE_MS = 1500;
+
+/**
+ * Firestore RECHAZA `undefined`. Los documentos escritos antes de la
+ * gamificación no traen `days`/`claims`/`shields`/`goalXp`/`lastGoalDay`, así
+ * que todo lo que entra o sale del sync pasa por aquí con valores por defecto.
+ */
+function sanitize(s: Partial<ProgressSnapshot> | undefined): ProgressSnapshot {
+  return {
+    xp: s?.xp ?? 0,
+    gems: s?.gems ?? 0,
+    streak: s?.streak ?? 0,
+    lastActiveDay: s?.lastActiveDay ?? null,
+    completed: s?.completed ?? [],
+    stars: s?.stars ?? {},
+    cards: s?.cards ?? {},
+    tutorMessages: s?.tutorMessages ?? 0,
+    listens: s?.listens ?? 0,
+    days: s?.days ?? {},
+    goalXp: s?.goalXp ?? DEFAULT_GOAL_XP,
+    claims: s?.claims ?? {},
+    shields: s?.shields ?? 0,
+    lastGoalDay: s?.lastGoalDay ?? null,
+  };
+}
 
 /** Gana el progreso MÁS avanzado: nunca se pierde lo hecho offline. */
 function merge(local: ProgressSnapshot, remote: ProgressSnapshot): ProgressSnapshot {
@@ -47,20 +72,19 @@ function merge(local: ProgressSnapshot, remote: ProgressSnapshot): ProgressSnaps
     goalXp: local.goalXp,
     claims: { ...remote.claims, ...local.claims },
     shields: Math.max(local.shields, remote.shields ?? 0),
-    lastGoalDay:
-      (local.lastGoalDay ?? "") > (remote.lastGoalDay ?? "")
-        ? local.lastGoalDay
-        : remote.lastGoalDay,
-    lastActiveDay:
-      (local.lastActiveDay ?? "") > (remote.lastActiveDay ?? "")
-        ? local.lastActiveDay
-        : remote.lastActiveDay,
+    lastGoalDay: maxDay(local.lastGoalDay, remote.lastGoalDay),
+    lastActiveDay: maxDay(local.lastActiveDay, remote.lastActiveDay),
     completed: [...new Set([...local.completed, ...remote.completed])],
     stars,
     cards,
     tutorMessages: Math.max(local.tutorMessages, remote.tutorMessages),
     listens: Math.max(local.listens, remote.listens),
   };
+}
+
+/** El día más reciente de los dos (nunca `undefined`: Firestore lo rechaza). */
+function maxDay(a: string | null, b: string | null): string | null {
+  return (a ?? "") > (b ?? "") ? (a ?? null) : (b ?? null);
 }
 
 /**
@@ -79,9 +103,11 @@ export function useProgressSync(uid: string | null) {
       try {
         const snap = await getDoc(ref);
         if (cancelled) return;
-        const local = useProgress.getState().snapshot();
-        const remote = snap.exists() ? (snap.data().progress as ProgressSnapshot | undefined) : undefined;
-        const next = remote ? merge(local, remote) : local;
+        const local = sanitize(useProgress.getState().snapshot());
+        const remote = snap.exists()
+          ? (snap.data().progress as Partial<ProgressSnapshot> | undefined)
+          : undefined;
+        const next = remote ? merge(local, sanitize(remote)) : local;
         useProgress.getState().hydrateFrom(next);
         await setDoc(ref, { progress: next }, { merge: true });
       } catch (err) {
@@ -94,9 +120,11 @@ export function useProgressSync(uid: string | null) {
       if (!state.hydrated) return;
       if (timer.current) clearTimeout(timer.current);
       timer.current = setTimeout(() => {
-        setDoc(ref, { progress: useProgress.getState().snapshot() }, { merge: true }).catch(
-          (err) => console.warn("[parlo] no se pudo guardar el progreso", err),
-        );
+        setDoc(
+          ref,
+          { progress: sanitize(useProgress.getState().snapshot()) },
+          { merge: true },
+        ).catch((err) => console.warn("[parlo] no se pudo guardar el progreso", err));
       }, WRITE_DEBOUNCE_MS);
     });
 

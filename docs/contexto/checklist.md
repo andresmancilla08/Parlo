@@ -20,6 +20,7 @@ Leyenda de prioridad: **P0** rompe o bloquea · **P1** siguiente entrega · **P2
 | M6 | **Música y podcasts con letra / transcripción** (nuevo, tipo LyricsTraining) | ⛔ por hacer | — |
 | M7 | Test de nivel inicial (colocación CEFR) | ⛔ por hacer | — |
 | M8 | Pronunciación (grabar y comparar) | ⛔ idea | — |
+| M9 | **Lector de documentos propios con voz** (nuevo) | ⛔ por hacer | — |
 
 ---
 
@@ -80,20 +81,22 @@ Harness de capturas (dev): `shot.mjs` (Chrome headless por CDP) entra con usuari
 ### P1 — Para que el ciclo de producto cierre
 4. **M7 · Test de nivel inicial**: 12–15 ítems adaptativos → coloca en A1/A2/B1 y abre la ruta desde ahí (hoy todos empiezan en A1 obligatoriamente).
 5. **M5 · Entrenador de conversación con corrección** (§5).
-6. **Verificación de correo** (`sendEmailVerification`): hoy cualquiera se registra con un correo ajeno.
-7. **Recordatorio diario** de la racha (Web Push o recordatorio local de la PWA).
+6. **M9 v1 · Lector de documentos con voz** (§7): subir TXT/PDF, leerlo, escuchar frase a frase y palabra a palabra.
+7. **Verificación de correo** (`sendEmailVerification`): hoy cualquiera se registra con un correo ajeno.
+8. **Recordatorio diario** de la racha (Web Push o recordatorio local de la PWA).
 
 ### P2 — Expansión
-8. **M6 · Música y podcasts con letra** (§6).
-9. **Contenido B2** (6 unidades) y más ejercicios por lección en A2/B1.
-10. **Arte propio** de las 3 insignias nuevas y poses extra de la mascota (las genera Andrés).
-11. **M8 · Pronunciación**: grabar, comparar con la referencia y puntuar.
-12. Liga/ranking entre amigos (opt-in) y retos compartidos.
+9. **M6 · Música y podcasts con letra** (§6).
+10. **M9 v2** (§7): EPUB/DOCX, **traducción en voz**, vocabulario del documento al SRS, búsqueda dentro del documento.
+11. **Contenido B2** (6 unidades) y más ejercicios por lección en A2/B1.
+12. **Arte propio** de las 3 insignias nuevas y poses extra de la mascota (las genera Andrés).
+13. **M8 · Pronunciación**: grabar, comparar con la referencia y puntuar.
+14. Liga/ranking entre amigos (opt-in) y retos compartidos.
 
 ### P3 — Aparcado
-13. Recuperación de PIN (el flujo estándar de Firebase pide 6+ caracteres y rompe `pin+"00"`; haría falta página propia y dominio).
-14. Dominio propio (por ahora se queda la URL de Vercel).
-15. `docs/roadmap-mvp.md` está desactualizado (menciona Claude y stack viejo) → reescribir o retirar.
+15. Recuperación de PIN (el flujo estándar de Firebase pide 6+ caracteres y rompe `pin+"00"`; haría falta página propia y dominio).
+16. Dominio propio (por ahora se queda la URL de Vercel).
+17. `docs/roadmap-mvp.md` está desactualizado (menciona Claude y stack viejo) → reescribir o retirar.
 
 ---
 
@@ -128,12 +131,29 @@ Fases: (1) reproductor + huecos con 3 piezas curadas; (2) buscador por nivel/tem
 
 ---
 
-## 7. Bloqueado en Andrés
+## 7. M9 · Lector de documentos propios con voz (especificación)
+
+**Idea**: subir un documento que yo quiera leer en inglés; la app lo lee e indexa, muestra el texto completo, permite **reproducir palabras sueltas o frases enteras**, escucharlo **completo** con muy buena voz inglesa y también oír la **traducción en voz**.
+
+- **Todo en el dispositivo** (privacidad + coste cero): el archivo se parsea en el cliente y se guarda en **IndexedDB**; a Firestore solo van metadatos y la posición de lectura. Nada de subir el documento a un servidor.
+- **Formatos**: v1 TXT/MD y **PDF** (pdf.js); v2 EPUB (epub.js) y DOCX (mammoth).
+- **Segmentación**: `Intl.Segmenter` (nativo, gratis) para partir en frases y palabras → cada frase es una unidad reproducible y cada palabra es tocable.
+- **Indexado**: índice invertido simple en IndexedDB para buscar dentro del documento y localizar una palabra en todas sus apariciones.
+- **Lectura en voz (el punto delicado)**: `speechSynthesis` es gratis pero su calidad depende del sistema. Plan: capa `lib/tts.ts` con proveedor conmutable → (a) **Web Speech eligiendo la mejor voz `en-*` instalada** (en macOS/iOS hay voces muy buenas; en Android varía), (b) **Gemini TTS** si su cuota gratuita lo permite (a verificar antes de prometerlo), (c) proveedores de pago (ElevenLabs/OpenAI) descartados por coste. La UI debe avisar cuando la voz del sistema sea pobre y sugerir instalar una voz mejor.
+- **Traducción en voz**: traducir por frase con Gemini, **cachear** en IndexedDB (una frase se traduce una sola vez) y leerla con voz `es-*`. Modo «bilingüe»: frase en inglés → misma frase en español.
+- **Aprender leyendo**: tocar una palabra → significado + botón «añadir al repaso» (entra al SRS con la misma clave `vocab.en`); el tiempo de lectura suma XP y alimenta los retos.
+- **Aviso al usuario**: la traducción envía fragmentos del documento a Gemini (el resto es local). Debe decirse en la UI.
+
+Fases: **v1** subir TXT/PDF + texto completo + reproducir palabra/frase + reproducción continua con resaltado; **v2** EPUB/DOCX, traducción en voz cacheada, palabras al SRS, buscador interno.
+
+Riesgos: calidad de voz desigual por dispositivo (mitigación: selector de voz + aviso); PDFs escaneados sin texto (mitigación: detectarlo y avisar — el OCR queda fuera del coste cero); documentos largos (mitigación: paginar por capítulos/bloques y no cargar todo en memoria).
+
+## 8. Bloqueado en Andrés
 - Arte de las insignias nuevas y poses de la mascota (pensar/saludar/oops).
 - Decisión de licencia para M6 (§6) y si acepta empezar por podcasts/transcripciones.
 - Rotar la API key de Gemini (se pegó en texto plano en el chat).
 
-## 8. Cómo se verifica cada cambio
+## 9. Cómo se verifica cada cambio
 1. `node --experimental-strip-types lib/curriculum/data.check.ts` (y el check del módulo que se toque).
 2. `pnpm exec tsc --noEmit` + `pnpm lint` + `pnpm build`.
 3. Capturas reales en 390 y 1440, claro y oscuro, antes de declarar terminado.
