@@ -6,8 +6,9 @@ import assert from "node:assert";
 // y `data.ts` importa sin extensión porque es lo que espera el bundler.
 import { a1 } from "./levels/a1.ts";
 import { a2 } from "./levels/a2.ts";
+import { b1 } from "./levels/b1.ts";
 
-const curriculum = [...a1, ...a2];
+const curriculum = [...a1, ...a2, ...b1];
 
 function normalize(s: string): string {
   return s
