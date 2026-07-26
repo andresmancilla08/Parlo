@@ -266,7 +266,12 @@
     "err_url": "That YouTube link isn't valid.",
     "err_lyrics": "Paste at least one line of lyrics.",
     "home_cta": "Practise with songs",
-    "link": "Use"
+    "link": "Use",
+    "show_es": "Show Spanish",
+    "hide_es": "English only",
+    "es_error": "Couldn't translate right now.",
+    "word_error": "Couldn't look up the word.",
+    "close": "Close"
   },
   "perfil": {
     "level": "Level {{level}}",

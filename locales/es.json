@@ -266,7 +266,12 @@
     "err_url": "Ese enlace de YouTube no es válido.",
     "err_lyrics": "Pega al menos una línea de letra.",
     "home_cta": "Practicar con canciones",
-    "link": "Usar"
+    "link": "Usar",
+    "show_es": "Ver en español",
+    "hide_es": "Solo inglés",
+    "es_error": "No se pudo traducir ahora mismo.",
+    "word_error": "No se pudo consultar la palabra.",
+    "close": "Cerrar"
   },
   "perfil": {
     "level": "Nivel {{level}}",

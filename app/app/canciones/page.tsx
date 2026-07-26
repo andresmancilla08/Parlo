@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import {
   IconArrowRight,
+  IconLanguage,
   IconMusic,
   IconPlus,
   IconTrash,
@@ -30,6 +31,11 @@ import {
 } from "@/lib/listening";
 import { useProgress } from "@/lib/progress";
 import { YouTubePlayer, type SongPlayer } from "@/components/song/youtube-player";
+import {
+  LyricLineView,
+  useLyricsEs,
+  WordSheet,
+} from "@/components/song/lyrics-view";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { spring } from "@/lib/motion";
@@ -302,6 +308,10 @@ function Session({
   const [checked, setChecked] = useState(false);
   const [score, setScore] = useState({ correct: 0, total: 0 });
   const [videoFailed, setVideoFailed] = useState(false);
+  const [showEs, setShowEs] = useState(false);
+  const [word, setWord] = useState<{ word: string; context: string } | null>(null);
+  const texts = useMemo(() => song.lines.map((l) => l.text), [song.lines]);
+  const { es, loading: esLoading, failed: esFailed, load: loadEs } = useLyricsEs(song.id, texts);
 
   const line = song.lines[index]?.text ?? "";
   const tokens = useMemo(() => tokenize(line), [line]);
@@ -379,9 +389,11 @@ function Session({
         </span>
       </div>
 
+      {/* El reproductor va compacto (los términos de YouTube piden que siga
+          visible), pero quien manda en pantalla es la letra. */}
       {song.youtubeId && (
         <YouTubePlayer
-          className="mt-4"
+          className="mx-auto mt-4 w-full max-w-[356px]"
           videoId={song.youtubeId}
           onReady={setPlayer}
           onTime={handleTime}
@@ -427,7 +439,22 @@ function Session({
         )}
       </div>
 
-      <div className="mt-6 flex gap-2">
+      {/* letra completa: la línea en curso lleva los huecos, el resto se lee */}
+      <div className="mt-5 space-y-1">
+        {song.lines.map((l, i) =>
+          i === index ? null : (
+            <LyricLineView
+              key={i}
+              text={l.text}
+              translation={es?.[i]}
+              showEs={showEs}
+              onWord={(w, c) => setWord({ word: w, context: c })}
+            />
+          ),
+        )}
+      </div>
+
+      <div className="mt-6 flex flex-wrap gap-2">
         <Button
           variant="secondary"
           className="shrink-0"
@@ -437,6 +464,17 @@ function Session({
           }}
         >
           {t("canciones.replay")}
+        </Button>
+        <Button
+          variant="secondary"
+          className="shrink-0"
+          onClick={() => {
+            setShowEs((v) => !v);
+            if (!es) loadEs();
+          }}
+        >
+          <IconLanguage className="size-4" />
+          {esLoading ? t("practica.thinking") : showEs ? t("canciones.hide_es") : t("canciones.show_es")}
         </Button>
         {checked ? (
           <Button className="flex-1" onClick={next}>
@@ -453,6 +491,21 @@ function Session({
           </Button>
         )}
       </div>
+
+      {esFailed && (
+        <p role="alert" className="mt-3 text-xs font-bold text-danger-ink">
+          {t("canciones.es_error")}
+        </p>
+      )}
+
+      {word && (
+        <WordSheet
+          key={`${word.word}-${word.context}`}
+          word={word.word}
+          context={word.context}
+          onClose={() => setWord(null)}
+        />
+      )}
     </div>
   );
 }
