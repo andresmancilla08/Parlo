@@ -283,7 +283,13 @@
     "sync_body": "Dale al play y toca «Marcar» cuando empiece cada verso",
     "sync_mark": "Marcar este verso",
     "sync_save": "Guardar tiempos",
-    "sync_reset": "Empezar de nuevo"
+    "sync_reset": "Empezar de nuevo",
+    "backup_title": "Copia de seguridad",
+    "backup_body": "Tus letras viven solo en este dispositivo. Descarga una copia para no perderlas.",
+    "export": "Descargar copia",
+    "import": "Restaurar copia",
+    "import_ok": "Restauradas {{n}} canciones",
+    "import_error": "Ese archivo no es una copia válida."
   },
   "perfil": {
     "level": "Nivel {{level}}",

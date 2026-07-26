@@ -7,11 +7,13 @@ import { useTranslation } from "react-i18next";
 import {
   IconArrowRight,
   IconClockEdit,
+  IconDownload,
   IconExternalLink,
   IconLanguage,
   IconMusic,
   IconPlus,
   IconTrash,
+  IconUpload,
   IconX,
 } from "@tabler/icons-react";
 import {
@@ -203,6 +205,8 @@ function Picker({
         ))}
       </div>
 
+      <Backup />
+
       <p className="mt-4 text-xs font-semibold text-muted">{t("canciones.legal")}</p>
 
       {/* Catálogo sugerido: sólo título y artista. La letra la pones tú. */}
@@ -294,6 +298,79 @@ function SuggestionRow({
         </div>
       )}
     </Card>
+  );
+}
+
+/** Exportar/importar el trabajo del usuario: sus letras no están en la nube. */
+function Backup() {
+  const { t } = useTranslation();
+  const songs = useUserSongs((s) => s.songs);
+  const videos = useUserSongs((s) => s.videos);
+  const times = useUserSongs((s) => s.times);
+  const add = useUserSongs((s) => s.add);
+  const setVideo = useUserSongs((s) => s.setVideo);
+  const setTimes = useUserSongs((s) => s.setTimes);
+  const [msg, setMsg] = useState<string | null>(null);
+
+  function exportAll() {
+    const blob = new Blob([JSON.stringify({ songs, videos, times }, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "parlo-canciones.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function importFile(file: File) {
+    try {
+      const data = JSON.parse(await file.text()) as {
+        songs?: Song[];
+        videos?: Record<string, string>;
+        times?: Record<string, number[]>;
+      };
+      (data.songs ?? []).forEach((song) => add(song));
+      Object.entries(data.videos ?? {}).forEach(([id, v]) => setVideo(id, v));
+      Object.entries(data.times ?? {}).forEach(([id, tt]) => setTimes(id, tt));
+      setMsg(t("canciones.import_ok", { n: (data.songs ?? []).length }));
+    } catch {
+      setMsg(t("canciones.import_error"));
+    }
+  }
+
+  return (
+    <div className="mt-6 rounded-2xl border border-border bg-card p-4">
+      <p className="font-display text-sm font-extrabold">{t("canciones.backup_title")}</p>
+      <p className="mt-0.5 text-xs font-semibold text-muted">{t("canciones.backup_body")}</p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Button
+          variant="secondary"
+          className="shrink-0 px-3 py-2 text-xs"
+          disabled={songs.length === 0 && Object.keys(videos).length === 0}
+          onClick={exportAll}
+        >
+          <IconDownload className="size-4" />
+          {t("canciones.export")}
+        </Button>
+        <label className="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-pill border border-border bg-surface px-3 py-2 font-display text-xs font-bold text-fg transition-colors hover:border-primary">
+          <IconUpload className="size-4" />
+          {t("canciones.import")}
+          <input
+            type="file"
+            accept="application/json"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) importFile(f);
+              e.target.value = "";
+            }}
+          />
+        </label>
+      </div>
+      {msg && <p className="mt-2 text-xs font-bold text-accent-ink">{msg}</p>}
+    </div>
   );
 }
 

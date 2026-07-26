@@ -283,7 +283,13 @@
     "sync_body": "Hit play and tap «Mark» as each line starts",
     "sync_mark": "Mark this line",
     "sync_save": "Save timings",
-    "sync_reset": "Start over"
+    "sync_reset": "Start over",
+    "backup_title": "Backup",
+    "backup_body": "Your lyrics live on this device only. Download a copy so you don't lose them.",
+    "export": "Download backup",
+    "import": "Restore backup",
+    "import_ok": "{{n}} songs restored",
+    "import_error": "That file isn't a valid backup."
   },
   "perfil": {
     "level": "Level {{level}}",
