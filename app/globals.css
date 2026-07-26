@@ -61,6 +61,9 @@
   --gradient-gem: linear-gradient(120deg, #ffc94a, #ffe58a);
   /* panel premium siempre oscuro (home): legible en claro y oscuro */
   --gradient-panel: linear-gradient(135deg, #2a1c54 0%, #171033 100%);
+  /* Titular con degradado. En claro usa los inks: coral/gem/mint puros
+     sobre crema dan 1.5–2.7:1 (ilegible). En oscuro sí pueden ir puros. */
+  --gradient-headline: linear-gradient(90deg, #c93c17, #8a5e00, #0c6f5d, #c93c17);
 }
 
 .dark {
@@ -80,6 +83,9 @@
   --accent: #39d8ba;
   --accent-soft: #103a38;
   --accent-ink: #39d8ba; /* mint brillante como TEXTO sobre accent-soft oscuro */
+
+  /* Sobre navy los colores puros sí pasan (7–12:1). */
+  --gradient-headline: linear-gradient(90deg, #ff7a5c, #ffc94a, #39d8ba, #ff7a5c);
   --gem: #ffd567;
   --success: #34c58b;
   --success-ink: #7ee0b4;
