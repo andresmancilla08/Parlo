@@ -11,6 +11,7 @@ import {
   IconHeadphones,
   IconCircleCheck,
   IconLock,
+  IconMusic,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { spring } from "@/lib/motion";
@@ -151,6 +152,21 @@ export default function HomePage() {
                 {t("escucha.home_cta")}
               </span>
               <span className="block text-xs font-bold text-muted">{t("escucha.kicker")}</span>
+            </span>
+            <IconArrowRight className="size-4 shrink-0 text-muted" />
+          </div>
+        </Link>
+
+        <Link href="/app/canciones" className="mt-3 block active:scale-[0.99]">
+          <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4">
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-ink">
+              <IconMusic className="size-5" stroke={2.2} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-display text-sm font-extrabold">
+                {t("canciones.home_cta")}
+              </span>
+              <span className="block text-xs font-bold text-muted">{t("canciones.kicker")}</span>
             </span>
             <IconArrowRight className="size-4 shrink-0 text-muted" />
           </div>

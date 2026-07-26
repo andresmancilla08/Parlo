@@ -148,9 +148,25 @@ Fases: **v1** subir TXT/PDF + texto completo + reproducir palabra/frase + reprod
 
 Riesgos: calidad de voz desigual por dispositivo (mitigación: selector de voz + aviso); PDFs escaneados sin texto (mitigación: detectarlo y avisar — el OCR queda fuera del coste cero); documentos largos (mitigación: paginar por capítulos/bloques y no cargar todo en memoria).
 
-## 8. Voz (TTS) — decisión pendiente
-Hoy la voz es **Web Speech** con selección automática de la mejor voz instalada y selector manual en el perfil (`lib/tts.ts` puntúa las voces: premium/neural arriba, las «novelty» de macOS al fondo). Eso arregla el «suena terrible» en equipos con voces buenas, pero **no lo garantiza en todos**.
-Siguiente paso recomendado (coste cero recurrente): **pregenerar el audio del currículo** (~270 ejercicios + vocabulario, unos 30k caracteres) con Google Cloud TTS Neural2/Chirp o Azure neural, servir MP3 estáticos y dejar Web Speech sólo para texto libre (M9 y escucha). Para texto imprevisible: cachear cada frase sintetizada en IndexedDB.
+## 8. Decisiones de IA y voz (verificado 2026-07-26)
+
+**Texto (tutor, coach, traducción)**: `gemini-flash-lite-latest` ✅ probado con la cuenta del proyecto (más barato y suficiente); `gemini-3.1-flash-lite` ✅ como alternativa; `gemini-flash-latest` ✅ (el que usa el coach hoy). `gemini-2.5-flash-lite` está **retirado (404)**. Plan B gratis: Groq.
+
+**M6 v2 · canciones REALES — qué es viable legalmente** (informativo, no asesoría legal):
+| Pieza | Viable | Cómo |
+|---|---|---|
+| Audio/vídeo | ✅ | Embed oficial de YouTube (IFrame API). Nunca se descarga ni se aloja el audio |
+| Letra de dominio público | ✅ completa | Tradicional/folk anterior a ~1929 → va en el repo con su atribución |
+| Letra de catálogo actual | ⚠️ con licencia | **Musixmatch API** plan gratis = ~30% de la letra + atribución obligatoria (basta para un ejercicio de huecos corto). Completa = licencia de pago (LyricFind / Musixmatch comercial) |
+| Letra que pega el usuario | ✅ | Solo en **su dispositivo** (IndexedDB). Nunca al repo ni a Firestore |
+| Genius API | ❌ | No sirve letras; scrapear su web viola sus términos |
+| Subtítulos de YouTube ajenos | ❌ | La API oficial solo permite descargarlos si eres dueño del vídeo |
+
+**Voz (TTS) — plan acordado**
+Hoy: **Web Speech** con selección automática de la mejor voz instalada y selector manual en el perfil (`lib/tts.ts` puntúa las voces). Arregla el «suena terrible» donde hay voces buenas, pero no lo garantiza en todos los equipos.
+Plan en dos capas (coste recurrente 0):
+1. **Currículo (finito)**: pregenerar los MP3 una sola vez (~30k caracteres) con Google Cloud TTS Neural2/Chirp o Azure neural y servirlos estáticos. El runtime usa el MP3 si existe y cae a Web Speech si no.
+2. **Texto libre (M9, escucha, coach)**: Web Speech con la voz elegida; si se activa TTS de servidor, cachear cada frase en IndexedDB para sintetizarla una única vez.
 
 ## 9. Bloqueado en Andrés
 - Arte de las insignias nuevas y poses de la mascota (pensar/saludar/oops).
