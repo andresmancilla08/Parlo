@@ -26,7 +26,18 @@ function qualityFromAccuracy(acc: number): number {
   return 2;
 }
 
-export type LessonResult = { correct: number; total: number };
+/** Resultado de UN ejercicio. `srsKey` sólo existe si evaluaba una carta. */
+export type GradedItem = { ok: boolean; srsKey?: string };
+
+export type LessonResult = { correct: number; total: number; graded: GradedItem[] };
+
+/**
+ * Calidad SM-2 de un ejercicio suelto. Acertar en opción múltiple es
+ * reconocimiento, no recuerdo puro → 4 (bien), no 5 (perfecto).
+ */
+export function qualityFromItem(ok: boolean): number {
+  return ok ? 4 : 2;
+}
 
 type ProgressState = {
   xp: number;
@@ -100,7 +111,9 @@ export const useProgress = create<ProgressState>()(
             const card = cards[r.key] ?? newCard(r.key, now);
             cards[r.key] = review(card, r.quality, now);
           }
-          return { cards, xp: s.xp + results.length * 5 };
+          // XP sólo por las cartas recordadas (quality >= 3), no por los fallos.
+          const hits = results.filter((r) => r.quality >= 3).length;
+          return { cards, xp: s.xp + hits * 5 };
         }),
 
       reset: () =>

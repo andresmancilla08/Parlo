@@ -56,6 +56,7 @@ export function buildReviewExercises(
         answer: v.en,
         explain: `«${v.en}» = ${v.es}.`,
         speak: v.en,
+        srsKey: v.en,
       };
     });
 }

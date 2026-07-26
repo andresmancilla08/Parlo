@@ -13,7 +13,7 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import type { Exercise } from "@/lib/curriculum";
-import type { LessonResult } from "@/lib/progress";
+import type { GradedItem, LessonResult } from "@/lib/progress";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { spring } from "@/lib/motion";
@@ -48,15 +48,16 @@ type Props = {
 export function LessonRunner({ title, exercises, onComplete, exitHref = "/app" }: Props) {
   const router = useRouter();
   const [step, setStep] = useState(0);
-  const [correctCount, setCorrectCount] = useState(0);
+  const [graded, setGraded] = useState<GradedItem[]>([]);
   const [done, setDone] = useState(false);
   const committed = useRef(false);
 
   const total = exercises.length;
   const ex = exercises[step];
+  const correctCount = graded.filter((g) => g.ok).length;
 
   function handleGraded(ok: boolean) {
-    if (ok) setCorrectCount((c) => c + 1);
+    setGraded((g) => [...g, { ok, srsKey: exercises[step].srsKey }]);
   }
 
   function next() {
@@ -68,9 +69,9 @@ export function LessonRunner({ title, exercises, onComplete, exitHref = "/app" }
   useEffect(() => {
     if (done && !committed.current) {
       committed.current = true;
-      onComplete({ correct: correctCount, total });
+      onComplete({ correct: correctCount, total, graded });
     }
-  }, [done, correctCount, total, onComplete]);
+  }, [done, correctCount, total, graded, onComplete]);
 
   if (done) {
     return (

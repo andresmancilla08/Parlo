@@ -10,7 +10,7 @@ import {
   learnedVocab,
   type Exercise,
 } from "@/lib/curriculum";
-import { dueCardKeys, useProgress } from "@/lib/progress";
+import { dueCardKeys, qualityFromItem, useProgress } from "@/lib/progress";
 import { LessonRunner } from "@/components/lesson/lesson-runner";
 
 export default function RepasoPage() {
@@ -54,13 +54,12 @@ export default function RepasoPage() {
     <LessonRunner
       title={t("repaso.title")}
       exercises={exercises}
-      onComplete={() => {
-        // ponytail: el runner solo reporta el agregado, así que avanzamos las cartas
-        // vencidas con quality 4. Calidad por-ejercicio si el runner llega a reportarla.
+      onComplete={({ graded }) => {
+        // Cada carta avanza con la calidad de SU ejercicio (acierto 4 / fallo 2).
         reviewCards(
-          exercises
-            .map((e) => ({ key: e.kind === "choose" ? e.answer : "", quality: 4 }))
-            .filter((r) => r.key),
+          graded
+            .filter((g) => g.srsKey)
+            .map((g) => ({ key: g.srsKey!, quality: qualityFromItem(g.ok) })),
         );
         router.push("/app");
       }}

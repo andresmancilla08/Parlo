@@ -7,34 +7,32 @@ export type Cefr = "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
 export type Vocab = { en: string; es: string };
 
 /**
- * Un ejercicio. `explain` es SIEMPRE en español: es el diferenciador de Parlo
- * (entender el porqué, no memorizar).
+ * Campos comunes a todo ejercicio. `explain` es SIEMPRE en español: es el
+ * diferenciador de Parlo (entender el porqué, no memorizar).
+ * `srsKey` (opcional) = carta de repaso que este ejercicio evalúa; si está,
+ * el resultado del ejercicio califica esa carta (SM-2) por separado.
  */
+type ExerciseBase = { prompt: string; explain: string; srsKey?: string };
+
 export type Exercise =
   // Opción múltiple. `speak` (opcional) = texto en inglés que se pronuncia (Web Speech).
-  | {
+  | (ExerciseBase & {
       kind: "choose";
-      prompt: string;
       options: string[];
       answer: string;
-      explain: string;
       speak?: string;
-    }
+    })
   // Ordenar palabras del banco hasta formar `answer`.
-  | {
+  | (ExerciseBase & {
       kind: "bank";
-      prompt: string;
       answer: string;
       bank: string[];
-      explain: string;
-    }
+    })
   // Escribir la respuesta. `answer` admite variantes aceptadas.
-  | {
+  | (ExerciseBase & {
       kind: "type";
-      prompt: string;
       answer: string | string[];
-      explain: string;
-    };
+    });
 
 export type Lesson = {
   id: string; // único global, p.ej. "a1-greetings-1"

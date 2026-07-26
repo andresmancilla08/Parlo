@@ -4,6 +4,7 @@ import "./globals.css";
 import RegisterPWA from "./register-pwa";
 import { ThemeProvider } from "@/components/theme-provider";
 import { I18nProvider } from "@/components/i18n-provider";
+import { siteUrl } from "@/lib/site";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -17,14 +18,15 @@ const nunito = Nunito({
   display: "swap",
 });
 
+const title = "Parlo — Aprende inglés como se debe";
+const description =
+  "Aprende inglés desde cero hasta avanzado con un tutor de IA que corrige y conversa en español, currículo por niveles, repaso espaciado y retos.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   applicationName: "Parlo",
-  title: {
-    default: "Parlo — Aprende inglés como se debe",
-    template: "%s · Parlo",
-  },
-  description:
-    "Aprende inglés desde cero hasta avanzado con un tutor de IA que corrige y conversa en español, currículo por niveles, repaso espaciado y retos.",
+  title: { default: title, template: "%s · Parlo" },
+  description,
   manifest: "/manifest.webmanifest",
   icons: {
     apple: "/apple-icon.png",
@@ -34,6 +36,18 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "Parlo",
   },
+  // El idioma de la UI se cambia en cliente (i18next), así que los metadatos
+  // van en español: el locale por URL exigiría rutas /es|/en (ver decisiones.md).
+  openGraph: {
+    type: "website",
+    siteName: "Parlo",
+    locale: "es_ES",
+    url: "/",
+    title,
+    description,
+  },
+  twitter: { card: "summary_large_image", title, description },
+  robots: { index: true, follow: true },
 };
 
 export const viewport: Viewport = {
