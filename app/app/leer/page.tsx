@@ -5,7 +5,6 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import {
-  IconArrowLeft,
   IconBook,
   IconLanguage,
   IconPlayerPlayFilled,
@@ -18,10 +17,12 @@ import {
 import { parseFile } from "@/lib/reader/parse";
 import { deleteDoc, getDoc, listDocs, saveDoc, type StoredDoc } from "@/lib/reader/store";
 import { buildIndex, cleanWord, search, toSentences, toWords } from "@/lib/reader/segment";
+import { detectLang, targetLang } from "@/lib/reader/detect";
 import { speak } from "@/lib/tts";
 import { useProgress } from "@/lib/progress";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { BackButton } from "@/components/ui/back-button";
 import { spring } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
@@ -66,6 +67,7 @@ function Library() {
         size: file.size,
         addedAt: Date.now(),
         position: 0,
+        lang: detectLang(parsed.text),
       });
       refresh();
     } catch {
@@ -210,6 +212,9 @@ function Reader({ id }: { id: string }) {
   }, [id]);
 
   const sentences = useMemo(() => (doc ? toSentences(doc.text) : []), [doc]);
+  // Documentos viejos (sin idioma guardado): se deduce al abrirlos.
+  const lang = doc ? (doc.lang ?? detectLang(doc.text)) : "en";
+  const to = targetLang(lang);
   const index = useMemo(() => buildIndex(sentences), [sentences]);
   const hits = useMemo(() => (query ? search(index, query) : []), [index, query]);
   const visible = query ? sentences.filter((s) => hits.includes(s.i)) : sentences;
@@ -225,7 +230,7 @@ function Reader({ id }: { id: string }) {
   function readOne(i: number) {
     setCurrent(i);
     remember(i);
-    speak(sentences[i].text);
+    speak(sentences[i].text, lang);
     noteListen();
   }
 
@@ -237,7 +242,7 @@ function Reader({ id }: { id: string }) {
       if (stop.current) break;
       setCurrent(i);
       remember(i);
-      await speakAndWait(sentences[i].text);
+      await speakAndWait(sentences[i].text, lang);
     }
     setReading(false);
   }
@@ -249,7 +254,7 @@ function Reader({ id }: { id: string }) {
       const res = await fetch("/api/translate", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ lines: missing.map((s) => s.text) }),
+        body: JSON.stringify({ lines: missing.map((s) => s.text), from: lang }),
       });
       if (!res.ok) return;
       const data = (await res.json()) as { lines: string[] };
@@ -277,16 +282,13 @@ function Reader({ id }: { id: string }) {
   return (
     <div className="mx-auto w-full max-w-2xl px-4 pb-28 pt-4 sm:px-5">
       <div className="flex items-center gap-3">
-        <button
-          onClick={() => router.push("/app/leer")}
-          aria-label={t("leer.back")}
-          className="grid size-9 shrink-0 place-items-center rounded-full text-muted transition-colors hover:bg-primary-soft"
-        >
-          <IconArrowLeft className="size-5" />
-        </button>
+        <BackButton onClick={() => router.push("/app/leer")} className="shrink-0 px-3 py-1.5 text-xs" />
         <p className="line-clamp-1 min-w-0 flex-1 font-display text-sm font-extrabold">
           {doc.title}
         </p>
+        <span className="shrink-0 rounded-pill bg-accent-soft px-2 py-0.5 text-[0.65rem] font-extrabold uppercase text-accent-ink">
+          {lang}
+        </span>
         <span className="shrink-0 text-xs font-bold tabular-nums text-muted">
           {current + 1}/{sentences.length}
         </span>
@@ -312,7 +314,9 @@ function Reader({ id }: { id: string }) {
           }}
         >
           <IconLanguage className="size-4" />
-          {showEs ? t("leer.only_en") : t("leer.show_es")}
+          {showEs
+            ? t(lang === "en" ? "leer.only_en" : "leer.only_es")
+            : t(to === "es" ? "leer.show_es" : "leer.show_en")}
         </Button>
       </div>
 
@@ -393,6 +397,7 @@ function Reader({ id }: { id: string }) {
           key={`${word.word}-${word.context}`}
           word={word.word}
           context={word.context}
+          lang={lang}
           onClose={() => setWord(null)}
         />
       )}
@@ -401,9 +406,9 @@ function Reader({ id }: { id: string }) {
 }
 
 /** Habla y espera a que termine, para poder encadenar frases. */
-function speakAndWait(text: string): Promise<void> {
+function speakAndWait(text: string, lang: "en" | "es"): Promise<void> {
   return new Promise((resolve) => {
-    speak(text);
+    speak(text, lang);
     const synth = typeof window !== "undefined" ? window.speechSynthesis : null;
     if (!synth) return resolve();
     const check = setInterval(() => {
@@ -420,10 +425,12 @@ function speakAndWait(text: string): Promise<void> {
 function WordCard({
   word,
   context,
+  lang,
   onClose,
 }: {
   word: string;
   context: string;
+  lang: "en" | "es";
   onClose: () => void;
 }) {
   const { t } = useTranslation();
@@ -441,7 +448,7 @@ function WordCard({
         const res = await fetch("/api/translate", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ mode: "word", word, context }),
+          body: JSON.stringify({ mode: "word", word, context, from: lang }),
         });
         if (!res.ok) throw new Error(String(res.status));
         const data = await res.json();
@@ -453,7 +460,7 @@ function WordCard({
     return () => {
       cancelled = true;
     };
-  }, [word, context]);
+  }, [word, context, lang]);
 
   return (
     <motion.div
@@ -472,7 +479,7 @@ function WordCard({
           )}
         </div>
         <button
-          onClick={() => speak(word)}
+          onClick={() => speak(word, lang)}
           aria-label={t("a11y.listen_option", { text: word })}
           className="grid size-10 shrink-0 place-items-center rounded-full bg-accent-soft text-accent-ink"
         >

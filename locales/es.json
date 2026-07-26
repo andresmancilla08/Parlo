@@ -260,7 +260,9 @@
     "word_error": "No se pudo consultar la palabra.",
     "save_word": "Añadir al repaso",
     "saved": "Añadida al repaso",
-    "home_cta": "Leer un documento"
+    "home_cta": "Leer un documento",
+    "show_en": "Ver en inglés",
+    "only_es": "Solo español"
   },
   "perfil": {
     "level": "Nivel {{level}}",

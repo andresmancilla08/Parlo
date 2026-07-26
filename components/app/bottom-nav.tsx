@@ -14,7 +14,7 @@ export function BottomNav() {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-bg/90 backdrop-blur-md md:hidden">
       {/* px-1 y min-w-0: con 5 pestañas, en 320px el texto ensanchaba la app entera */}
-      <div className="mx-auto flex max-w-lg items-stretch justify-around px-1 pb-[env(safe-area-inset-bottom)] pt-2 sm:px-4">
+      <div className="mx-auto flex max-w-lg items-stretch justify-around px-1 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-2 sm:px-4">
         {navItems.map(({ href, labelKey, icon: Icon }) => {
           const active = href === "/app" ? pathname === "/app" : pathname.startsWith(href);
           return (

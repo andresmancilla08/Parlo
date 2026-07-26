@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { IconArrowRight, IconHeadphones, IconVolume, IconX } from "@tabler/icons-react";
+import { IconArrowRight, IconHeadphones, IconVolume } from "@tabler/icons-react";
 import {
   blankHint,
   blanksFor,
@@ -22,6 +22,7 @@ import { useProgress } from "@/lib/progress";
 import { speak } from "@/lib/tts";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { BackButton } from "@/components/ui/back-button";
 import { spring } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 import mascotCelebrate from "@/public/brand/mascot-celebrate.png";
@@ -213,13 +214,7 @@ function Session({
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-xl flex-col px-5 pb-6 pt-4">
       <div className="flex items-center gap-3">
-        <button
-          onClick={onExit}
-          aria-label={t("escucha.exit")}
-          className="grid size-9 shrink-0 place-items-center rounded-full text-muted transition-colors hover:bg-primary-soft"
-        >
-          <IconX className="size-5" />
-        </button>
+        <BackButton onClick={onExit} className="shrink-0 px-3 py-1.5 text-xs" />
         <div className="h-3 flex-1 overflow-hidden rounded-pill bg-border/60">
           <motion.div
             className="h-full rounded-pill bg-primary"

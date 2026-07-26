@@ -260,7 +260,9 @@
     "word_error": "Couldn't look up the word.",
     "save_word": "Add to review",
     "saved": "Added to review",
-    "home_cta": "Read a document"
+    "home_cta": "Read a document",
+    "show_en": "Show English",
+    "only_es": "Spanish only"
   },
   "perfil": {
     "level": "Level {{level}}",

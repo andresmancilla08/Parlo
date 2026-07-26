@@ -18,7 +18,7 @@ const LINES = jsonSchema<{ lines: string[] }>({
   properties: {
     lines: {
       type: "array",
-      description: "Traducción al español, una por frase recibida y en el mismo orden.",
+      description: "Traducción, una por frase recibida y en el mismo orden.",
       items: { type: "string" },
     },
   },
@@ -29,7 +29,7 @@ const WORD = jsonSchema<{ translation: string; meaning: string; example: string 
   additionalProperties: false,
   required: ["translation", "meaning", "example"],
   properties: {
-    translation: { type: "string", description: "Traducción al español en contexto." },
+    translation: { type: "string", description: "Traducción en contexto al idioma contrario." },
     meaning: { type: "string", description: "Qué significa aquí, en español, breve." },
     example: { type: "string", description: "Otra frase de ejemplo en inglés." },
   },
@@ -44,7 +44,14 @@ export async function POST(req: Request) {
     return Response.json({ error: "Too many requests" }, { status: 429 });
   }
 
-  let body: { mode?: unknown; lines?: unknown; word?: unknown; context?: unknown };
+  let body: {
+    mode?: unknown;
+    lines?: unknown;
+    word?: unknown;
+    context?: unknown;
+    /** Idioma del texto de origen; se traduce al contrario. */
+    from?: unknown;
+  };
   try {
     body = await req.json();
   } catch {
@@ -53,6 +60,11 @@ export async function POST(req: Request) {
 
   // El más barato verificado con esta cuenta; de sobra para traducir.
   const model = google("gemini-flash-lite-latest");
+  const from = body.from === "es" ? "es" : "en";
+  const pair =
+    from === "en"
+      ? { source: "inglés", target: "español" }
+      : { source: "español", target: "inglés" };
 
   try {
     if (body.mode === "word") {
@@ -63,7 +75,9 @@ export async function POST(req: Request) {
         model,
         schema: WORD,
         system:
-          "Explicas inglés a un hispanohablante. Responde SIEMPRE en español, claro y breve. Si la palabra forma parte de una expresión, explica la expresión entera.",
+          from === "en"
+            ? "Explicas inglés a un hispanohablante. Responde SIEMPRE en español, claro y breve. Si la palabra forma parte de una expresión, explica la expresión entera."
+            : "Ayudas a un hispanohablante a decir las cosas en inglés. `translation` es cómo se dice esa palabra o expresión en inglés; `meaning` y el resto van SIEMPRE en español, claros y breves; `example` es una frase de ejemplo en inglés.",
         prompt: `Palabra: «${word}»\nFrase donde aparece: «${context}»`,
         maxOutputTokens: 300,
       });
@@ -82,8 +96,7 @@ export async function POST(req: Request) {
     const { object } = await generateObject({
       model,
       schema: LINES,
-      system:
-        "Traduces del inglés al español para alguien que está aprendiendo: natural, no literal, respetando el sentido de cada frase. Devuelve exactamente una traducción por frase recibida y en el mismo orden.",
+      system: `Traduces del ${pair.source} al ${pair.target} para alguien que está aprendiendo: natural, no literal, respetando el sentido de cada frase. Devuelve exactamente una traducción por frase recibida y en el mismo orden.`,
       prompt: clean.map((l, i) => `${i + 1}. ${l}`).join("\n"),
       // Con menos, el JSON se corta y llega texto suelto.
       maxOutputTokens: 1600,

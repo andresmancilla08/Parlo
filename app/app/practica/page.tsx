@@ -23,6 +23,7 @@ import { firstPendingLesson, unitOfLesson } from "@/lib/curriculum";
 import { speak } from "@/lib/tts";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { BackButton } from "@/components/ui/back-button";
 import { spring } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
@@ -236,12 +237,7 @@ function Conversation({
             {scenario ? t(`practica.goal_${scenario.id}`) : t("practica.free_body")}
           </p>
         </div>
-        <button
-          onClick={onExit}
-          className="shrink-0 rounded-pill border border-border px-3 py-1.5 text-xs font-extrabold text-muted transition-colors hover:text-fg"
-        >
-          {t("practica.change")}
-        </button>
+        <BackButton onClick={onExit} className="shrink-0 px-3 py-1.5 text-xs" />
       </header>
 
       <div className="mt-4 flex-1 space-y-3">

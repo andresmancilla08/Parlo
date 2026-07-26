@@ -13,6 +13,8 @@ export type StoredDoc = {
   addedAt: number;
   /** Última frase leída, para retomar. */
   position: number;
+  /** Idioma del texto: decide la voz y hacia dónde se traduce. */
+  lang: "en" | "es";
 };
 
 const DB = "parlo-reader";
