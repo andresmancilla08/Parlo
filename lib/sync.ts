@@ -22,10 +22,35 @@ function merge(local: ProgressSnapshot, remote: ProgressSnapshot): ProgressSnaps
   for (const [id, n] of Object.entries(local.stars)) {
     stars[id] = Math.max(n, stars[id] ?? 0);
   }
+  // Estadísticas por día: se queda el mejor valor de cada métrica en cada día.
+  const days = { ...remote.days };
+  for (const [key, day] of Object.entries(local.days ?? {})) {
+    const other = days[key];
+    days[key] = other
+      ? {
+          xp: Math.max(day.xp, other.xp),
+          lessons: Math.max(day.lessons, other.lessons),
+          correct: Math.max(day.correct, other.correct),
+          reviews: Math.max(day.reviews, other.reviews),
+          tutor: Math.max(day.tutor, other.tutor),
+          listens: Math.max(day.listens, other.listens),
+        }
+      : day;
+  }
+
   return {
     xp: Math.max(local.xp, remote.xp),
     gems: Math.max(local.gems, remote.gems),
     streak: Math.max(local.streak, remote.streak),
+    days,
+    // El objetivo lo manda este dispositivo (es lo último que tocó el usuario).
+    goalXp: local.goalXp,
+    claims: { ...remote.claims, ...local.claims },
+    shields: Math.max(local.shields, remote.shields ?? 0),
+    lastGoalDay:
+      (local.lastGoalDay ?? "") > (remote.lastGoalDay ?? "")
+        ? local.lastGoalDay
+        : remote.lastGoalDay,
     lastActiveDay:
       (local.lastActiveDay ?? "") > (remote.lastActiveDay ?? "")
         ? local.lastActiveDay

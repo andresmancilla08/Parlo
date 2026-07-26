@@ -9,7 +9,8 @@ import { IconArrowRight } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { spring } from "@/lib/motion";
 import { allLessons, curriculum, localTitle, unitOfLesson } from "@/lib/curriculum";
-import { dueCardKeys, useProgress } from "@/lib/progress";
+import { challengeProgress, challengesFor } from "@/lib/gamification";
+import { dueCardKeys, todayXp, useProgress } from "@/lib/progress";
 import { useAuth } from "@/lib/auth";
 import { useHydrated } from "@/lib/use-hydrated";
 import { PwaInstall } from "@/components/ui/pwa-install";
@@ -26,9 +27,20 @@ export default function HomePage() {
   const streak = useProgress((s) => s.streak);
   const completedArr = useProgress((s) => s.completed);
   const cards = useProgress((s) => s.cards);
+  const days = useProgress((s) => s.days);
+  const goalXp = useProgress((s) => s.goalXp);
+  const claims = useProgress((s) => s.claims);
 
   const completed = new Set(hydrated ? completedArr : []);
   const dueCount = hydrated ? dueCardKeys(cards, now).length : 0;
+
+  // Objetivo del día y retos ya cumplidos pero sin cobrar.
+  const goalXpDone = hydrated ? todayXp(days) : 0;
+  const claimable = hydrated
+    ? challengesFor(new Date(now)).filter(
+        (c) => !claims[c.key] && challengeProgress(c, days, new Date(now)) >= c.target,
+      ).length
+    : 0;
 
   // Lección actual = primera no completada (o ninguna si todo A1 está hecho).
   const current = allLessons.find((l) => !completed.has(l.id)) ?? null;
@@ -84,6 +96,8 @@ export default function HomePage() {
         due={dueCount}
         gems={hydrated ? gems : 0}
       />
+
+      <GoalCard done={goalXpDone} goal={goalXp} claimable={claimable} />
 
       <PwaInstall className="mt-6 md:hidden" />
 
@@ -221,6 +235,61 @@ function StatTile({
         {label}
       </p>
     </div>
+  );
+}
+
+/* ---------------- objetivo del día ---------------- */
+
+function GoalCard({
+  done,
+  goal,
+  claimable,
+}: {
+  done: number;
+  goal: number;
+  claimable: number;
+}) {
+  const { t } = useTranslation();
+  const fraction = Math.min(done / goal, 1);
+  const complete = fraction >= 1;
+
+  return (
+    <Link href="/app/retos" className="mt-4 block active:scale-[0.99]">
+      <div
+        className={cn(
+          "rounded-2xl border p-4",
+          complete ? "border-accent bg-accent-soft" : "border-border bg-card",
+        )}
+      >
+        <div className="flex items-center justify-between gap-3">
+          <p
+            className={cn(
+              "font-display text-xs font-extrabold uppercase tracking-[0.13em]",
+              complete ? "text-accent-ink" : "text-muted",
+            )}
+          >
+            {t("home.goal_kicker")}
+          </p>
+          <span className="inline-flex items-center gap-1 text-xs font-extrabold text-primary-ink">
+            {claimable > 0 ? t("home.claimable", { n: claimable }) : t("home.goal_cta")}
+            <IconArrowRight className="size-3.5" />
+          </span>
+        </div>
+
+        <p className="mt-1.5 font-display text-lg font-extrabold">
+          {complete ? t("home.goal_done") : t("home.goal_left", { n: goal - done })}
+        </p>
+
+        <div className="mt-2.5 h-1.5 overflow-hidden rounded-pill bg-border">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${Math.round(fraction * 100)}%` }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className={cn("h-full rounded-pill", complete ? "bg-accent" : "bg-primary")}
+          />
+        </div>
+      </div>
+    </Link>
   );
 }
 

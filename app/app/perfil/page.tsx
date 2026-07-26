@@ -16,7 +16,9 @@ import {
   IconSparkles,
   IconTrophy,
 } from "@tabler/icons-react";
+import Link from "next/link";
 import { useAuth } from "@/lib/auth";
+import { levelFromXp } from "@/lib/gamification";
 import { useProgress } from "@/lib/progress";
 import { useHydrated } from "@/lib/use-hydrated";
 import { allLessons, learnedVocab, unitOfLesson } from "@/lib/curriculum";
@@ -35,11 +37,13 @@ export default function PerfilPage() {
   const hydrated = useHydrated();
   const streak = useProgress((s) => s.streak);
   const gems = useProgress((s) => s.gems);
+  const xp = useProgress((s) => s.xp);
   const completed = useProgress((s) => s.completed);
   const tutorMessages = useProgress((s) => s.tutorMessages);
   const listens = useProgress((s) => s.listens);
 
   const name = email?.split("@")[0] ?? "";
+  const rank = levelFromXp(hydrated ? xp : 0);
 
   // Nivel actual = el de la unidad en curso (ya no es un texto fijo A1).
   const done = new Set(completed);
@@ -64,7 +68,34 @@ export default function PerfilPage() {
         </span>
       </motion.div>
 
-      <div className="mt-8 grid grid-cols-3 gap-3">
+      {/* nivel de avance (XP) → lleva a retos y objetivos */}
+      <Link href="/app/retos" className="mt-6 block active:scale-[0.99]">
+        <Card className="p-5">
+          <div className="flex items-baseline justify-between gap-3">
+            <p className="font-display text-base font-extrabold">
+              {t("retos.level_title", { n: rank.level })}
+              <span className="ml-2 text-sm font-bold text-accent-ink">
+                {t(`retos.rank_${rank.rank}`)}
+              </span>
+            </p>
+            <p className="shrink-0 text-xs font-bold text-muted">
+              {t("retos.level_progress", {
+                into: rank.into,
+                need: rank.need,
+                next: rank.level + 1,
+              })}
+            </p>
+          </div>
+          <div className="mt-3 h-1.5 overflow-hidden rounded-pill bg-border">
+            <div
+              className="h-full rounded-pill bg-primary transition-[width] duration-500"
+              style={{ width: `${Math.round(rank.fraction * 100)}%` }}
+            />
+          </div>
+        </Card>
+      </Link>
+
+      <div className="mt-6 grid grid-cols-3 gap-3">
         <StatCard icon={IconFlame} value={String(hydrated ? streak : 0)} label={t("perfil.streak")} tint="text-primary" />
         <StatCard icon={IconSparkles} value={String(hydrated ? gems : 0)} label={t("perfil.gems")} tint="text-gem" />
         <StatCard icon={IconTrophy} value={String(hydrated ? completed.length : 0)} label={t("perfil.achievements")} tint="text-accent" />
