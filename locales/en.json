@@ -295,7 +295,17 @@
     "src_ok": "Lyrics fetched (licensed excerpt)",
     "src_missing_key": "Musixmatch key not configured",
     "src_not_found": "That song isn't in the source",
-    "src_error": "Couldn't fetch the lyrics"
+    "src_error": "Couldn't fetch the lyrics",
+    "free_title": "Free catalogue",
+    "free_body": "Creative Commons music: full lyrics, free and available to every user.",
+    "free_placeholder": "Search by title or style (pop, rock…)",
+    "free_search": "Search",
+    "free_add": "Add",
+    "free_added": "“{{title}}” added to your songs",
+    "free_empty": "No songs with lyrics found for that search.",
+    "free_no_lyrics": "That track has no usable lyrics.",
+    "free_missing_key": "Jamendo client_id not configured",
+    "pause": "Pause"
   },
   "perfil": {
     "level": "Level {{level}}",

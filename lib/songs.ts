@@ -14,7 +14,7 @@ export type LyricLine = {
   text: string;
 };
 
-export type SongSource = "public-domain" | "user" | "licensed";
+export type SongSource = "public-domain" | "user" | "licensed" | "cc";
 
 export type Song = {
   id: string;
@@ -25,6 +25,10 @@ export type Song = {
   source: SongSource;
   /** Vídeo de YouTube con el que se reproduce (embed oficial). */
   youtubeId?: string;
+  /** Audio directo con licencia Creative Commons (catálogo libre de Jamendo). */
+  audioUrl?: string;
+  /** Enlace a la ficha original, para la atribución de la licencia. */
+  sourceUrl?: string;
   lines: LyricLine[];
 };
 

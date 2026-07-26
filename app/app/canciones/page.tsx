@@ -16,7 +16,9 @@ import {
   IconUpload,
   IconX,
 } from "@tabler/icons-react";
+import type { JamendoTrack } from "@/app/api/jamendo/route";
 import {
+  cleanLyrics,
   lineAt,
   PUBLIC_DOMAIN_SONGS,
   songFromUser,
@@ -41,6 +43,7 @@ import {
 } from "@/lib/listening";
 import { useProgress } from "@/lib/progress";
 import { YouTubePlayer, type SongPlayer } from "@/components/song/youtube-player";
+import { AudioPlayer } from "@/components/song/audio-player";
 import {
   LyricLineView,
   useLyricsEs,
@@ -78,7 +81,7 @@ export default function CancionesPage() {
   const song = all.find((s) => s.id === params.get("s")) ?? null;
   const urlDifficulty = DIFFICULTIES.find((d) => d.id === params.get("d")) ?? difficulty;
 
-  if (song && song.youtubeId) {
+  if (song && (song.youtubeId || song.audioUrl)) {
     return (
       <Session
         key={`${song.id}-${urlDifficulty.id}`}
@@ -196,7 +199,7 @@ function Picker({
                 {song.level} · {song.credit}
               </span>
             </button>
-            {!song.youtubeId && <VideoField songId={song.id} />}
+            {!song.youtubeId && !song.audioUrl && <VideoField songId={song.id} />}
             {song.source === "user" && (
               <button
                 onClick={() => remove(song.id)}
@@ -209,6 +212,8 @@ function Picker({
           </Card>
         ))}
       </div>
+
+      <FreeCatalog />
 
       <Backup />
 
@@ -333,6 +338,114 @@ function SuggestionRow({
       )}
       {children}
     </Card>
+  );
+}
+
+/**
+ * Catálogo libre (Jamendo): música con licencia Creative Commons. La letra viene
+ * completa del propio artista, así que se puede usar tal cual y para cualquier
+ * usuario, con su atribución y enlace a la ficha original.
+ */
+function FreeCatalog() {
+  const { t } = useTranslation();
+  const add = useUserSongs((s) => s.add);
+  const [query, setQuery] = useState("");
+  const [tracks, setTracks] = useState<JamendoTrack[] | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+
+  async function search() {
+    setBusy(true);
+    setMsg(null);
+    try {
+      const res = await fetch("/api/jamendo", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ mode: "search", query, tags: query ? "" : "pop" }),
+      });
+      if (res.status === 503) return setMsg(t("canciones.free_missing_key"));
+      if (!res.ok) return setMsg(t("canciones.src_error"));
+      const data = (await res.json()) as { tracks: JamendoTrack[] };
+      setTracks(data.tracks);
+      if (data.tracks.length === 0) setMsg(t("canciones.free_empty"));
+    } catch {
+      setMsg(t("canciones.src_error"));
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function addTrack(track: JamendoTrack) {
+    const lines = cleanLyrics(track.lyrics ?? "");
+    if (lines.length === 0) return setMsg(t("canciones.free_no_lyrics"));
+    const per = track.duration ? track.duration / lines.length : 4;
+    add({
+      id: `cc-${track.id}`,
+      title: `${track.title} — ${track.artist}`,
+      credit: `${track.artist} · Creative Commons · Jamendo`,
+      level: "B1",
+      source: "cc",
+      audioUrl: track.audio,
+      sourceUrl: track.shareUrl,
+      lines: lines.map((text, i) => ({ t: Math.round(i * per), text })),
+    });
+    setMsg(t("canciones.free_added", { title: track.title }));
+  }
+
+  return (
+    <div className="mt-6 rounded-2xl border border-accent bg-accent-soft p-4">
+      <p className="font-display text-sm font-extrabold text-accent-ink">
+        {t("canciones.free_title")}
+      </p>
+      <p className="mt-0.5 text-xs font-semibold text-accent-ink/80">
+        {t("canciones.free_body")}
+      </p>
+
+      <form
+        className="mt-3 flex gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          search();
+        }}
+      >
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={t("canciones.free_placeholder")}
+          className="min-w-0 flex-1 rounded-xl border border-border bg-surface px-3 py-2 text-sm font-semibold outline-none focus:border-primary"
+        />
+        <Button className="shrink-0 px-3 py-2 text-xs" disabled={busy} type="submit">
+          {busy ? t("practica.thinking") : t("canciones.free_search")}
+        </Button>
+      </form>
+
+      {msg && <p className="mt-2 text-xs font-bold text-accent-ink">{msg}</p>}
+
+      {tracks && tracks.length > 0 && (
+        <div className="mt-3 space-y-2">
+          {tracks.map((track) => (
+            <div
+              key={track.id}
+              className="flex items-center gap-3 rounded-xl border border-border bg-card p-3"
+            >
+              <span className="min-w-0 flex-1">
+                <span className="block line-clamp-1 text-sm font-extrabold">{track.title}</span>
+                <span className="block line-clamp-1 text-xs font-bold text-muted">
+                  {track.artist} · {Math.round(track.duration / 60)} min · CC
+                </span>
+              </span>
+              <Button
+                variant="secondary"
+                className="shrink-0 px-3 py-2 text-xs"
+                onClick={() => addTrack(track)}
+              >
+                {t("canciones.free_add")}
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -670,9 +783,20 @@ function Session({
         </span>
       </div>
 
-      {/* El reproductor va compacto (los términos de YouTube piden que siga
-          visible), pero quien manda en pantalla es la letra. */}
-      {song.youtubeId && (
+      {/* Catálogo libre: audio directo con licencia CC. */}
+      {song.audioUrl && (
+        <AudioPlayer
+          className="mt-4"
+          src={song.audioUrl}
+          onReady={setPlayer}
+          onTime={handleTime}
+          onError={() => setVideoFailed(true)}
+        />
+      )}
+
+      {/* El reproductor de vídeo va compacto (los términos de YouTube piden que
+          siga visible), pero quien manda en pantalla es la letra. */}
+      {!song.audioUrl && song.youtubeId && (
         <YouTubePlayer
           className="mx-auto mt-4 w-full max-w-[356px]"
           videoId={song.youtubeId}

@@ -295,7 +295,17 @@
     "src_ok": "Letra traída (fragmento con licencia)",
     "src_missing_key": "Falta configurar la clave de Musixmatch",
     "src_not_found": "Esa canción no está en la fuente",
-    "src_error": "No se pudo traer la letra"
+    "src_error": "No se pudo traer la letra",
+    "free_title": "Catálogo libre",
+    "free_body": "Música con licencia Creative Commons: letra completa, gratis y disponible para cualquier usuario.",
+    "free_placeholder": "Busca por título o estilo (pop, rock…)",
+    "free_search": "Buscar",
+    "free_add": "Añadir",
+    "free_added": "«{{title}}» añadida a tus canciones",
+    "free_empty": "No se encontraron canciones con letra para esa búsqueda.",
+    "free_no_lyrics": "Esa pista no trae letra utilizable.",
+    "free_missing_key": "Falta configurar el client_id de Jamendo",
+    "pause": "Pausar"
   },
   "perfil": {
     "level": "Nivel {{level}}",
