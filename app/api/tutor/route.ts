@@ -54,7 +54,10 @@ export async function POST(req: Request) {
   }
 
   const result = streamText({
-    model: google("gemini-2.5-flash"),
+    // Alias estable: gemini-2.5-flash quedó retirado para cuentas nuevas.
+    // Alternativas verificadas con esta cuenta: gemini-3-flash-preview,
+    // gemini-3.1-flash-lite.
+    model: google("gemini-flash-latest"),
     instructions: INSTRUCTIONS,
     messages: await convertToModelMessages(messages as UIMessage[]),
     maxOutputTokens: 800,

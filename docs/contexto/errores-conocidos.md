@@ -48,3 +48,8 @@
 
 ## Check del currículo
 - **Cómo correr:** `node --experimental-strip-types lib/curriculum/data.check.ts`. Valida ids únicos, que la respuesta de `choose` esté entre las opciones y que la de `bank` se pueda formar con las fichas. Correr SIEMPRE tras tocar `lib/curriculum/data.ts`.
+
+## El tutor responde 404 `NOT_FOUND` con un modelo de Gemini
+- **Síntoma:** `This model models/gemini-2.5-flash is no longer available to new users`.
+- **Causa real:** Google retiró los modelos 2.5 para cuentas creadas después de cierta fecha. La clave es válida; el modelo no está disponible para esa cuenta. `models.list` los sigue listando, así que listar NO sirve para saber si puedes usarlos: hay que probar `generateContent`.
+- **Solución:** usar el alias `gemini-flash-latest` (verificado). Alternativas que también responden: `gemini-3-flash-preview`, `gemini-3.1-flash-lite`. `gemini-2.0-flash` devuelve cuota agotada.
