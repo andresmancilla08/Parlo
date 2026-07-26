@@ -94,7 +94,12 @@
     "invalid_email": "Ese correo no parece válido.",
     "too_many": "Demasiados intentos. Espera un momento y vuelve a probar.",
     "network": "Sin conexión. Revisa tu internet e inténtalo otra vez.",
-    "generic_error": "Algo falló. Inténtalo de nuevo."
+    "generic_error": "Algo falló. Inténtalo de nuevo.",
+    "working": "Un momento…",
+    "disabled_account": "Esta cuenta está deshabilitada. Escríbenos si crees que es un error.",
+    "provider_off": "El acceso por correo no está habilitado. Avisa al equipo.",
+    "bad_email_format": "Escribe un correo válido (ejemplo: nombre@correo.com).",
+    "pin_incomplete": "El PIN debe tener 4 dígitos."
   },
   "home": {
     "slot_morning": "Buenos días",

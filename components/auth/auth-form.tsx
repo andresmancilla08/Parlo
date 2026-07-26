@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { IconArrowRight, IconMail } from "@tabler/icons-react";
+import { IconArrowRight, IconLoader2, IconMail } from "@tabler/icons-react";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Mascot } from "@/components/ui/mascot";
@@ -21,6 +21,10 @@ function errorKey(code: string): string {
       return "auth.invalid";
     case "email-already-in-use":
       return "auth.email_taken";
+    case "user-disabled":
+      return "auth.disabled_account";
+    case "operation-not-allowed":
+      return "auth.provider_off";
     case "invalid-email":
       return "auth.invalid_email";
     case "too-many-requests":
@@ -31,6 +35,9 @@ function errorKey(code: string): string {
       return "auth.generic_error";
   }
 }
+
+/** Suficiente para atajar erratas; la validación de verdad la hace Firebase. */
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i;
 
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const { t } = useTranslation();
@@ -44,7 +51,8 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const [busy, setBusy] = useState(false);
 
   const isLogin = mode === "login";
-  const canSubmit = email.includes("@") && pin.length === 4 && !busy;
+  const emailOk = EMAIL_RE.test(email.trim());
+  const canSubmit = emailOk && pin.length === 4 && !busy;
 
   const submit = async () => {
     setBusy(true);
@@ -101,6 +109,9 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
               setEmail(e.target.value);
               setError(null);
             }}
+            onBlur={() => {
+              if (email && !emailOk) setError(t("auth.bad_email_format"));
+            }}
             placeholder={t("auth.email_ph")}
             className="w-full rounded-2xl border-2 border-border bg-surface py-3 pl-11 pr-4 text-fg outline-none transition-colors placeholder:text-muted/60 focus:border-primary focus:ring-4 focus:ring-primary/15"
           />
@@ -119,6 +130,8 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
 
         {error && (
           <motion.p
+            role="alert"
+            aria-live="assertive"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="mt-4 text-center text-sm font-medium text-danger-ink"
@@ -128,8 +141,17 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
         )}
 
         <Button type="submit" fullWidth shimmer disabled={!canSubmit} className="mt-6">
-          {isLogin ? t("auth.login_btn") : t("auth.signup_btn")}
-          <IconArrowRight className="size-5" />
+          {busy ? (
+            <>
+              {t("auth.working")}
+              <IconLoader2 className="size-5 animate-spin" />
+            </>
+          ) : (
+            <>
+              {isLogin ? t("auth.login_btn") : t("auth.signup_btn")}
+              <IconArrowRight className="size-5" />
+            </>
+          )}
         </Button>
       </motion.form>
 

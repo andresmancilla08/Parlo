@@ -94,7 +94,12 @@
     "invalid_email": "That email doesn't look valid.",
     "too_many": "Too many attempts. Wait a moment and try again.",
     "network": "No connection. Check your internet and try again.",
-    "generic_error": "Something went wrong. Try again."
+    "generic_error": "Something went wrong. Try again.",
+    "working": "One moment…",
+    "disabled_account": "This account is disabled. Contact us if you think it's a mistake.",
+    "provider_off": "Email sign-in isn't enabled. Let the team know.",
+    "bad_email_format": "Enter a valid email (example: name@email.com).",
+    "pin_incomplete": "The PIN must be 4 digits."
   },
   "home": {
     "slot_morning": "Good morning",
