@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import {
   IconArrowRight,
   IconChevronDown,
+  IconHeadphones,
   IconCircleCheck,
   IconLock,
 } from "@tabler/icons-react";
@@ -137,6 +138,21 @@ export default function HomePage() {
         />
 
         <GoalCard done={goalXpDone} goal={goalXp} claimable={claimable} />
+
+        <Link href="/app/escucha" className="mt-4 block active:scale-[0.99]">
+          <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-4">
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent-ink">
+              <IconHeadphones className="size-5" stroke={2.2} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-display text-sm font-extrabold">
+                {t("escucha.home_cta")}
+              </span>
+              <span className="block text-xs font-bold text-muted">{t("escucha.kicker")}</span>
+            </span>
+            <IconArrowRight className="size-4 shrink-0 text-muted" />
+          </div>
+        </Link>
 
         <PwaInstall className="mt-4 md:hidden" />
       </aside>

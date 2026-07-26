@@ -144,6 +144,7 @@ type ProgressState = {
   reviewCards: (results: { key: string; quality: number }[]) => void;
   noteTutorMessage: () => void;
   noteListen: () => void;
+  completeListening: (correct: number, total: number) => void;
   setGoal: (xp: number) => void;
   setStartLevel: (level: Cefr) => void;
   claimChallenge: (challenge: Challenge) => void;
@@ -264,6 +265,25 @@ export const useProgress = create<ProgressState>()(
           listens: s.listens + 1,
           days: addToday(s.days, { listens: 1 }).days,
         })),
+
+      /** Escucha activa: 5 XP por hueco acertado; cuenta como escuchas del día. */
+      completeListening: (correct, total) =>
+        set((s) => {
+          const gain = correct * 5;
+          const { days, today } = addToday(s.days, {
+            xp: gain,
+            correct,
+            listens: total,
+          });
+          const streak = bumpStreak(s, today.xp);
+          return {
+            xp: s.xp + gain,
+            listens: s.listens + total,
+            lastActiveDay: todayStr(),
+            days,
+            ...(streak ?? {}),
+          };
+        }),
 
       setGoal: (xp) => set({ goalXp: xp }),
 

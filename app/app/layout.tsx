@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { IconFeather } from "@tabler/icons-react";
 import { useAuth, watchAuth } from "@/lib/auth";
 import { useProgressSync } from "@/lib/sync";
@@ -19,7 +19,12 @@ const FOCUS_ROUTES = ["/app/leccion", "/app/repaso", "/app/test"];
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const focus = FOCUS_ROUTES.some((r) => pathname.startsWith(r));
+  const params = useSearchParams();
+  // La escucha sólo entra en foco cuando hay una pista en marcha (`?t=`);
+  // el listado de piezas sí lleva navegación.
+  const focus =
+    FOCUS_ROUTES.some((r) => pathname.startsWith(r)) ||
+    (pathname.startsWith("/app/escucha") && Boolean(params.get("t")));
   const uid = useAuth((s) => s.uid);
   const hydrated = useAuth((s) => s.hydrated);
 

@@ -15,10 +15,10 @@ Leyenda de prioridad: **P0** rompe o bloquea · **P1** siguiente entrega · **P2
 | M1 | Currículo + motor de lecciones (choose/bank/type, explicación en español) | ✅ operativo | `lib/curriculum/`, `components/lesson/` |
 | M2 | Repaso espaciado (SRS SM-2) | ✅ operativo | `lib/srs.ts`, `app/app/repaso` |
 | M3 | Progreso y gamificación (XP, gemas, racha, objetivo diario, retos, premios, niveles, logros) | ✅ v1 | `lib/progress.ts`, `lib/gamification.ts`, `app/app/retos` |
-| M4 | Tutor IA conversacional (Gemini free) | 🟡 básico (chat suelto) | `app/app/tutor`, `app/api/tutor` |
-| M5 | **Entrenador de conversación con corrección** (nuevo) | ⛔ por hacer | — |
-| M6 | **Música y podcasts con letra / transcripción** (nuevo, tipo LyricsTraining) | ⛔ por hacer | — |
-| M7 | Test de nivel inicial (colocación CEFR) | ⛔ por hacer | — |
+| M4 | Tutor IA conversacional (Gemini free) | ✅ chat libre | `app/app/tutor`, `app/api/tutor` |
+| M5 | **Entrenador de conversación con corrección** | ✅ v1 | `app/app/practica`, `app/api/coach`, `lib/coach.ts` |
+| M6 | Escucha activa con huecos (tipo LyricsTraining) | 🟡 v1 con piezas propias; falta fuente externa con licencia | `app/app/escucha`, `lib/listening.ts` |
+| M7 | Test de nivel inicial (colocación CEFR) | ✅ v1 | `app/app/test`, `lib/placement.ts` |
 | M8 | Pronunciación (grabar y comparar) | ⛔ idea | — |
 | M9 | **Lector de documentos propios con voz** (nuevo) | ⛔ por hacer | — |
 
@@ -74,19 +74,19 @@ Harness de capturas (dev): `shot.mjs` (Chrome headless por CDP) entra con usuari
 ## 4. Pendientes priorizados
 
 ### P0 — Calidad de lo que ya existe
-1. **Rediseño visual de la app logueada**: V1–V7 de la auditoría (en curso).
+1. ~~Rediseño visual de la app logueada (V1–V7)~~ ✅ hecho 2026-07-26.
 2. **Barrido de textos y espaciados** (V8): grep de strings hardcodeados, escala 4-8-12-16-24-32, 320px sin overflow.
 3. **Estados vacíos y de error** en repaso, retos y tutor (V9).
 
 ### P1 — Para que el ciclo de producto cierre
-4. **M7 · Test de nivel inicial**: 12–15 ítems adaptativos → coloca en A1/A2/B1 y abre la ruta desde ahí (hoy todos empiezan en A1 obligatoriamente).
-5. **M5 · Entrenador de conversación con corrección** (§5).
+4. ~~M7 · Test de nivel inicial~~ ✅ 12 ítems (4 por nivel), coloca en A1/A2/B1 y abre la ruta desde ahí.
+5. ~~M5 · Entrenador de conversación con corrección~~ ✅ escenarios + puerta de corrección con ejemplos en español.
 6. **M9 v1 · Lector de documentos con voz** (§7): subir TXT/PDF, leerlo, escuchar frase a frase y palabra a palabra.
 7. **Verificación de correo** (`sendEmailVerification`): hoy cualquiera se registra con un correo ajeno.
 8. **Recordatorio diario** de la racha (Web Push o recordatorio local de la PWA).
 
 ### P2 — Expansión
-9. **M6 · Música y podcasts con letra** (§6).
+9. **M6 v2 · fuente externa** (§6): reproductor de YouTube + transcripciones con licencia (la v1 ya funciona con piezas propias de Parlo).
 10. **M9 v2** (§7): EPUB/DOCX, **traducción en voz**, vocabulario del documento al SRS, búsqueda dentro del documento.
 11. **Contenido B2** (6 unidades) y más ejercicios por lección en A2/B1.
 12. **Arte propio** de las 3 insignias nuevas y poses extra de la mascota (las genera Andrés).
@@ -127,7 +127,7 @@ Riesgos: latencia de dos llamadas por turno (mitigación: una sola llamada que d
 - **Fuente del texto — restricción legal, decidir antes de implementar**: no vamos a alojar letras de canciones sin licencia. Opciones: (a) API de letras con licencia (Musixmatch/LyricFind, de pago → choca con «coste cero»); (b) **transcripciones/subtítulos** de vídeos que los publican y podcasts con transcripción abierta o propia (CC/dominio público); (c) contenido grabado por nosotros. **Recomendación: empezar por (b)** — encaja mejor con aprender inglés y es gratis; canciones solo cuando haya licencia.
 - **Datos**: colección `tracks` (título, fuente, nivel, duración, licencia) + `lines`; arrancar con un puñado curado en el repo antes de montar buscador.
 
-Fases: (1) reproductor + huecos con 3 piezas curadas; (2) buscador por nivel/tema; (3) puntuación y nivel de escucha; (4) canciones **si** hay licencia.
+**Estado**: la **v1 está hecha** en `/app/escucha` con **3 piezas originales de Parlo** (24 frases, A1/A2/B1) leídas con la voz del dispositivo, huecos deterministas en 4 dificultades, XP y métricas que alimentan los retos. Lo que falta es la **fuente externa**: reproductor de YouTube + transcripción con licencia. Fases restantes: (2) buscador por nivel/tema; (3) nivel de escucha estimado; (4) canciones **sólo** con licencia.
 
 ---
 
@@ -148,12 +148,16 @@ Fases: **v1** subir TXT/PDF + texto completo + reproducir palabra/frase + reprod
 
 Riesgos: calidad de voz desigual por dispositivo (mitigación: selector de voz + aviso); PDFs escaneados sin texto (mitigación: detectarlo y avisar — el OCR queda fuera del coste cero); documentos largos (mitigación: paginar por capítulos/bloques y no cargar todo en memoria).
 
-## 8. Bloqueado en Andrés
+## 8. Voz (TTS) — decisión pendiente
+Hoy la voz es **Web Speech** con selección automática de la mejor voz instalada y selector manual en el perfil (`lib/tts.ts` puntúa las voces: premium/neural arriba, las «novelty» de macOS al fondo). Eso arregla el «suena terrible» en equipos con voces buenas, pero **no lo garantiza en todos**.
+Siguiente paso recomendado (coste cero recurrente): **pregenerar el audio del currículo** (~270 ejercicios + vocabulario, unos 30k caracteres) con Google Cloud TTS Neural2/Chirp o Azure neural, servir MP3 estáticos y dejar Web Speech sólo para texto libre (M9 y escucha). Para texto imprevisible: cachear cada frase sintetizada en IndexedDB.
+
+## 9. Bloqueado en Andrés
 - Arte de las insignias nuevas y poses de la mascota (pensar/saludar/oops).
 - Decisión de licencia para M6 (§6) y si acepta empezar por podcasts/transcripciones.
 - Rotar la API key de Gemini (se pegó en texto plano en el chat).
 
-## 9. Cómo se verifica cada cambio
+## 10. Cómo se verifica cada cambio
 1. `node --experimental-strip-types lib/curriculum/data.check.ts` (y el check del módulo que se toque).
 2. `pnpm exec tsc --noEmit` + `pnpm lint` + `pnpm build`.
 3. Capturas reales en 390 y 1440, claro y oscuro, antes de declarar terminado.
