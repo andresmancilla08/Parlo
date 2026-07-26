@@ -15,13 +15,13 @@ Leyenda de prioridad: **P0** rompe o bloquea · **P1** siguiente entrega · **P2
 | M1 | Currículo + motor de lecciones (choose/bank/type, explicación en español) | ✅ operativo | `lib/curriculum/`, `components/lesson/` |
 | M2 | Repaso espaciado (SRS SM-2) | ✅ operativo | `lib/srs.ts`, `app/app/repaso` |
 | M3 | Progreso y gamificación (XP, gemas, racha, objetivo diario, retos, premios, niveles, logros) | ✅ v1 | `lib/progress.ts`, `lib/gamification.ts`, `app/app/retos` |
-| M4 | Tutor IA conversacional (Gemini free) | ✅ chat libre | `app/app/tutor`, `app/api/tutor` |
+| M4 | Tutor IA conversacional | 🔀 **unificado en M5** (Practicar → Charla libre); pantalla y endpoint retirados | — |
 | M5 | **Entrenador de conversación con corrección** | ✅ v1 | `app/app/practica`, `app/api/coach`, `lib/coach.ts` |
-| M6 | Escucha activa con huecos | ✅ v1 (piezas propias) | `app/app/escucha`, `lib/listening.ts` |
-| M6b | **Canciones reales** (vídeo de YouTube + letra) | ✅ v2 (dominio público + letras del usuario); pendiente fuente con licencia | `app/app/canciones`, `lib/songs.ts`, `components/song/` |
+| M6 | Escucha activa con huecos | ✅ v1 (piezas propias de Parlo) | `app/app/escucha`, `lib/listening.ts` |
+| M6b | Canciones con letra | ⛔ **RETIRADO 2026-07-26**: sin licencia no se pueden servir letras de catálogo actual a los usuarios, y el repertorio libre (Jamendo/dominio público) no convence. Queda entero en el historial de git |
 | M7 | Test de nivel inicial (colocación CEFR) | ✅ v1 | `app/app/test`, `lib/placement.ts` |
 | M8 | Pronunciación (grabar y comparar) | ⛔ idea | — |
-| M9 | **Lector de documentos propios con voz** (nuevo) | ⛔ por hacer | — |
+| M9 | **Lector de documentos propios con voz** | ✅ v1 **bidireccional** | `app/app/leer`, `lib/reader/*`, `app/api/translate` |
 
 ---
 
@@ -82,7 +82,7 @@ Harness de capturas (dev): `shot.mjs` (Chrome headless por CDP) entra con usuari
 ### P1 — Para que el ciclo de producto cierre
 4. ~~M7 · Test de nivel inicial~~ ✅ 12 ítems (4 por nivel), coloca en A1/A2/B1 y abre la ruta desde ahí.
 5. ~~M5 · Entrenador de conversación con corrección~~ ✅ escenarios + puerta de corrección con ejemplos en español.
-6. **M9 v1 · Lector de documentos con voz** (§7): subir TXT/PDF, leerlo, escuchar frase a frase y palabra a palabra.
+6. ~~M9 v1 · Lector de documentos con voz~~ ✅ hecho, y además **bidireccional** (§7).
 7. **Verificación de correo** (`sendEmailVerification`): hoy cualquiera se registra con un correo ajeno.
 8. **Recordatorio diario** de la racha (Web Push o recordatorio local de la PWA).
 
@@ -147,9 +147,18 @@ Riesgos: latencia de dos llamadas por turno (mitigación: una sola llamada que d
 - **Aprender leyendo**: tocar una palabra → significado + botón «añadir al repaso» (entra al SRS con la misma clave `vocab.en`); el tiempo de lectura suma XP y alimenta los retos.
 - **Aviso al usuario**: la traducción envía fragmentos del documento a Gemini (el resto es local). Debe decirse en la UI.
 
-Fases: **v1** subir TXT/PDF + texto completo + reproducir palabra/frase + reproducción continua con resaltado; **v2** EPUB/DOCX, traducción en voz cacheada, palabras al SRS, buscador interno.
+**Estado (hecho 2026-07-26)**: `/app/leer` funcionando. Subida de TXT/MD/CSV y **PDF** (pdf.js con carga diferida; detecta PDF escaneado y avisa). Documento en **IndexedDB del dispositivo** (`lib/reader/store.ts`), nunca sale del navegador. Segmentación con **`Intl.Segmenter`** (frases + palabras) e índice invertido para buscar dentro del texto. Altavoz por frase y **lectura continua** con resaltado y botón de parar. **Traducción por frase** con `gemini-flash-lite-latest` cacheada por documento en localStorage. **Clic en palabra** → traducción en contexto, explicación en español, ejemplo, y **«añadir al repaso»** (acción `addCard` del store). Guarda la última frase leída para retomar.
+**Bidireccional**: `lib/reader/detect.ts` detecta el idioma contando palabras funcionales (sin IA ni dependencias). Si el documento está en español, la voz habla español y la traducción/significados van **al inglés**; la cabecera muestra el idioma detectado. Checks: `lib/reader/segment.check.ts` y `lib/reader/detect.check.ts`.
+Pendiente v2: EPUB/DOCX y TTS de servidor cacheado.
 
 Riesgos: calidad de voz desigual por dispositivo (mitigación: selector de voz + aviso); PDFs escaneados sin texto (mitigación: detectarlo y avisar — el OCR queda fuera del coste cero); documentos largos (mitigación: paginar por capítulos/bloques y no cargar todo en memoria).
+
+## 7b. Navegación y sesión (2026-07-26)
+- **Menú**: `Ruta · Leer · Practicar · Retos · Perfil` (5 pestañas). El Tutor suelto se retiró: lo cubre Practicar → Charla libre, que además corrige antes de seguir.
+- **Lateral plegable** a solo iconos (`useSidebar`, preferencia recordada) con **tooltips propios** desde i18n; tema e idioma pasan a modo icono (`LangToggle` tiene prop `iconOnly`).
+- **Sesión**: con cookie de presencia, `/`, `/login` y `/registro` redirigen a `/app`; sin ella, `/app/*` va a `/login`. `app/not-found.tsx` (server) manda a `/app` o a la landing según haya sesión.
+- **Volver**: `BackButton` (admite `href` o `onClick`) en todas las subvistas: conversación, escucha y lector.
+- Barra móvil: el pill activo lleva `0.5rem` de aire abajo más el área segura.
 
 ## 8. Decisiones de IA y voz (verificado 2026-07-26)
 
