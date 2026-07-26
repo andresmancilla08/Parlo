@@ -1,9 +1,12 @@
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import { google } from "@ai-sdk/google";
+import { allow } from "@/lib/rate-limit";
 
 export const maxDuration = 30;
 
 const MAX_MESSAGES = 50;
+const MAX_CHARS = 12_000; // una conversación larga cabe de sobra
+const RATE = { store: new Map<string, number[]>(), limit: 15, windowMs: 60_000 };
 
 const INSTRUCTIONS = `Eres el tutor de inglés de Parlo. El usuario es hispanohablante y está aprendiendo inglés (asume nivel principiante A1–A2 salvo que demuestre más).
 
@@ -20,6 +23,16 @@ export async function POST(req: Request) {
     return Response.json({ error: "AI not configured" }, { status: 503 });
   }
 
+  // La cuota de Gemini es gratis pero finita: sin tope, un bucle del cliente
+  // (o alguien con curl) la agota para todos.
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
+  if (!allow(ip, Date.now(), RATE)) {
+    return Response.json(
+      { error: "Too many requests" },
+      { status: 429, headers: { "retry-after": "60" } },
+    );
+  }
+
   let body: { messages?: unknown };
   try {
     body = await req.json();
@@ -34,6 +47,10 @@ export async function POST(req: Request) {
     messages.length > MAX_MESSAGES
   ) {
     return Response.json({ error: "Invalid messages" }, { status: 400 });
+  }
+
+  if (JSON.stringify(messages).length > MAX_CHARS) {
+    return Response.json({ error: "Conversation too long" }, { status: 413 });
   }
 
   const result = streamText({
