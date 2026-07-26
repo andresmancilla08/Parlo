@@ -41,6 +41,12 @@ export function AuroraBackground({
         <Blob y={y2} className="right-[-15%] top-[10%] bg-accent/25" />
         <Blob y={y3} className="bottom-[-20%] left-[25%] bg-gem/20" size={520} />
       </div>
+      {/* El aurora se funde con el fondo: sin esta capa se ve un corte recto
+          justo donde termina la sección. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-bg"
+      />
       <div className="relative">{children}</div>
     </div>
   );
