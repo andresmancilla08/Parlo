@@ -77,7 +77,7 @@ function Hero() {
 
   return (
     <AuroraBackground className="relative overflow-hidden px-5 pb-14 pt-10 sm:pb-16 lg:pt-14">
-      <div className="mx-auto grid max-w-6xl items-center gap-6 lg:grid-cols-[1.05fr_0.95fr] lg:gap-6">
+      <div className="mx-auto grid max-w-6xl items-center gap-6 lg:grid-cols-[1.05fr_0.95fr]">
         {/* --- columna de texto: zona segura, ningún decorativo entra aquí --- */}
         <motion.div
           // Con reduced-motion el contenido aparece ya visible: nunca debe
@@ -86,7 +86,7 @@ function Hero() {
           animate="show"
           variants={stagger}
           style={{ y, opacity }}
-          className="relative z-20 order-2 lg:order-1"
+          className="relative z-20"
         >
           {/* scrim: garantiza contraste del texto sobre cualquier mancha del aurora */}
           <div
@@ -110,9 +110,21 @@ function Hero() {
             {t("landing.hero_post")}
           </motion.h1>
 
-          <motion.p variants={rise} className="mt-6 max-w-lg text-lg leading-relaxed text-muted">
-            {t("landing.hero_subtitle")}
-          </motion.p>
+          {/* En móvil/tablet la mascota acompaña al subtítulo: una banda propia
+              para ella empujaba el CTA fuera de pantalla y dejaba un hueco muerto. */}
+          <motion.div variants={rise} className="mt-6 flex items-center gap-3 sm:gap-6">
+            <p className="max-w-lg text-lg leading-relaxed text-muted">
+              {t("landing.hero_subtitle")}
+            </p>
+            <div className="relative shrink-0 lg:hidden">
+              <div className="absolute left-1/2 top-1/2 size-[110px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/20 blur-2xl sm:size-[135px]" />
+              <Mascot
+                height={200}
+                priority
+                imgClassName="h-[104px] w-auto drop-shadow-[0_14px_24px_rgba(0,0,0,0.3)] sm:h-[124px]"
+              />
+            </div>
+          </motion.div>
 
           <motion.div
             variants={rise}
@@ -151,7 +163,7 @@ function Stage() {
   return (
     <div
       aria-hidden
-      className="relative order-1 h-[190px] select-none sm:h-[240px] lg:order-2 lg:h-[440px]"
+      className="relative hidden select-none lg:block lg:h-[440px]"
     >
       {/* Los decorativos se posicionan contra ESTA caja, no contra la columna:
           si no, en tablet se dispersan hasta los bordes de la pantalla. */}
