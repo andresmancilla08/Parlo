@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { LangToggle } from "@/components/ui/lang-toggle";
+import { VoicePicker } from "@/components/ui/voice-picker";
 import { spring } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
@@ -148,6 +149,13 @@ export default function PerfilPage() {
             earned={hydrated && listens >= 20}
           />
         </div>
+      </div>
+
+      <div className="mt-8">
+        <p className="mb-2 text-sm font-semibold text-muted">
+          {t("perfil.voice_title")}
+        </p>
+        <VoicePicker />
       </div>
 
       <div className="mt-8">

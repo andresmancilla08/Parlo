@@ -190,7 +190,13 @@
     "logout": "Cerrar sesión",
     "badge_streak30": "Racha de 30 días",
     "badge_talk": "Primera conversación",
-    "badge_listen": "20 escuchas"
+    "badge_listen": "20 escuchas",
+    "voice_title": "Voz en inglés",
+    "voice_best": "recomendada",
+    "voice_test": "Probar la voz",
+    "voice_none": "Tu navegador no tiene voces en inglés instaladas.",
+    "voice_hint": "Solo hay voces básicas instaladas. En los ajustes del sistema puedes descargar una voz inglesa de mejor calidad.",
+    "voice_better": "Se oiría mejor con «{{name}}»"
   },
   "leccion": {
     "check": "Comprobar",

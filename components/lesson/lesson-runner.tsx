@@ -14,6 +14,7 @@ import {
 } from "@tabler/icons-react";
 import { optionsSpeakable, type Exercise } from "@/lib/curriculum";
 import { useProgress, type GradedItem, type LessonResult } from "@/lib/progress";
+import { speak } from "@/lib/tts";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { spring } from "@/lib/motion";
@@ -27,15 +28,6 @@ function normalize(s: string): string {
     .replace(/[^a-z0-9\s]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-}
-
-function speak(text: string) {
-  if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = "en-US";
-  u.rate = 0.95;
-  window.speechSynthesis.speak(u);
 }
 
 type Props = {
@@ -171,23 +163,10 @@ function ExerciseView({
 
   return (
     <div className="flex flex-1 flex-col pt-8">
-      <div className="flex items-start gap-2">
-        <h1 className="font-display text-2xl font-extrabold leading-tight tracking-tight">
-          {ex.prompt}
-        </h1>
-        {ex.kind === "choose" && ex.speak && (
-          <button
-            onClick={() => {
-              speak(ex.speak!);
-              noteListen();
-            }}
-            aria-label={t("a11y.listen")}
-            className="mt-1 grid size-9 shrink-0 place-items-center rounded-full bg-accent-soft text-accent"
-          >
-            <IconVolume className="size-5" />
-          </button>
-        )}
-      </div>
+      {/* El enunciado va en español: no lleva altavoz (lo llevan las opciones). */}
+      <h1 className="font-display text-2xl font-extrabold leading-tight tracking-tight">
+        {ex.prompt}
+      </h1>
 
       {/* el contenido se centra en el alto libre: antes quedaba media pantalla muerta */}
       <div className="mt-8 flex flex-1 flex-col justify-center pb-2">
