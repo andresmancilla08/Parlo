@@ -110,7 +110,7 @@ function Picker({
   onDifficulty: (d: Difficulty) => void;
   onPick: (s: Song) => void;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [adding, setAdding] = useState<{ open: boolean; preset?: string }>({ open: false });
   const remove = useUserSongs((s) => s.remove);
   const groups = suggestionsByLevel();
@@ -210,13 +210,24 @@ function Picker({
         {t("canciones.suggested")}
       </p>
       <p className="mb-3 text-xs font-semibold text-muted">{t("canciones.suggested_body")}</p>
-      {groups.map((g) => (
-        <div key={g.level} className="mt-3">
-          <p className="mb-1.5 font-display text-sm font-extrabold text-primary-ink">
-            {g.level} · {t(`home.level_${g.level.toLowerCase()}`, { defaultValue: g.level })}
-          </p>
+      {groups.map(({ section, songs: list }) => (
+        <div key={section.level} className="mt-5">
+          <div className="mb-2 flex items-baseline gap-2">
+            <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-primary text-primary-fg font-display text-xs font-extrabold">
+              {section.level}
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-display text-sm font-extrabold">
+                {i18n.language.startsWith("en") ? section.titleEn : section.titleEs}
+              </span>
+              <span className="block text-xs font-bold text-muted">
+                {i18n.language.startsWith("en") ? section.focusEn : section.focusEs}
+              </span>
+            </span>
+            <span className="shrink-0 text-xs font-bold text-muted">{list.length}</span>
+          </div>
           <div className="space-y-1.5">
-            {g.songs.map((sug) => (
+            {list.map((sug) => (
               <SuggestionRow
                 key={sug.id}
                 suggestion={sug}
