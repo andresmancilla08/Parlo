@@ -305,7 +305,9 @@
     "exit_lesson": "Salir de la lección",
     "listen": "Escuchar",
     "listen_option": "Escuchar «{{text}}»",
-    "toggle_level": "Mostrar u ocultar el nivel {{level}}"
+    "toggle_level": "Mostrar u ocultar el nivel {{level}}",
+    "collapse_menu": "Contraer el menú",
+    "expand_menu": "Expandir el menú"
   },
   "pwa": {
     "title": "Instala Parlo en tu móvil",

@@ -305,7 +305,9 @@
     "exit_lesson": "Exit lesson",
     "listen": "Listen",
     "listen_option": "Listen to “{{text}}”",
-    "toggle_level": "Show or hide level {{level}}"
+    "toggle_level": "Show or hide level {{level}}",
+    "collapse_menu": "Collapse the menu",
+    "expand_menu": "Expand the menu"
   },
   "pwa": {
     "title": "Install Parlo on your phone",
