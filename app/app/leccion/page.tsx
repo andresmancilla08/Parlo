@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 import { IconArrowLeft } from "@tabler/icons-react";
-import { getLesson } from "@/lib/curriculum";
+import { getLesson, localTitle } from "@/lib/curriculum";
 import { useProgress } from "@/lib/progress";
 import { LessonRunner } from "@/components/lesson/lesson-runner";
 
@@ -18,7 +18,7 @@ export default function LeccionPage() {
 }
 
 function LeccionInner() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const id = useSearchParams().get("id") ?? "";
   const lesson = getLesson(id);
   const completeLesson = useProgress((s) => s.completeLesson);
@@ -42,7 +42,7 @@ function LeccionInner() {
 
   return (
     <LessonRunner
-      title={lesson.titleEs}
+      title={localTitle(lesson, i18n.language)}
       exercises={lesson.exercises}
       onComplete={(r) => completeLesson(lesson.id, r)}
     />

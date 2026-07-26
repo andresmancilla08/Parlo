@@ -8,14 +8,14 @@ import { useTranslation } from "react-i18next";
 import { IconArrowRight } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { spring } from "@/lib/motion";
-import { allLessons, curriculum, unitOfLesson } from "@/lib/curriculum";
+import { allLessons, curriculum, localTitle, unitOfLesson } from "@/lib/curriculum";
 import { dueCardKeys, useProgress } from "@/lib/progress";
 import { useAuth } from "@/lib/auth";
 import { useHydrated } from "@/lib/use-hydrated";
 import mascotCelebrate from "@/public/brand/mascot-celebrate.png";
 
 export default function HomePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const hydrated = useHydrated();
   const [now] = useState(() => Date.now()); // cliente-only (el layout monta tras auth)
 
@@ -59,8 +59,8 @@ export default function HomePage() {
       {current && currentUnit ? (
         <FeaturePanel
           kicker={t("home.feature_kicker")}
-          title={current.titleEs}
-          subtitle={`${currentUnit.level} · ${currentUnit.titleEs}`}
+          title={localTitle(current, i18n.language)}
+          subtitle={`${currentUnit.level} · ${localTitle(currentUnit, i18n.language)}`}
           href={`/app/leccion?id=${current.id}`}
           cta={t("home.feature_continue")}
           progress={unitFraction(currentUnit.id, completed)}
@@ -232,7 +232,8 @@ function UnitRow({
   index: number;
   completed: Set<string>;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const title = localTitle(unit, i18n.language);
 
   const firstPendingUnitIdx = curriculum.findIndex((u) =>
     u.lessons.some((l) => !completed.has(l.id)),
@@ -271,9 +272,11 @@ function UnitRow({
             state === "locked" && "text-muted",
           )}
         >
-          {unit.titleEs}
+          {title}
         </h3>
-        <p className="text-sm font-bold text-muted">{status}</p>
+        <p className="text-sm font-bold text-muted">
+          {unit.level} · {status}
+        </p>
       </div>
       <Ring
         fraction={state === "done" ? 1 : fraction}
@@ -284,7 +287,7 @@ function UnitRow({
 
   if (!clickable) return row;
   return (
-    <Link href={`/app/leccion?id=${target.id}`} aria-label={unit.titleEs}>
+    <Link href={`/app/leccion?id=${target.id}`} aria-label={title}>
       <motion.div whileTap={{ scale: 0.99 }}>{row}</motion.div>
     </Link>
   );

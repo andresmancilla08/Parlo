@@ -46,6 +46,7 @@ type Props = {
 };
 
 export function LessonRunner({ title, exercises, onComplete, exitHref = "/app" }: Props) {
+  const { t } = useTranslation();
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [graded, setGraded] = useState<GradedItem[]>([]);
@@ -89,7 +90,7 @@ export function LessonRunner({ title, exercises, onComplete, exitHref = "/app" }
       <div className="flex items-center gap-3">
         <button
           onClick={() => router.push(exitHref)}
-          aria-label={title}
+          aria-label={t("a11y.exit_lesson")}
           className="grid size-9 shrink-0 place-items-center rounded-full text-muted transition-colors hover:bg-primary-soft"
         >
           <IconX className="size-5" />
@@ -106,6 +107,11 @@ export function LessonRunner({ title, exercises, onComplete, exitHref = "/app" }
           {step + 1}/{total}
         </span>
       </div>
+
+      {/* qué estás practicando (mismo kicker editorial que la home) */}
+      <p className="mt-3 pl-12 font-display text-[0.7rem] font-extrabold uppercase tracking-[0.14em] text-muted">
+        {title}
+      </p>
 
       <AnimatePresence mode="wait">
         <motion.div
@@ -171,7 +177,7 @@ function ExerciseView({
         {ex.kind === "choose" && ex.speak && (
           <button
             onClick={() => speak(ex.speak!)}
-            aria-label="Escuchar"
+            aria-label={t("a11y.listen")}
             className="mt-1 grid size-9 shrink-0 place-items-center rounded-full bg-accent-soft text-accent"
           >
             <IconVolume className="size-5" />

@@ -15,6 +15,17 @@ export function unitOfLesson(id: string): Unit | undefined {
   return curriculum.find((u) => u.lessons.some((l) => l.id === id));
 }
 
+/**
+ * Título en el idioma de la UI. El contenido es datos bilingües (no i18n de
+ * strings), así que se elige aquí y no en `locales/`.
+ */
+export function localTitle(
+  item: { titleEs: string; titleEn: string },
+  lang: string,
+): string {
+  return lang.startsWith("en") ? item.titleEn : item.titleEs;
+}
+
 export type NodeState = "done" | "current" | "locked";
 
 /**

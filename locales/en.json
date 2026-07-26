@@ -57,9 +57,18 @@
     "rewards_title": "Challenges and rewards that hook you",
     "rewards_subtitle": "Gamification in service of learning, not a replacement for it.",
     "rewards": {
-      "streak": { "title": "Streak", "body": "Day after day. Your streak protects the habit." },
-      "achievements": { "title": "Achievements", "body": "Milestones that celebrate real progress." },
-      "gems": { "title": "Gems", "body": "Earn gems and unlock themes and perks." }
+      "streak": {
+        "title": "Streak",
+        "body": "Day after day. Your streak protects the habit."
+      },
+      "achievements": {
+        "title": "Achievements",
+        "body": "Milestones that celebrate real progress."
+      },
+      "gems": {
+        "title": "Gems",
+        "body": "Earn gems and unlock themes and perks."
+      }
     },
     "cta_title": "Start today. Your future English begins with the first conversation.",
     "cta_subtitle": "Free to start. Install it as an app and practice 10 minutes a day.",
@@ -155,6 +164,8 @@
     "change_lang": "Change language",
     "home": "Home",
     "pin_group": "4-digit PIN",
-    "pin_digit": "Digit {{n}}"
+    "pin_digit": "Digit {{n}}",
+    "exit_lesson": "Exit lesson",
+    "listen": "Listen"
   }
 }

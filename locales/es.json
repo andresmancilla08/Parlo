@@ -57,9 +57,18 @@
     "rewards_title": "Retos y recompensas que enganchan",
     "rewards_subtitle": "La gamificación al servicio del aprendizaje, no para reemplazarlo.",
     "rewards": {
-      "streak": { "title": "Racha", "body": "Un día tras otro. La racha protege el hábito." },
-      "achievements": { "title": "Logros", "body": "Hitos que celebran tu progreso real." },
-      "gems": { "title": "Gemas", "body": "Gana gemas y desbloquea temas y ventajas." }
+      "streak": {
+        "title": "Racha",
+        "body": "Un día tras otro. La racha protege el hábito."
+      },
+      "achievements": {
+        "title": "Logros",
+        "body": "Hitos que celebran tu progreso real."
+      },
+      "gems": {
+        "title": "Gemas",
+        "body": "Gana gemas y desbloquea temas y ventajas."
+      }
     },
     "cta_title": "Empieza hoy. Tu inglés del futuro comienza con la primera conversación.",
     "cta_subtitle": "Gratis para arrancar. Instálalo como app y practica 10 minutos al día.",
@@ -155,6 +164,8 @@
     "change_lang": "Cambiar idioma",
     "home": "Inicio",
     "pin_group": "PIN de 4 dígitos",
-    "pin_digit": "Dígito {{n}}"
+    "pin_digit": "Dígito {{n}}",
+    "exit_lesson": "Salir de la lección",
+    "listen": "Escuchar"
   }
 }
