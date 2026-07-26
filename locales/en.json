@@ -162,7 +162,9 @@
     "rank_charlatan": "Chatterbox",
     "rank_elocuente": "Eloquent",
     "rank_maestro": "Master",
-    "badge_weekly": "Week"
+    "badge_weekly": "Week",
+    "nothing_yet": "You haven't practised today",
+    "nothing_yet_body": "Start today's lesson and the challenges take care of themselves"
   },
   "test": {
     "kicker": "Placement test",
@@ -278,8 +280,12 @@
   },
   "repaso": {
     "title": "Review",
-    "empty_title": "Nothing to review",
-    "empty_body": "Complete lessons and your spaced review will show up here when it's due."
+    "empty_title": "All caught up",
+    "empty_body": "Complete lessons and your spaced review will show up here when it's due.",
+    "none_title": "No reviews yet",
+    "none_body": "Reviews show up after your first lesson: they're the words you've already seen.",
+    "empty_next": "You're keeping {{count}} words. The next one is due in about {{n}} h.",
+    "cta_lesson": "Continue with “{{title}}”"
   },
   "theme": {
     "light": "Light",

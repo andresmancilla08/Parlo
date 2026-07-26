@@ -13,14 +13,15 @@ export function BottomNav() {
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-bg/90 backdrop-blur-md md:hidden">
-      <div className="mx-auto flex max-w-lg items-stretch justify-around px-4 pb-[env(safe-area-inset-bottom)] pt-2">
+      {/* px-1 y min-w-0: con 5 pestañas, en 320px el texto ensanchaba la app entera */}
+      <div className="mx-auto flex max-w-lg items-stretch justify-around px-1 pb-[env(safe-area-inset-bottom)] pt-2 sm:px-4">
         {navItems.map(({ href, labelKey, icon: Icon }) => {
           const active = href === "/app" ? pathname === "/app" : pathname.startsWith(href);
           return (
             <Link
               key={href}
               href={href}
-              className="relative flex flex-1 flex-col items-center gap-1 rounded-2xl py-2 text-xs font-semibold"
+              className="relative flex min-w-0 flex-1 flex-col items-center gap-1 rounded-2xl px-0.5 py-2 text-[0.7rem] font-semibold sm:text-xs"
             >
               {active && (
                 <motion.span
@@ -37,7 +38,7 @@ export function BottomNav() {
               />
               <span
                 className={cn(
-                  "relative transition-colors",
+                  "relative max-w-full truncate transition-colors",
                   active ? "text-primary" : "text-muted",
                 )}
               >

@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import {
+  IconArrowRight,
   IconBolt,
   IconBook,
   IconCheck,
@@ -150,6 +152,23 @@ export default function RetosPage() {
         </div>
         <Bar fraction={level.fraction} className="mt-3" />
       </Card>
+
+      {hydrated && done === 0 && (
+        <Link href="/app" className="mt-8 block active:scale-[0.99]">
+          <Card className="flex items-center gap-3 border-primary/40 p-4">
+            <IconBolt className="size-5 shrink-0 text-primary" />
+            <span className="min-w-0 flex-1">
+              <span className="block font-display text-sm font-extrabold">
+                {t("retos.nothing_yet")}
+              </span>
+              <span className="block text-xs font-bold text-muted">
+                {t("retos.nothing_yet_body")}
+              </span>
+            </span>
+            <IconArrowRight className="size-4 shrink-0 text-muted" />
+          </Card>
+        </Link>
+      )}
 
       <Section title={t("retos.daily")}>
         {challenges

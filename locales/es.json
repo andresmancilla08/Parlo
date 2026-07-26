@@ -162,7 +162,9 @@
     "rank_charlatan": "Charlatán",
     "rank_elocuente": "Elocuente",
     "rank_maestro": "Maestro",
-    "badge_weekly": "Semana"
+    "badge_weekly": "Semana",
+    "nothing_yet": "Hoy todavía no has practicado",
+    "nothing_yet_body": "Empieza por la lección de hoy y los retos se van solos"
   },
   "test": {
     "kicker": "Test de nivel",
@@ -278,8 +280,12 @@
   },
   "repaso": {
     "title": "Repaso",
-    "empty_title": "Nada que repasar",
-    "empty_body": "Completa lecciones y tu repaso espaciado aparecerá aquí cuando toque."
+    "empty_title": "Todo repasado",
+    "empty_body": "Completa lecciones y tu repaso espaciado aparecerá aquí cuando toque.",
+    "none_title": "Aún no hay repaso",
+    "none_body": "El repaso aparece cuando terminas tu primera lección: son las palabras que ya has visto.",
+    "empty_next": "Guardas {{count}} palabras. La próxima toca en unas {{n}} h.",
+    "cta_lesson": "Seguir con «{{title}}»"
   },
   "theme": {
     "light": "Claro",

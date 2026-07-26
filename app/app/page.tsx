@@ -74,10 +74,10 @@ export default function HomePage() {
         animate={{ opacity: 1, y: 0 }}
         transition={spring}
       >
-        <p className="font-display text-xs font-extrabold uppercase tracking-[0.13em] text-primary-ink">
+        <p className="truncate font-display text-xs font-extrabold uppercase tracking-[0.13em] text-primary-ink">
           {greet}
         </p>
-        <h1 className="mt-2 font-display text-[2.6rem] font-extrabold leading-[0.98] tracking-tight sm:text-6xl">
+        <h1 className="mt-2 font-display text-[2.1rem] font-extrabold leading-[0.98] tracking-tight min-[380px]:text-[2.6rem] sm:text-6xl">
           {t("home.hero_line1")}
           <br />
           <span className="text-muted">{t("home.hero_line2")}</span>

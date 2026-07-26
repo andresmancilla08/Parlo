@@ -74,8 +74,8 @@ export default function PerfilPage() {
         <span className="grid size-20 place-items-center rounded-full bg-primary font-display text-3xl font-extrabold uppercase text-primary-fg shadow-lg shadow-primary/25">
           {name.charAt(0) || "P"}
         </span>
-        <h1 className="mt-4 font-display text-xl font-extrabold">{name}</h1>
-        <p className="text-sm text-muted">{email}</p>
+        <h1 className="mt-4 max-w-full truncate font-display text-xl font-extrabold">{name}</h1>
+        <p className="max-w-full truncate text-sm text-muted">{email}</p>
         <span className="mt-3 rounded-pill bg-accent-soft px-3 py-1 text-sm font-bold text-accent-ink">
           {t("perfil.level", { level })}
         </span>

@@ -45,10 +45,13 @@ export default function TutorPage() {
         </div>
       </header>
 
-      <div className="flex-1 space-y-3">
-        {messages.length === 0 && (
-          <EmptyState onPick={send} />
+      <div
+        className={cn(
+          "flex-1 space-y-3",
+          messages.length === 0 && "flex flex-col justify-center",
         )}
+      >
+        {messages.length === 0 && <EmptyState onPick={send} />}
 
         {messages.map((m) => (
           <Bubble key={m.id} role={m.role}>
