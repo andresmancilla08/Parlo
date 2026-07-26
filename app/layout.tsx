@@ -76,6 +76,13 @@ export default function RootLayout({
             __html: `try{var s=localStorage.getItem('parlo-theme');var t=s?JSON.parse(s).state.theme:'system';var d=t==='dark'||((t==='system'||!t)&&matchMedia('(prefers-color-scheme:dark)').matches);document.documentElement.classList.toggle('dark',d);}catch(e){}`,
           }}
         />
+        {/* El evento de instalación llega antes de que React monte: se guarda
+            para poder ofrecer el diálogo nativo después (patrón de Spendia). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.__pwaPrompt=null;addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__pwaPrompt=e;});`,
+          }}
+        />
         <RegisterPWA />
         <ThemeProvider />
         <I18nProvider>{children}</I18nProvider>

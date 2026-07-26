@@ -180,5 +180,14 @@
     "pin_digit": "Digit {{n}}",
     "exit_lesson": "Exit lesson",
     "listen": "Listen"
+  },
+  "pwa": {
+    "title": "Install Parlo on your phone",
+    "subtitle": "Opens like an app, works offline and takes almost no space.",
+    "cta": "Install",
+    "dismiss": "Close",
+    "step1": "Tap Safari's Share button",
+    "step2": "Choose “Add to Home Screen”",
+    "step3": "Confirm with “Add”"
   }
 }

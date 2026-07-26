@@ -20,6 +20,7 @@ import { Logo } from "@/components/ui/logo";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Mascot } from "@/components/ui/mascot";
+import { PwaInstall } from "@/components/ui/pwa-install";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { LangToggle } from "@/components/ui/lang-toggle";
 import { cn } from "@/lib/utils";
@@ -33,6 +34,9 @@ export default function Home() {
     <main className="min-h-dvh">
       <Nav />
       <Hero />
+      <div className="mx-auto w-full max-w-6xl px-5">
+        <PwaInstall className="lg:hidden" />
+      </div>
       <Method />
       <Levels />
       <Rewards />
@@ -49,7 +53,9 @@ function Wordmark() {
 function Nav() {
   const { t } = useTranslation();
   return (
-    <header className="sticky top-0 z-40 border-b border-border/60 bg-bg/80 backdrop-blur-md">
+    // pt con safe-area: en iOS (viewport-fit=cover) el contenido se cuela por
+      // encima de la barra si esta no cubre la zona del notch.
+      <header className="sticky top-0 z-40 border-b border-border/60 bg-bg/80 pt-[env(safe-area-inset-top)] backdrop-blur-md">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5">
         <Wordmark />
         <div className="flex items-center gap-2">

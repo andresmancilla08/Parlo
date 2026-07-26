@@ -32,7 +32,7 @@ export function AppBar() {
   const streak = useProgress((s) => s.streak);
   const gems = useProgress((s) => s.gems);
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-border bg-bg/80 px-5 py-3 backdrop-blur-md">
+    <header className="sticky top-0 z-30 flex items-center justify-between gap-3 border-b border-border bg-bg/80 px-5 py-3 pt-[calc(0.75rem+env(safe-area-inset-top))] backdrop-blur-md">
       <Link href="/app" className="md:hidden" aria-label={t("a11y.home")}>
         <Logo height={26} />
       </Link>

@@ -12,6 +12,7 @@ import { allLessons, curriculum, localTitle, unitOfLesson } from "@/lib/curricul
 import { dueCardKeys, useProgress } from "@/lib/progress";
 import { useAuth } from "@/lib/auth";
 import { useHydrated } from "@/lib/use-hydrated";
+import { PwaInstall } from "@/components/ui/pwa-install";
 import mascotCelebrate from "@/public/brand/mascot-celebrate.png";
 
 export default function HomePage() {
@@ -83,6 +84,8 @@ export default function HomePage() {
         due={dueCount}
         gems={hydrated ? gems : 0}
       />
+
+      <PwaInstall className="mt-6 md:hidden" />
 
       {/* ruta editorial (lista numerada) */}
       <p className="mt-8 mb-1 font-display text-xs font-extrabold uppercase tracking-[0.14em] text-muted">
