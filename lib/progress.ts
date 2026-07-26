@@ -47,10 +47,14 @@ type ProgressState = {
   completed: string[]; // ids de lecciones
   stars: Record<string, number>; // 1..3 por lección
   cards: Record<string, SrsCard>; // SRS, clave = vocab.en
+  tutorMessages: number; // mensajes enviados al tutor (logro «primera conversación»)
+  listens: number; // veces que se ha escuchado la pronunciación (logro «oído fino»)
   hydrated: boolean;
 
   completeLesson: (lessonId: string, result: LessonResult) => void;
   reviewCards: (results: { key: string; quality: number }[]) => void;
+  noteTutorMessage: () => void;
+  noteListen: () => void;
   reset: () => void;
   setHydrated: () => void;
 };
@@ -65,6 +69,8 @@ export const useProgress = create<ProgressState>()(
       completed: [],
       stars: {},
       cards: {},
+      tutorMessages: 0,
+      listens: 0,
       hydrated: false,
 
       completeLesson: (lessonId, { correct, total }) =>
@@ -116,8 +122,22 @@ export const useProgress = create<ProgressState>()(
           return { cards, xp: s.xp + hits * 5 };
         }),
 
+      noteTutorMessage: () => set((s) => ({ tutorMessages: s.tutorMessages + 1 })),
+
+      noteListen: () => set((s) => ({ listens: s.listens + 1 })),
+
       reset: () =>
-        set({ xp: 0, gems: 0, streak: 0, lastActiveDay: null, completed: [], stars: {}, cards: {} }),
+        set({
+          xp: 0,
+          gems: 0,
+          streak: 0,
+          lastActiveDay: null,
+          completed: [],
+          stars: {},
+          cards: {},
+          tutorMessages: 0,
+          listens: 0,
+        }),
 
       setHydrated: () => set({ hydrated: true }),
     }),
@@ -132,6 +152,8 @@ export const useProgress = create<ProgressState>()(
         completed: s.completed,
         stars: s.stars,
         cards: s.cards,
+        tutorMessages: s.tutorMessages,
+        listens: s.listens,
       }),
       onRehydrateStorage: () => (state) => state?.setHydrated(),
     },

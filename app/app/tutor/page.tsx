@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import { IconFeather, IconSend2 } from "@tabler/icons-react";
 import { Mascot } from "@/components/ui/mascot";
+import { useProgress } from "@/lib/progress";
 import { cn } from "@/lib/utils";
 
 export default function TutorPage() {
@@ -14,6 +15,7 @@ export default function TutorPage() {
   const { messages, sendMessage, status, error, regenerate } = useChat({
     transport: new DefaultChatTransport({ api: "/api/tutor" }),
   });
+  const noteTutorMessage = useProgress((s) => s.noteTutorMessage);
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const busy = status === "submitted" || status === "streaming";
@@ -25,6 +27,7 @@ export default function TutorPage() {
   const send = (text: string) => {
     if (!text.trim() || busy) return;
     sendMessage({ text });
+    noteTutorMessage();
     setInput("");
   };
 

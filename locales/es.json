@@ -123,7 +123,7 @@
     ]
   },
   "perfil": {
-    "level": "Nivel A1 · Principiante",
+    "level": "Nivel {{level}}",
     "streak": "Racha",
     "gems": "Gemas",
     "achievements": "Logros",
@@ -132,7 +132,10 @@
     "badge_streak": "Racha de 3 días",
     "badge_words": "10 palabras",
     "appearance": "Apariencia",
-    "logout": "Cerrar sesión"
+    "logout": "Cerrar sesión",
+    "badge_streak30": "Racha de 30 días",
+    "badge_talk": "Primera conversación",
+    "badge_listen": "20 escuchas"
   },
   "leccion": {
     "check": "Comprobar",

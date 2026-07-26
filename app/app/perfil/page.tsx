@@ -8,15 +8,18 @@ import badgeLevel from "@/public/brand/badge-level.png";
 import badgeStreak from "@/public/brand/badge-streak.png";
 import badgeWords from "@/public/brand/badge-words.png";
 import {
+  IconCalendarStar,
+  IconEar,
   IconFlame,
   IconLogout,
+  IconMessages,
   IconSparkles,
   IconTrophy,
 } from "@tabler/icons-react";
 import { useAuth } from "@/lib/auth";
 import { useProgress } from "@/lib/progress";
 import { useHydrated } from "@/lib/use-hydrated";
-import { learnedVocab } from "@/lib/curriculum";
+import { allLessons, learnedVocab, unitOfLesson } from "@/lib/curriculum";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
@@ -33,8 +36,15 @@ export default function PerfilPage() {
   const streak = useProgress((s) => s.streak);
   const gems = useProgress((s) => s.gems);
   const completed = useProgress((s) => s.completed);
+  const tutorMessages = useProgress((s) => s.tutorMessages);
+  const listens = useProgress((s) => s.listens);
 
   const name = email?.split("@")[0] ?? "";
+
+  // Nivel actual = el de la unidad en curso (ya no es un texto fijo A1).
+  const done = new Set(completed);
+  const nextLesson = allLessons.find((l) => !done.has(l.id)) ?? allLessons[allLessons.length - 1];
+  const level = unitOfLesson(nextLesson.id)?.level ?? "A1";
 
   return (
     <div className="mx-auto w-full max-w-2xl px-5 pt-8">
@@ -50,7 +60,7 @@ export default function PerfilPage() {
         <h1 className="mt-4 font-display text-xl font-extrabold">{name}</h1>
         <p className="text-sm text-muted">{email}</p>
         <span className="mt-3 rounded-pill bg-accent-soft px-3 py-1 text-sm font-bold text-accent-ink">
-          {t("perfil.level")}
+          {t("perfil.level", { level })}
         </span>
       </motion.div>
 
@@ -79,6 +89,21 @@ export default function PerfilPage() {
             src={badgeWords}
             title={t("perfil.badge_words")}
             earned={hydrated && learnedVocab(new Set(completed)).length >= 10}
+          />
+          <BadgeTile
+            icon={IconCalendarStar}
+            title={t("perfil.badge_streak30")}
+            earned={hydrated && streak >= 30}
+          />
+          <BadgeTile
+            icon={IconMessages}
+            title={t("perfil.badge_talk")}
+            earned={hydrated && tutorMessages >= 1}
+          />
+          <BadgeTile
+            icon={IconEar}
+            title={t("perfil.badge_listen")}
+            earned={hydrated && listens >= 20}
           />
         </div>
       </div>
@@ -129,25 +154,49 @@ function StatCard({
   );
 }
 
+/** Logro: con arte propio (`src`) o con medalla de icono (`icon`). */
 function BadgeTile({
   src,
+  icon: Icon,
   title,
   earned,
 }: {
-  src: StaticImageData;
+  src?: StaticImageData;
+  icon?: typeof IconFlame;
   title: string;
   earned: boolean;
 }) {
   return (
-    <Card className={cn("flex flex-col items-center gap-2 p-4 text-center", !earned && "opacity-90")}>
-      <Image
-        src={src}
-        alt=""
-        height={72}
-        width={Math.round((72 * src.width) / src.height)}
-        className={cn("transition", !earned && "opacity-25 grayscale")}
-      />
-      <p className="text-xs font-bold leading-tight">{title}</p>
+    // p-3 y 56px en móvil: con 72px + p-4 las 3 columnas no caben en 360px.
+    <Card
+      className={cn(
+        "flex min-w-0 flex-col items-center gap-2 p-3 text-center sm:p-4",
+        !earned && "opacity-90",
+      )}
+    >
+      {src ? (
+        <Image
+          src={src}
+          alt=""
+          height={72}
+          width={Math.round((72 * src.width) / src.height)}
+          className={cn("h-14 w-auto transition sm:h-[72px]", !earned && "opacity-25 grayscale")}
+        />
+      ) : Icon ? (
+        // Moneda: aro dorado + centro coral, para que hable el mismo idioma
+        // que las medallas ilustradas de al lado.
+        <span
+          className={cn(
+            "grid size-14 place-items-center rounded-full bg-gem p-[5px] shadow-md shadow-gem/30 transition sm:size-[72px]",
+            !earned && "opacity-25 grayscale",
+          )}
+        >
+          <span className="grid size-full place-items-center rounded-full bg-primary text-white shadow-inner">
+            <Icon className="size-7 sm:size-8" stroke={2.2} />
+          </span>
+        </span>
+      ) : null}
+      <p className="hyphens-auto text-[0.7rem] font-bold leading-tight sm:text-xs">{title}</p>
     </Card>
   );
 }

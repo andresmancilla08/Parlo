@@ -13,7 +13,7 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import type { Exercise } from "@/lib/curriculum";
-import type { GradedItem, LessonResult } from "@/lib/progress";
+import { useProgress, type GradedItem, type LessonResult } from "@/lib/progress";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { spring } from "@/lib/motion";
@@ -141,6 +141,7 @@ function ExerciseView({
   onNext: () => void;
 }) {
   const { t } = useTranslation();
+  const noteListen = useProgress((s) => s.noteListen);
   const [checked, setChecked] = useState(false);
   const [ok, setOk] = useState(false);
 
@@ -176,7 +177,10 @@ function ExerciseView({
         </h1>
         {ex.kind === "choose" && ex.speak && (
           <button
-            onClick={() => speak(ex.speak!)}
+            onClick={() => {
+              speak(ex.speak!);
+              noteListen();
+            }}
             aria-label={t("a11y.listen")}
             className="mt-1 grid size-9 shrink-0 place-items-center rounded-full bg-accent-soft text-accent"
           >
