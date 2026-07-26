@@ -17,7 +17,8 @@ Leyenda de prioridad: **P0** rompe o bloquea · **P1** siguiente entrega · **P2
 | M3 | Progreso y gamificación (XP, gemas, racha, objetivo diario, retos, premios, niveles, logros) | ✅ v1 | `lib/progress.ts`, `lib/gamification.ts`, `app/app/retos` |
 | M4 | Tutor IA conversacional (Gemini free) | ✅ chat libre | `app/app/tutor`, `app/api/tutor` |
 | M5 | **Entrenador de conversación con corrección** | ✅ v1 | `app/app/practica`, `app/api/coach`, `lib/coach.ts` |
-| M6 | Escucha activa con huecos (tipo LyricsTraining) | 🟡 v1 con piezas propias; falta fuente externa con licencia | `app/app/escucha`, `lib/listening.ts` |
+| M6 | Escucha activa con huecos | ✅ v1 (piezas propias) | `app/app/escucha`, `lib/listening.ts` |
+| M6b | **Canciones reales** (vídeo de YouTube + letra) | ✅ v2 (dominio público + letras del usuario); pendiente fuente con licencia | `app/app/canciones`, `lib/songs.ts`, `components/song/` |
 | M7 | Test de nivel inicial (colocación CEFR) | ✅ v1 | `app/app/test`, `lib/placement.ts` |
 | M8 | Pronunciación (grabar y comparar) | ⛔ idea | — |
 | M9 | **Lector de documentos propios con voz** (nuevo) | ⛔ por hacer | — |
@@ -86,7 +87,7 @@ Harness de capturas (dev): `shot.mjs` (Chrome headless por CDP) entra con usuari
 8. **Recordatorio diario** de la racha (Web Push o recordatorio local de la PWA).
 
 ### P2 — Expansión
-9. **M6 v2 · fuente externa** (§6): reproductor de YouTube + transcripciones con licencia (la v1 ya funciona con piezas propias de Parlo).
+9. **M6b · fuente de letras con licencia** (§6): integrar **Musixmatch API** (plan gratis = ~30% de la letra + atribución) para no depender de que el usuario pegue la letra. Necesita que Andrés cree su key gratuita. Letras completas de catálogo actual = licencia de pago.
 10. **M9 v2** (§7): EPUB/DOCX, **traducción en voz**, vocabulario del documento al SRS, búsqueda dentro del documento.
 11. **Contenido B2** (6 unidades) y más ejercicios por lección en A2/B1.
 12. **Arte propio** de las 3 insignias nuevas y poses extra de la mascota (las genera Andrés).
@@ -127,7 +128,9 @@ Riesgos: latencia de dos llamadas por turno (mitigación: una sola llamada que d
 - **Fuente del texto — restricción legal, decidir antes de implementar**: no vamos a alojar letras de canciones sin licencia. Opciones: (a) API de letras con licencia (Musixmatch/LyricFind, de pago → choca con «coste cero»); (b) **transcripciones/subtítulos** de vídeos que los publican y podcasts con transcripción abierta o propia (CC/dominio público); (c) contenido grabado por nosotros. **Recomendación: empezar por (b)** — encaja mejor con aprender inglés y es gratis; canciones solo cuando haya licencia.
 - **Datos**: colección `tracks` (título, fuente, nivel, duración, licencia) + `lines`; arrancar con un puñado curado en el repo antes de montar buscador.
 
-**Estado**: la **v1 está hecha** en `/app/escucha` con **3 piezas originales de Parlo** (24 frases, A1/A2/B1) leídas con la voz del dispositivo, huecos deterministas en 4 dificultades, XP y métricas que alimentan los retos. Lo que falta es la **fuente externa**: reproductor de YouTube + transcripción con licencia. Fases restantes: (2) buscador por nivel/tema; (3) nivel de escucha estimado; (4) canciones **sólo** con licencia.
+**Estado v2 (hecho 2026-07-26)**: `/app/canciones` reproduce **canciones reales** con el embed oficial de YouTube y pausa el vídeo en cada línea para completar los huecos (4 dificultades, XP y métricas compartidas con la escucha). Tres fuentes de letra: (a) catálogo de **dominio público** incluido con atribución, al que el usuario asigna el vídeo que quiera; (b) **su propia letra pegada**, guardada sólo en su dispositivo (`parlo-user-songs`, nunca al repo ni a Firestore); (c) pendiente: fuente con licencia (Musixmatch).
+
+**Estado v1**: hecha en `/app/escucha` con **3 piezas originales de Parlo** (24 frases, A1/A2/B1) leídas con la voz del dispositivo, huecos deterministas en 4 dificultades, XP y métricas que alimentan los retos. Lo que falta es la **fuente externa**: reproductor de YouTube + transcripción con licencia. Fases restantes: (2) buscador por nivel/tema; (3) nivel de escucha estimado; (4) canciones **sólo** con licencia.
 
 ---
 
