@@ -62,8 +62,8 @@ Hecha mirando capturas reales de la app logueada (móvil 390 y desktop 1440, cla
 | V5 | 🟠 | /app/retos | Panel apretado, titular en 2 líneas; diario y semanal indistinguibles; cobrar sin celebración | Jerarquía por periodo + microcelebración al cobrar |
 | V6 | 🟠 | /app/tutor | Botón enviar deshabilitado en rojo apagado (parece error); hueco enorme entre starters e input | Estado deshabilitado neutro; repartir el alto |
 | V7 | 🟠 | /app/perfil | «Logros» muestra el nº de lecciones (etiqueta engañosa) | Contar insignias ganadas o corregir la etiqueta |
-| V8 | 🟡 | global | Revisión de espaciados/tamaños contra la escala y textos huérfanos (nada hardcodeado) | Barrido con grep + capturas 320/390/768/1440 |
-| V9 | 🟡 | /app/repaso | Sin estado vacío real cuando no hay cartas vencidas | Estado vacío con mascota + siguiente acción |
+| V8 | ✅ | global | Desborde horizontal real a 320px (medido, no a ojo) | `truncate` (whitespace-nowrap) en títulos subía el ancho MÍNIMO y estiraba la página → `line-clamp`; `<select>` con `w-0 flex-1`; nav de 5 pestañas y AppBar que encogen; densidad escalonada en 320 |
+| V9 | ✅ | /app/repaso · /app/retos | Sin estado vacío útil | Repaso: mascota + «vuelve en N h» + CTA a la lección real; Retos: aviso «hoy no has practicado» con CTA |
 
 Reglas de verificación: capturas reales (no supuestos) en 320/390/768/1440, claro y oscuro, es y en; contraste ≥4.5:1 medido; touch ≥44px; `prefers-reduced-motion`; cero strings hardcodeados.
 
@@ -73,10 +73,10 @@ Harness de capturas (dev): `shot.mjs` (Chrome headless por CDP) entra con usuari
 
 ## 4. Pendientes priorizados
 
-### P0 — Calidad de lo que ya existe
-1. ~~Rediseño visual de la app logueada (V1–V7)~~ ✅ hecho 2026-07-26.
-2. **Barrido de textos y espaciados** (V8): grep de strings hardcodeados, escala 4-8-12-16-24-32, 320px sin overflow.
-3. **Estados vacíos y de error** en repaso, retos y tutor (V9).
+### P0 — ✅ CERRADO (2026-07-26)
+1. ~~Rediseño visual de la app logueada (V1–V7)~~ ✅
+2. ~~Barrido de textos y espaciados (V8)~~ ✅ **cero desborde medido en 320/390/768** en las 8 pantallas; cero strings hardcodeados.
+3. ~~Estados vacíos y de error (V9)~~ ✅ repaso y retos con estado vacío que propone la siguiente acción; tutor ya tenía error con reintento.
 
 ### P1 — Para que el ciclo de producto cierre
 4. ~~M7 · Test de nivel inicial~~ ✅ 12 ítems (4 por nivel), coloca en A1/A2/B1 y abre la ruta desde ahí.
@@ -160,5 +160,9 @@ Siguiente paso recomendado (coste cero recurrente): **pregenerar el audio del cu
 ## 10. Cómo se verifica cada cambio
 1. `node --experimental-strip-types lib/curriculum/data.check.ts` (y el check del módulo que se toque).
 2. `pnpm exec tsc --noEmit` + `pnpm lint` + `pnpm build`.
-3. Capturas reales en 390 y 1440, claro y oscuro, antes de declarar terminado.
+3. Capturas reales en 320, 390 y 1440, claro y oscuro, antes de declarar terminado.
+   OJO con el harness: `window.innerWidth` MIENTE bajo emulación de móvil (crece con el
+   contenido desbordado). Hay que medir contra `document.documentElement.clientWidth`, y
+   capturar SIN `--full` para ver el recorte real (con `--full` el clip usa el scrollWidth
+   y el desborde queda oculto).
 4. Paridad de claves i18n es/en y cero strings hardcodeados.
