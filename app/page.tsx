@@ -110,21 +110,33 @@ function Hero() {
             {t("landing.hero_post")}
           </motion.h1>
 
-          {/* En móvil/tablet la mascota acompaña al subtítulo: una banda propia
-              para ella empujaba el CTA fuera de pantalla y dejaba un hueco muerto. */}
-          <motion.div variants={rise} className="mt-6 flex items-center gap-3 sm:gap-6">
-            <p className="max-w-lg text-lg leading-relaxed text-muted">
+          {/* Móvil (<sm): la mascota va en línea con el subtítulo, pequeña, porque
+              no hay ancho libre. Tablet (sm–lg): grande y anclada a la derecha. */}
+          <motion.div variants={rise} className="mt-6 flex items-center gap-3">
+            <p className="max-w-lg text-lg leading-relaxed text-muted sm:max-w-sm lg:max-w-lg">
               {t("landing.hero_subtitle")}
             </p>
-            <div className="relative shrink-0 lg:hidden">
-              <div className="absolute left-1/2 top-1/2 size-[110px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/20 blur-2xl sm:size-[135px]" />
+            <div className="relative shrink-0 sm:hidden">
+              <div className="absolute left-1/2 top-1/2 size-[110px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/20 blur-2xl" />
               <Mascot
                 height={200}
                 priority
-                imgClassName="h-[104px] w-auto drop-shadow-[0_14px_24px_rgba(0,0,0,0.3)] sm:h-[124px]"
+                imgClassName="h-[104px] w-auto drop-shadow-[0_14px_24px_rgba(0,0,0,0.3)]"
               />
             </div>
           </motion.div>
+
+          {/* Tablet: personaje grande a la derecha, alineado con el bloque de texto. */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -bottom-2 right-0 hidden select-none sm:block lg:hidden"
+          >
+            <div className="absolute left-1/2 top-1/2 size-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/20 blur-3xl" />
+            <Mascot
+              height={300}
+              imgClassName="relative h-[270px] w-auto drop-shadow-[0_24px_40px_rgba(0,0,0,0.35)]"
+            />
+          </div>
 
           <motion.div
             variants={rise}
