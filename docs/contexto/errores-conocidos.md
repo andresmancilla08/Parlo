@@ -35,3 +35,16 @@
 
 ## Check de `lib/srs.ts`
 - **Cómo correr:** `node --experimental-strip-types lib/srs.check.ts`. Los `*.check.ts` están excluidos del tsconfig (usan import con extensión `.ts` que Node exige pero tsc rechaza). No romper esa exclusión.
+
+## `ImageResponse` (OG image) falla el build con "Expected <div> to have explicit display: flex"
+- **Síntoma:** `Error occurred prerendering page "/opengraph-image"` al construir.
+- **Causa real:** satori (el motor de `next/og`) exige `display: flex` explícito en cualquier `div` con más de un hijo, y soporta un CSS reducido.
+- **Solución:** poner `display: "flex"` en esos contenedores. Evitar radiales grandes: dejan una costura visible en el borde de la caja (se usa un `linear-gradient` de fondo).
+
+## Chrome headless no baja de 500px de viewport
+- **Síntoma:** al validar UI con `--window-size=360,…` la captura parece desbordada (columnas cortadas).
+- **Causa real:** el viewport real se queda en 500px; la captura solo recorta la imagen. `innerWidth` lo confirma (`--dump-dom` con un script que escriba el ancho en el `title`).
+- **Solución:** simular el ancho con un contenedor fijo (`<div style="width:360px">`) dentro de un viewport de 500px. Los breakpoints `sm:` (640px) siguen sin aplicar, así que el resultado es válido.
+
+## Check del currículo
+- **Cómo correr:** `node --experimental-strip-types lib/curriculum/data.check.ts`. Valida ids únicos, que la respuesta de `choose` esté entre las opciones y que la de `bank` se pueda formar con las fichas. Correr SIEMPRE tras tocar `lib/curriculum/data.ts`.

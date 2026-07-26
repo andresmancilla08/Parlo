@@ -59,3 +59,20 @@
 - **Por qué:** auditoría de contraste (hex→ratio) encontró pares <4.5 (blanco sobre coral 2.8, mint sobre mint-soft 1.9, etc.). Regla dura: todo texto ≥4.5:1.
 - **Cómo:** usar `text-*-ink` para TEXTO sobre fondos "soft"/tint; el color base (`text-accent`, etc.) queda para íconos/gráficos (≥3:1).
 - **Estado:** vigente.
+
+## SEO: metadatos fijos en español (sin rutas por idioma)
+- **Qué:** `metadataBase` desde `lib/site.ts`, OpenGraph/Twitter y `robots.index`, más `app/opengraph-image.tsx` (generada con `next/og` en build), `app/robots.ts` y `app/sitemap.ts` (solo rutas públicas; `/app` y `/api` fuera).
+- **Por qué:** el idioma de la UI se cambia en cliente (i18next) y no está en la URL, así que no hay locale que servir a los crawlers. Los metadatos van en español (público v1).
+- **Descartado:** rutas `/es|/en` con `generateMetadata` por locale — coste alto (mover toda la app a un segmento) para un beneficio nulo hoy.
+- **Estado:** vigente; revisar si se abre mercado angloparlante.
+
+## SRS: cada carta se califica con SU ejercicio
+- **Qué:** `Exercise.srsKey` marca qué carta evalúa un ejercicio; el runner devuelve `graded[]` (ok + srsKey) y `/app/repaso` llama a `reviewCards` con `qualityFromItem` (acierto 4 / fallo 2).
+- **Por qué:** antes el repaso avanzaba TODAS las cartas con calidad fija 4, aunque fallaras: el intervalo crecía igual y el SRS mentía.
+- **Nota:** 4 y no 5 porque acertar en opción múltiple es reconocimiento, no recuerdo puro.
+- **Estado:** vigente. En las lecciones sigue usándose la calidad agregada (sus ejercicios no apuntan a una sola carta).
+
+## Logros: arte ilustrado + "moneda" de icono
+- **Qué:** `BadgeTile` acepta `src` (PNG ilustrado) o `icon` (Tabler). La variante icono se dibuja como moneda: aro `bg-gem` + centro `bg-primary` + icono blanco.
+- **Por qué:** los logros nuevos (racha 30, primera conversación, escuchas) no tienen arte generado; la moneda mantiene la familia visual sin bloquear la feature.
+- **Estado:** vigente; si se genera arte para esos tres, basta pasar `src`.
