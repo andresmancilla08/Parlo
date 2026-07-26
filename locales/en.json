@@ -271,7 +271,19 @@
     "hide_es": "English only",
     "es_error": "Couldn't translate right now.",
     "word_error": "Couldn't look up the word.",
-    "close": "Close"
+    "close": "Close",
+    "suggested": "Suggested catalogue",
+    "suggested_body": "English songs sorted by listening difficulty. Tap one, paste its link and lyrics (stored on your device only).",
+    "put_lyrics": "Add lyrics",
+    "have": "Already added",
+    "find_lyrics": "Find the lyrics",
+    "find_video": "Find the video",
+    "sync": "Sync",
+    "sync_title": "Mark each line",
+    "sync_body": "Hit play and tap «Mark» as each line starts",
+    "sync_mark": "Mark this line",
+    "sync_save": "Save timings",
+    "sync_reset": "Start over"
   },
   "perfil": {
     "level": "Level {{level}}",

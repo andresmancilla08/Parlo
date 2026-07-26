@@ -13,11 +13,22 @@ import { cn } from "@/lib/utils";
  * - iOS: Safari no tiene diálogo, así que se explican los 3 pasos reales.
  * No se muestra si ya está instalada.
  */
+const DISMISS_KEY = "parlo-pwa-dismissed";
+
+function wasDismissed(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return localStorage.getItem(DISMISS_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
 export function PwaInstall({ className }: { className?: string }) {
   const { t } = useTranslation();
   const { isStandalone, canNativeInstall, install } = usePwaInstall();
   const [showSteps, setShowSteps] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissed, setDismissed] = useState(() => wasDismissed());
 
   const ios = isIOS();
   // Sin prompt nativo y sin ser iOS no hay nada que ofrecer (p.ej. Firefox de escritorio).
@@ -40,7 +51,14 @@ export function PwaInstall({ className }: { className?: string }) {
           {t("pwa.cta")}
         </button>
         <button
-          onClick={() => setDismissed(true)}
+          onClick={() => {
+            setDismissed(true);
+            try {
+              localStorage.setItem(DISMISS_KEY, "1");
+            } catch {
+              // Sin localStorage sólo se oculta en esta visita.
+            }
+          }}
           aria-label={t("pwa.dismiss")}
           className="grid size-8 shrink-0 place-items-center rounded-full text-muted transition-colors hover:bg-primary-soft"
         >

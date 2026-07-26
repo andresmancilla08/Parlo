@@ -35,7 +35,7 @@ export default function Home() {
       <Nav />
       <Hero />
       <div className="mx-auto w-full max-w-6xl px-5">
-        <PwaInstall className="lg:hidden" />
+        <PwaInstall className="mt-10 lg:hidden" />
       </div>
       <Method />
       <Levels />

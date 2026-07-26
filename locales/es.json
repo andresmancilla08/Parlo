@@ -271,7 +271,19 @@
     "hide_es": "Solo inglés",
     "es_error": "No se pudo traducir ahora mismo.",
     "word_error": "No se pudo consultar la palabra.",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "suggested": "Catálogo sugerido",
+    "suggested_body": "Canciones en inglés ordenadas por dificultad de oído. Toca una, pega su enlace y su letra (se guarda solo en tu dispositivo).",
+    "put_lyrics": "Poner letra",
+    "have": "Ya la tienes",
+    "find_lyrics": "Buscar la letra",
+    "find_video": "Buscar el vídeo",
+    "sync": "Sincronizar",
+    "sync_title": "Marca cada verso",
+    "sync_body": "Dale al play y toca «Marcar» cuando empiece cada verso",
+    "sync_mark": "Marcar este verso",
+    "sync_save": "Guardar tiempos",
+    "sync_reset": "Empezar de nuevo"
   },
   "perfil": {
     "level": "Nivel {{level}}",

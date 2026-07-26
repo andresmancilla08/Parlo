@@ -15,6 +15,9 @@ type State = {
   add: (song: Song) => void;
   remove: (id: string) => void;
   setVideo: (songId: string, youtubeId: string) => void;
+  /** Tiempos reales por canción, marcados a mano (tap-to-sync). */
+  times: Record<string, number[]>;
+  setTimes: (songId: string, times: number[]) => void;
 };
 
 export const useUserSongs = create<State>()(
@@ -24,6 +27,9 @@ export const useUserSongs = create<State>()(
       videos: {},
       setVideo: (songId, youtubeId) =>
         set((s) => ({ videos: { ...s.videos, [songId]: youtubeId } })),
+      times: {},
+      setTimes: (songId, times) =>
+        set((s) => ({ times: { ...s.times, [songId]: times } })),
       add: (song) =>
         set((s) => ({ songs: [song, ...s.songs.filter((x) => x.id !== song.id)] })),
       remove: (id) => set((s) => ({ songs: s.songs.filter((x) => x.id !== id) })),
