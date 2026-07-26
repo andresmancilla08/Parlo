@@ -1,10 +1,10 @@
 import { curriculum } from "./data";
-import type { Exercise, Lesson, Unit, Vocab } from "./types";
+import type { Cefr, Exercise, Lesson, Unit, Vocab } from "./types";
 
 export { optionsSpeakable } from "./speech";
 
 export { curriculum };
-export type { Exercise, Lesson, Unit, Vocab };
+export type { Cefr, Exercise, Lesson, Unit, Vocab };
 
 /** Todas las lecciones en orden de ruta (unidades en orden, lecciones en orden). */
 export const allLessons: Lesson[] = curriculum.flatMap((u) => u.lessons);
@@ -26,6 +26,45 @@ export function localTitle(
   lang: string,
 ): string {
   return lang.startsWith("en") ? item.titleEn : item.titleEs;
+}
+
+/* ---------------- niveles y punto de arranque ---------------- */
+
+export const LEVEL_ORDER: Cefr[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
+
+export function levelRank(level: Cefr): number {
+  return LEVEL_ORDER.indexOf(level);
+}
+
+const unitByLesson = new Map<string, Unit>(
+  curriculum.flatMap((u) => u.lessons.map((l) => [l.id, u] as const)),
+);
+
+/**
+ * Siguiente lección a hacer. Si el test de nivel colocó al usuario en A2/B1, se
+ * empieza ahí y los niveles anteriores quedan disponibles pero no obligatorios.
+ * Si ya no queda nada en su nivel o por encima, se vuelve a lo pendiente antes.
+ */
+export function firstPendingLesson(
+  completed: Set<string>,
+  startLevel?: Cefr | null,
+): Lesson | null {
+  const from = startLevel ? levelRank(startLevel) : 0;
+  const pending = allLessons.filter((l) => !completed.has(l.id));
+  const atOrAbove = pending.find(
+    (l) => levelRank(unitByLesson.get(l.id)!.level) >= from,
+  );
+  return atOrAbove ?? pending[0] ?? null;
+}
+
+/** Índice (en `curriculum`) de la unidad en curso, respetando el nivel de arranque. */
+export function currentUnitIndex(
+  completed: Set<string>,
+  startLevel?: Cefr | null,
+): number {
+  const lesson = firstPendingLesson(completed, startLevel);
+  if (!lesson) return curriculum.length - 1;
+  return curriculum.findIndex((u) => u.id === unitByLesson.get(lesson.id)!.id);
 }
 
 export type NodeState = "done" | "current" | "locked";

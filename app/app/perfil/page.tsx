@@ -14,6 +14,7 @@ import {
   IconLogout,
   IconMessages,
   IconSparkles,
+  IconTargetArrow,
   IconTrophy,
 } from "@tabler/icons-react";
 import Link from "next/link";
@@ -150,6 +151,13 @@ export default function PerfilPage() {
           />
         </div>
       </div>
+
+      <Link href="/app/test" className="mt-8 block active:scale-[0.99]">
+        <Card className="flex items-center gap-3 p-4">
+          <IconTargetArrow className="size-5 shrink-0 text-primary" />
+          <span className="flex-1 text-sm font-bold">{t("test.redo")}</span>
+        </Card>
+      </Link>
 
       <div className="mt-8">
         <p className="mb-2 text-sm font-semibold text-muted">

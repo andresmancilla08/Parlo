@@ -163,6 +163,20 @@
     "rank_maestro": "Master",
     "badge_weekly": "Week"
   },
+  "test": {
+    "kicker": "Placement test",
+    "hint": "Pick the one that sounds right. Wrong answers don't count against you.",
+    "exit": "Leave the test",
+    "result_kicker": "Your starting point",
+    "result_score": "{{correct}} of {{total}} correct",
+    "level_score": "{{correct}} of {{total}}",
+    "start_at": "You'll start with “{{unit}}”",
+    "start_cta": "Start here",
+    "banner_title": "Already know some English?",
+    "banner_body": "Take the placement test and start where you belong, not from zero.",
+    "banner_cta": "Take the test",
+    "redo": "Retake the placement test"
+  },
   "tutor": {
     "title": "Parlo Tutor",
     "subtitle": "Speak, write and learn with AI",

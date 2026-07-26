@@ -13,7 +13,15 @@ import {
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { spring } from "@/lib/motion";
-import { allLessons, curriculum, localTitle, unitOfLesson } from "@/lib/curriculum";
+import {
+  currentUnitIndex,
+  curriculum,
+  firstPendingLesson,
+  levelRank,
+  localTitle,
+  unitOfLesson,
+  type Cefr,
+} from "@/lib/curriculum";
 import { challengeProgress, challengesFor } from "@/lib/gamification";
 import { dueCardKeys, todayXp, useProgress } from "@/lib/progress";
 import { useAuth } from "@/lib/auth";
@@ -35,6 +43,7 @@ export default function HomePage() {
   const days = useProgress((s) => s.days);
   const goalXp = useProgress((s) => s.goalXp);
   const claims = useProgress((s) => s.claims);
+  const startLevel = useProgress((s) => s.startLevel);
 
   const completed = new Set(hydrated ? completedArr : []);
   const dueCount = hydrated ? dueCardKeys(cards, now).length : 0;
@@ -48,7 +57,8 @@ export default function HomePage() {
     : 0;
 
   // Lección actual = primera no completada (o ninguna si todo A1 está hecho).
-  const current = allLessons.find((l) => !completed.has(l.id)) ?? null;
+  const current = firstPendingLesson(completed, startLevel);
+  const currentUnitIdx = currentUnitIndex(completed, startLevel);
   const currentUnit = current ? unitOfLesson(current.id) : null;
 
   const name = hydrated && email ? cap(email.split("@")[0]) : "";
@@ -97,6 +107,24 @@ export default function HomePage() {
             progress={1}
           />
         )}
+
+        {/* Sólo a quien no ha empezado: no obligar a arrancar en A1 si ya sabe. */}
+        {hydrated && startLevel === null && completedArr.length === 0 && (
+          <Link href="/app/test" className="mt-4 block active:scale-[0.99]">
+            <div className="rounded-2xl border border-accent bg-accent-soft p-4">
+              <p className="font-display text-base font-extrabold text-accent-ink">
+                {t("test.banner_title")}
+              </p>
+              <p className="mt-1 text-sm font-semibold text-accent-ink/80">
+                {t("test.banner_body")}
+              </p>
+              <span className="mt-2 inline-flex items-center gap-1.5 font-display text-sm font-extrabold text-accent-ink">
+                {t("test.banner_cta")}
+                <IconArrowRight className="size-4" />
+              </span>
+            </div>
+          </Link>
+        )}
       </div>
 
       {/* «hoy»: stats, objetivo e instalación (columna derecha en desktop) */}
@@ -118,7 +146,11 @@ export default function HomePage() {
         <p className="mb-1 font-display text-xs font-extrabold uppercase tracking-[0.14em] text-muted">
           {t("home.route_kicker")}
         </p>
-        <LevelPath completed={completed} />
+        <LevelPath
+          completed={completed}
+          currentUnitIdx={currentUnitIdx}
+          startLevel={startLevel}
+        />
       </section>
       </div>
     </div>
@@ -138,14 +170,21 @@ function levelGroups() {
   return out;
 }
 
-function LevelPath({ completed }: { completed: Set<string> }) {
+function LevelPath({
+  completed,
+  currentUnitIdx,
+  startLevel,
+}: {
+  completed: Set<string>;
+  currentUnitIdx: number;
+  startLevel: Cefr | null;
+}) {
   const { t } = useTranslation();
   const groups = levelGroups();
 
-  // Nivel en curso = el primero con alguna lección pendiente.
-  const currentLevel =
-    groups.find((g) => g.units.some((u) => u.lessons.some((l) => !completed.has(l.id))))?.level ??
-    groups.at(-1)!.level;
+  // Nivel en curso = el de la unidad actual (ya respeta el test de nivel).
+  const currentLevel = curriculum[currentUnitIdx]?.level ?? groups[0].level;
+  const startRank = startLevel ? levelRank(startLevel) : 0;
 
   const [open, setOpen] = useState<Record<string, boolean>>({ [currentLevel]: true });
 
@@ -158,7 +197,15 @@ function LevelPath({ completed }: { completed: Set<string> }) {
           u.lessons.every((l) => completed.has(l.id)),
         ).length;
         const state =
-          done === lessons.length ? "done" : g.level === currentLevel ? "current" : "locked";
+          done === lessons.length
+            ? "done"
+            : g.level === currentLevel
+              ? "current"
+              : // Si el test colocó al usuario más arriba, lo anterior queda
+                // disponible (repaso opcional), no bloqueado.
+                levelRank(g.level as Cefr) < startRank
+                ? "open"
+                : "locked";
         const isOpen = open[g.level] ?? false;
 
         return (
@@ -239,6 +286,7 @@ function LevelPath({ completed }: { completed: Set<string> }) {
                         index={g.from + i}
                         label={String(i + 1).padStart(2, "0")}
                         completed={completed}
+                        currentUnitIdx={currentUnitIdx}
                       />
                     ))}
                   </div>
@@ -438,35 +486,41 @@ function UnitRow({
   index,
   label,
   completed,
+  currentUnitIdx,
 }: {
   unit: (typeof curriculum)[number];
   index: number;
   /** Número visible (dentro del nivel, no global). */
   label?: string;
   completed: Set<string>;
+  /** Unidad en curso (ya respeta el test de nivel). */
+  currentUnitIdx: number;
 }) {
   const { t, i18n } = useTranslation();
   const title = localTitle(unit, i18n.language);
-
-  const firstPendingUnitIdx = curriculum.findIndex((u) =>
-    u.lessons.some((l) => !completed.has(l.id)),
-  );
-  const currentUnitIdx = firstPendingUnitIdx === -1 ? curriculum.length - 1 : firstPendingUnitIdx;
-
-  const state: "done" | "current" | "locked" =
-    index < currentUnitIdx ? "done" : index === currentUnitIdx ? "current" : "locked";
-  const clickable = state !== "locked";
 
   const doneCount = unit.lessons.filter((l) => completed.has(l.id)).length;
   const fraction = doneCount / unit.lessons.length;
   const target = unit.lessons.find((l) => !completed.has(l.id)) ?? unit.lessons[0];
 
+  // El estado sale de los datos, no de la posición: si el test de nivel te
+  // colocó en B1, las unidades de A1 quedan ABIERTAS (no «completadas»).
+  const state: "done" | "current" | "open" | "locked" =
+    doneCount === unit.lessons.length
+      ? "done"
+      : index === currentUnitIdx
+        ? "current"
+        : index < currentUnitIdx
+          ? "open"
+          : "locked";
+  const clickable = state !== "locked";
+
   const status =
     state === "done"
       ? t("home.unit_done")
-      : state === "current"
-        ? t("home.unit_progress", { done: doneCount, total: unit.lessons.length })
-        : t("home.unit_locked");
+      : state === "locked"
+        ? t("home.unit_locked")
+        : t("home.unit_progress", { done: doneCount, total: unit.lessons.length });
 
   const row = (
     <div className="flex items-center gap-4 border-b border-border py-4 last:border-b-0">

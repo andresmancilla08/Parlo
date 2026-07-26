@@ -14,7 +14,7 @@ import { Sidebar } from "@/components/app/sidebar";
  * salida es la «X» del propio ejercicio (si no, se compite con la navegación
  * y se abandona la lección a medias).
  */
-const FOCUS_ROUTES = ["/app/leccion", "/app/repaso"];
+const FOCUS_ROUTES = ["/app/leccion", "/app/repaso", "/app/test"];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();

@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { getLesson } from "@/lib/curriculum";
+import type { Cefr } from "@/lib/curriculum/types";
 import { isDue, newCard, review, type SrsCard } from "@/lib/srs";
 import {
   challengeProgress,
@@ -53,6 +54,8 @@ export type ProgressSnapshot = {
   claims: Record<string, number>;
   shields: number;
   lastGoalDay: string | null;
+  /** Nivel por el que empezar según el test de nivel (null = nunca se hizo). */
+  startLevel: Cefr | null;
 };
 
 /**
@@ -132,6 +135,7 @@ type ProgressState = {
   claims: Record<string, number>; // retos ya cobrados → cuándo
   shields: number; // escudos de racha comprados con gemas
   lastGoalDay: string | null; // último día en que se cumplió el objetivo
+  startLevel: Cefr | null; // nivel de arranque según el test de nivel
   hydrated: boolean;
 
   snapshot: () => ProgressSnapshot;
@@ -141,6 +145,7 @@ type ProgressState = {
   noteTutorMessage: () => void;
   noteListen: () => void;
   setGoal: (xp: number) => void;
+  setStartLevel: (level: Cefr) => void;
   claimChallenge: (challenge: Challenge) => void;
   buyShield: () => void;
   reset: () => void;
@@ -162,6 +167,7 @@ const initial = {
   claims: {} as Record<string, number>,
   shields: 0,
   lastGoalDay: null as string | null,
+  startLevel: null as Cefr | null,
 };
 
 export const useProgress = create<ProgressState>()(
@@ -187,6 +193,7 @@ export const useProgress = create<ProgressState>()(
           claims: s.claims,
           shields: s.shields,
           lastGoalDay: s.lastGoalDay,
+          startLevel: s.startLevel,
         };
       },
 
@@ -259,6 +266,8 @@ export const useProgress = create<ProgressState>()(
         })),
 
       setGoal: (xp) => set({ goalXp: xp }),
+
+      setStartLevel: (level) => set({ startLevel: level }),
 
       claimChallenge: (challenge) =>
         set((s) => {

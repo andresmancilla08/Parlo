@@ -168,8 +168,8 @@ function ExerciseView({
         {ex.prompt}
       </h1>
 
-      {/* el contenido se centra en el alto libre: antes quedaba media pantalla muerta */}
-      <div className="mt-8 flex flex-1 flex-col justify-center pb-2">
+      {/* contenido pegado al enunciado; el aire sobrante queda sobre el CTA */}
+      <div className="mt-6 flex-1 pb-2">
         {ex.kind === "choose" && (
           <ChooseView ex={ex} choice={choice} checked={checked} onPick={setChoice} />
         )}

@@ -163,6 +163,20 @@
     "rank_maestro": "Maestro",
     "badge_weekly": "Semana"
   },
+  "test": {
+    "kicker": "Test de nivel",
+    "hint": "Elige la que te suene mejor. No se penaliza fallar.",
+    "exit": "Salir del test",
+    "result_kicker": "Tu punto de partida",
+    "result_score": "{{correct}} de {{total}} correctas",
+    "level_score": "{{correct}} de {{total}}",
+    "start_at": "Empezarás por «{{unit}}»",
+    "start_cta": "Empezar aquí",
+    "banner_title": "¿Ya sabes algo de inglés?",
+    "banner_body": "Haz el test de nivel y empieza donde te toca, no desde cero.",
+    "banner_cta": "Hacer el test",
+    "redo": "Rehacer el test de nivel"
+  },
   "tutor": {
     "title": "Tutor Parlo",
     "subtitle": "Habla, escribe y aprende con IA",
