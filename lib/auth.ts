@@ -1,51 +1,84 @@
+import {
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+  type User,
+} from "firebase/auth";
 import { create } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
+import { auth, pinToPassword } from "@/lib/firebase";
 
-// El email se guarda solo para la UI (saludo, avatar). La verdad de la sesión es
-// la cookie httpOnly firmada que valida el proxy. Las credenciales viven en el
-// servidor (/api/login), NO en este bundle.
+// Auth real multi-usuario con Firebase (correo + PIN de 4 dígitos).
+// La sesión la mantiene el SDK (IndexedDB); aquí sólo se refleja para la UI.
+
+export type AuthResult = { ok: true } | { ok: false; code: string };
+
 type AuthState = {
+  uid: string | null;
   email: string | null;
-  hydrated: boolean;
-  login: (email: string, pin: string) => Promise<{ ok: boolean }>;
+  hydrated: boolean; // ya sabemos si hay sesión o no
+  login: (email: string, pin: string) => Promise<AuthResult>;
+  register: (email: string, pin: string) => Promise<AuthResult>;
   logout: () => Promise<void>;
-  setHydrated: () => void;
 };
 
-export const useAuth = create<AuthState>()(
-  persist(
-    (set) => ({
-      email: null,
-      hydrated: false,
-      login: async (email, pin) => {
-        try {
-          const res = await fetch("/api/login", {
-            method: "POST",
-            headers: { "content-type": "application/json" },
-            body: JSON.stringify({ email, pin }),
-          });
-          if (!res.ok) return { ok: false };
-          const data = (await res.json()) as { email: string };
-          set({ email: data.email });
-          return { ok: true };
-        } catch {
-          return { ok: false };
-        }
-      },
-      logout: async () => {
-        try {
-          await fetch("/api/logout", { method: "POST" });
-        } finally {
-          set({ email: null });
-        }
-      },
-      setHydrated: () => set({ hydrated: true }),
-    }),
-    {
-      name: "parlo-auth",
-      storage: createJSONStorage(() => localStorage),
-      partialize: (s) => ({ email: s.email }),
-      onRehydrateStorage: () => (state) => state?.setHydrated(),
-    },
-  ),
-);
+/**
+ * Cookie de presencia (NO es seguridad): permite que `proxy.ts` redirija a
+ * /login en el servidor sin que parpadee la app. La frontera real de datos son
+ * las reglas de Firestore, que validan `request.auth.uid` en el servidor.
+ */
+function setSessionCookie(active: boolean) {
+  if (typeof document === "undefined") return;
+  document.cookie = active
+    ? "parlo_session=1; path=/; max-age=2592000; samesite=lax"
+    : "parlo_session=; path=/; max-age=0; samesite=lax";
+}
+
+function apply(set: (s: Partial<AuthState>) => void, user: User | null) {
+  setSessionCookie(Boolean(user));
+  set({ uid: user?.uid ?? null, email: user?.email ?? null, hydrated: true });
+}
+
+export const useAuth = create<AuthState>()((set) => ({
+  uid: null,
+  email: null,
+  hydrated: false,
+
+  login: async (email, pin) => {
+    try {
+      const cred = await signInWithEmailAndPassword(auth(), email.trim(), pinToPassword(pin));
+      apply(set, cred.user);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, code: errorCode(e) };
+    }
+  },
+
+  register: async (email, pin) => {
+    try {
+      const cred = await createUserWithEmailAndPassword(auth(), email.trim(), pinToPassword(pin));
+      apply(set, cred.user);
+      return { ok: true };
+    } catch (e) {
+      return { ok: false, code: errorCode(e) };
+    }
+  },
+
+  logout: async () => {
+    try {
+      await signOut(auth());
+    } finally {
+      apply(set, null);
+    }
+  },
+}));
+
+/** Escucha la sesión del SDK (recarga, expiración, otra pestaña). */
+export function watchAuth(): () => void {
+  return onAuthStateChanged(auth(), (user) => apply(useAuth.setState, user));
+}
+
+function errorCode(e: unknown): string {
+  const code = (e as { code?: string })?.code ?? "";
+  return code.replace("auth/", "") || "unknown";
+}

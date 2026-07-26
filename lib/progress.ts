@@ -31,6 +31,19 @@ export type GradedItem = { ok: boolean; srsKey?: string };
 
 export type LessonResult = { correct: number; total: number; graded: GradedItem[] };
 
+/** Lo que se guarda y se sincroniza (sin acciones ni flags de UI). */
+export type ProgressSnapshot = {
+  xp: number;
+  gems: number;
+  streak: number;
+  lastActiveDay: string | null;
+  completed: string[];
+  stars: Record<string, number>;
+  cards: Record<string, SrsCard>;
+  tutorMessages: number;
+  listens: number;
+};
+
 /**
  * Calidad SM-2 de un ejercicio suelto. Acertar en opción múltiple es
  * reconocimiento, no recuerdo puro → 4 (bien), no 5 (perfecto).
@@ -51,6 +64,8 @@ type ProgressState = {
   listens: number; // veces que se ha escuchado la pronunciación (logro «oído fino»)
   hydrated: boolean;
 
+  snapshot: () => ProgressSnapshot;
+  hydrateFrom: (data: ProgressSnapshot) => void;
   completeLesson: (lessonId: string, result: LessonResult) => void;
   reviewCards: (results: { key: string; quality: number }[]) => void;
   noteTutorMessage: () => void;
@@ -61,7 +76,7 @@ type ProgressState = {
 
 export const useProgress = create<ProgressState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       xp: 0,
       gems: 0,
       streak: 0,
@@ -72,6 +87,23 @@ export const useProgress = create<ProgressState>()(
       tutorMessages: 0,
       listens: 0,
       hydrated: false,
+
+      snapshot: () => {
+        const s = get();
+        return {
+          xp: s.xp,
+          gems: s.gems,
+          streak: s.streak,
+          lastActiveDay: s.lastActiveDay,
+          completed: s.completed,
+          stars: s.stars,
+          cards: s.cards,
+          tutorMessages: s.tutorMessages,
+          listens: s.listens,
+        };
+      },
+
+      hydrateFrom: (data) => set({ ...data }),
 
       completeLesson: (lessonId, { correct, total }) =>
         set((s) => {

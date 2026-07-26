@@ -12,10 +12,31 @@ import { Mascot } from "@/components/ui/mascot";
 import { spring } from "@/lib/motion";
 import { PinInput } from "./pin-input";
 
+/** Traduce el código de error de Firebase a un mensaje que sirva de algo. */
+function errorKey(code: string): string {
+  switch (code) {
+    case "invalid-credential":
+    case "wrong-password":
+    case "user-not-found":
+      return "auth.invalid";
+    case "email-already-in-use":
+      return "auth.email_taken";
+    case "invalid-email":
+      return "auth.invalid_email";
+    case "too-many-requests":
+      return "auth.too_many";
+    case "network-request-failed":
+      return "auth.network";
+    default:
+      return "auth.generic_error";
+  }
+}
+
 export function AuthForm({ mode }: { mode: "login" | "signup" }) {
   const { t } = useTranslation();
   const router = useRouter();
   const login = useAuth((s) => s.login);
+  const register = useAuth((s) => s.register);
   const [email, setEmail] = useState("");
   const [pin, setPin] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -27,13 +48,13 @@ export function AuthForm({ mode }: { mode: "login" | "signup" }) {
 
   const submit = async () => {
     setBusy(true);
-    const { ok } = await login(email, pin);
+    const res = isLogin ? await login(email, pin) : await register(email, pin);
     setBusy(false);
-    if (ok) {
+    if (res.ok) {
       router.push("/app");
       return;
     }
-    setError(t("auth.invalid"));
+    setError(t(errorKey(res.code)));
     setShake(true);
     setPin("");
     setTimeout(() => setShake(false), 400);

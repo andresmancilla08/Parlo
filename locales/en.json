@@ -89,7 +89,12 @@
     "no_account": "Don't have an account? ",
     "have_account": "Already have an account? ",
     "go_signup": "Sign up",
-    "go_login": "Log in"
+    "go_login": "Log in",
+    "email_taken": "That email already has an account. Log in instead.",
+    "invalid_email": "That email doesn't look valid.",
+    "too_many": "Too many attempts. Wait a moment and try again.",
+    "network": "No connection. Check your internet and try again.",
+    "generic_error": "Something went wrong. Try again."
   },
   "home": {
     "slot_morning": "Good morning",

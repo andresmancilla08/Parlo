@@ -1,0 +1,84 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { db, firebaseReady } from "@/lib/firebase";
+import { useProgress, type ProgressSnapshot } from "@/lib/progress";
+
+// Sincroniza el progreso local (zustand persist) con `users/{uid}` en Firestore.
+// Local-first: la app funciona sin red; Firestore es la copia entre dispositivos.
+
+const WRITE_DEBOUNCE_MS = 1500;
+
+/** Gana el progreso MÁS avanzado: nunca se pierde lo hecho offline. */
+function merge(local: ProgressSnapshot, remote: ProgressSnapshot): ProgressSnapshot {
+  const cards = { ...remote.cards };
+  for (const [key, card] of Object.entries(local.cards)) {
+    const other = cards[key];
+    // La carta más reciente es la que se repasó después (mayor `due`).
+    if (!other || card.due > other.due) cards[key] = card;
+  }
+  const stars: Record<string, number> = { ...remote.stars };
+  for (const [id, n] of Object.entries(local.stars)) {
+    stars[id] = Math.max(n, stars[id] ?? 0);
+  }
+  return {
+    xp: Math.max(local.xp, remote.xp),
+    gems: Math.max(local.gems, remote.gems),
+    streak: Math.max(local.streak, remote.streak),
+    lastActiveDay:
+      (local.lastActiveDay ?? "") > (remote.lastActiveDay ?? "")
+        ? local.lastActiveDay
+        : remote.lastActiveDay,
+    completed: [...new Set([...local.completed, ...remote.completed])],
+    stars,
+    cards,
+    tutorMessages: Math.max(local.tutorMessages, remote.tutorMessages),
+    listens: Math.max(local.listens, remote.listens),
+  };
+}
+
+/**
+ * Al iniciar sesión: fusiona local↔remoto y deja el resultado en ambos.
+ * Después, cada cambio del store se escribe con debounce.
+ */
+export function useProgressSync(uid: string | null) {
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!uid || !firebaseReady) return;
+    let cancelled = false;
+    const ref = doc(db(), "users", uid);
+
+    (async () => {
+      try {
+        const snap = await getDoc(ref);
+        if (cancelled) return;
+        const local = useProgress.getState().snapshot();
+        const remote = snap.exists() ? (snap.data().progress as ProgressSnapshot | undefined) : undefined;
+        const next = remote ? merge(local, remote) : local;
+        useProgress.getState().hydrateFrom(next);
+        await setDoc(ref, { progress: next }, { merge: true });
+      } catch (err) {
+        // Sin red o reglas denegando: la app sigue funcionando en local.
+        console.warn("[parlo] sync inicial falló", err);
+      }
+    })();
+
+    const unsubscribe = useProgress.subscribe((state) => {
+      if (!state.hydrated) return;
+      if (timer.current) clearTimeout(timer.current);
+      timer.current = setTimeout(() => {
+        setDoc(ref, { progress: useProgress.getState().snapshot() }, { merge: true }).catch(
+          (err) => console.warn("[parlo] no se pudo guardar el progreso", err),
+        );
+      }, WRITE_DEBOUNCE_MS);
+    });
+
+    return () => {
+      cancelled = true;
+      unsubscribe();
+      if (timer.current) clearTimeout(timer.current);
+    };
+  }, [uid]);
+}

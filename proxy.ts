@@ -1,16 +1,12 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { SESSION_COOKIE, verifySession } from "@/lib/session";
 
-// Gate server-side de la app: sin sesión válida → /login. Complementa el gate
-// del cliente (AppLayout). Runtime Node por defecto (Next 16).
+// Gate de UX, no de seguridad: evita el parpadeo de /app antes de que el SDK de
+// Firebase resuelva la sesión en el cliente. La cookie sólo marca "hay sesión".
+// La frontera real es Firestore, que valida request.auth.uid en el servidor.
 export async function proxy(request: NextRequest) {
-  const token = request.cookies.get(SESSION_COOKIE)?.value;
-  const email = await verifySession(token);
-  if (email) return NextResponse.next();
-
-  const url = new URL("/login", request.url);
-  return NextResponse.redirect(url);
+  if (request.cookies.get("parlo_session")?.value) return NextResponse.next();
+  return NextResponse.redirect(new URL("/login", request.url));
 }
 
 export const config = {

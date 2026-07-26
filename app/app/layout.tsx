@@ -3,21 +3,25 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { IconFeather } from "@tabler/icons-react";
-import { useAuth } from "@/lib/auth";
+import { useAuth, watchAuth } from "@/lib/auth";
+import { useProgressSync } from "@/lib/sync";
 import { AppBar } from "@/components/app/app-bar";
 import { BottomNav } from "@/components/app/bottom-nav";
 import { Sidebar } from "@/components/app/sidebar";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const email = useAuth((s) => s.email);
+  const uid = useAuth((s) => s.uid);
   const hydrated = useAuth((s) => s.hydrated);
 
-  useEffect(() => {
-    if (hydrated && !email) router.replace("/login");
-  }, [hydrated, email, router]);
+  useEffect(() => watchAuth(), []);
+  useProgressSync(uid);
 
-  if (!hydrated || !email) {
+  useEffect(() => {
+    if (hydrated && !uid) router.replace("/login");
+  }, [hydrated, uid, router]);
+
+  if (!hydrated || !uid) {
     return (
       <div className="grid min-h-dvh place-items-center">
         <IconFeather className="size-8 animate-pulse text-primary" />
