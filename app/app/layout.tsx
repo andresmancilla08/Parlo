@@ -5,7 +5,6 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { IconFeather } from "@tabler/icons-react";
 import { useAuth, watchAuth } from "@/lib/auth";
 import { useProgressSync } from "@/lib/sync";
-import { useSongSync } from "@/lib/song-sync";
 import { AppBar } from "@/components/app/app-bar";
 import { BottomNav } from "@/components/app/bottom-nav";
 import { Sidebar } from "@/components/app/sidebar";
@@ -31,7 +30,6 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => watchAuth(), []);
   useProgressSync(uid);
-  useSongSync(uid);
 
   useEffect(() => {
     if (hydrated && !uid) router.replace("/login");
