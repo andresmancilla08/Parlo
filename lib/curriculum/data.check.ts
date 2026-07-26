@@ -2,7 +2,12 @@
 //   node --experimental-strip-types lib/curriculum/data.check.ts
 // Verifica que ningún ejercicio sea irresoluble (el fallo típico al añadir contenido).
 import assert from "node:assert";
-import { curriculum } from "./data.ts";
+// Importa los niveles directamente: Node (strip-types) exige la extensión .ts,
+// y `data.ts` importa sin extensión porque es lo que espera el bundler.
+import { a1 } from "./levels/a1.ts";
+import { a2 } from "./levels/a2.ts";
+
+const curriculum = [...a1, ...a2];
 
 function normalize(s: string): string {
   return s
