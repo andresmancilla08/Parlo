@@ -67,7 +67,7 @@ export default function PracticaPage() {
 function Picker({ onStart }: { onStart: (id: string | null) => void }) {
   const { t } = useTranslation();
   return (
-    <div className="mx-auto w-full max-w-2xl px-5 pb-8 pt-5">
+    <div className="mx-auto w-full max-w-2xl px-4 pb-8 pt-5 sm:px-5">
       <motion.header initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={spring}>
         <p className="font-display text-xs font-extrabold uppercase tracking-[0.13em] text-primary-ink">
           {t("practica.kicker")}
@@ -209,7 +209,7 @@ function Conversation({
           <p className="font-display text-xs font-extrabold uppercase tracking-[0.13em] text-primary-ink">
             {scenario ? t(`practica.scenario_${scenario.id}`) : t("practica.free_title")}
           </p>
-          <p className="truncate text-xs font-bold text-muted">
+          <p className="line-clamp-1 text-xs font-bold text-muted">
             {scenario ? t(`practica.goal_${scenario.id}`) : t("practica.free_body")}
           </p>
         </div>

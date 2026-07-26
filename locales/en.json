@@ -128,7 +128,8 @@
     "level_a2": "Solid basics",
     "level_b1": "Intermediate",
     "level_units": "{{done}} of {{total}} units",
-    "level_locked": "Unlocks after {{prev}}"
+    "level_locked": "Unlocks after {{prev}}",
+    "unit_skipped": "Passed in the test"
   },
   "retos": {
     "kicker": "Your progress",

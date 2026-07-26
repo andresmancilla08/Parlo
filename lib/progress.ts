@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { getLesson } from "@/lib/curriculum";
+import { curriculum, getLesson, levelRank } from "@/lib/curriculum";
 import type { Cefr } from "@/lib/curriculum/types";
 import { isDue, newCard, review, type SrsCard } from "@/lib/srs";
 import {
@@ -56,6 +56,8 @@ export type ProgressSnapshot = {
   lastGoalDay: string | null;
   /** Nivel por el que empezar según el test de nivel (null = nunca se hizo). */
   startLevel: Cefr | null;
+  /** Lecciones dadas por superadas en el test (se pueden rehacer cuando quiera). */
+  skipped: string[];
 };
 
 /**
@@ -136,6 +138,7 @@ type ProgressState = {
   shields: number; // escudos de racha comprados con gemas
   lastGoalDay: string | null; // último día en que se cumplió el objetivo
   startLevel: Cefr | null; // nivel de arranque según el test de nivel
+  skipped: string[]; // superadas en el test, no practicadas
   hydrated: boolean;
 
   snapshot: () => ProgressSnapshot;
@@ -169,6 +172,7 @@ const initial = {
   shields: 0,
   lastGoalDay: null as string | null,
   startLevel: null as Cefr | null,
+  skipped: [] as string[],
 };
 
 export const useProgress = create<ProgressState>()(
@@ -195,6 +199,7 @@ export const useProgress = create<ProgressState>()(
           shields: s.shields,
           lastGoalDay: s.lastGoalDay,
           startLevel: s.startLevel,
+          skipped: s.skipped,
         };
       },
 
@@ -287,7 +292,20 @@ export const useProgress = create<ProgressState>()(
 
       setGoal: (xp) => set({ goalXp: xp }),
 
-      setStartLevel: (level) => set({ startLevel: level }),
+      setStartLevel: (level) =>
+        set((s) => {
+          const rank = levelRank(level);
+          const passed = curriculum
+            .filter((u) => levelRank(u.level) < rank)
+            .flatMap((u) => u.lessons.map((l) => l.id));
+          return {
+            startLevel: level,
+            // Se marcan como hechas, pero sin XP ni estrellas: demostrar un
+            // nivel no es lo mismo que haber practicado sus lecciones.
+            completed: [...new Set([...s.completed, ...passed])],
+            skipped: [...new Set([...s.skipped, ...passed])],
+          };
+        }),
 
       claimChallenge: (challenge) =>
         set((s) => {

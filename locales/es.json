@@ -128,7 +128,8 @@
     "level_a2": "Base sólida",
     "level_b1": "Intermedio",
     "level_units": "{{done}} de {{total}} unidades",
-    "level_locked": "Se abre al terminar {{prev}}"
+    "level_locked": "Se abre al terminar {{prev}}",
+    "unit_skipped": "Superada en el test"
   },
   "retos": {
     "kicker": "Tu avance",

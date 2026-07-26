@@ -45,8 +45,10 @@ export default function HomePage() {
   const goalXp = useProgress((s) => s.goalXp);
   const claims = useProgress((s) => s.claims);
   const startLevel = useProgress((s) => s.startLevel);
+  const skippedArr = useProgress((s) => s.skipped);
 
   const completed = new Set(hydrated ? completedArr : []);
+  const skipped = new Set(hydrated ? skippedArr : []);
   const dueCount = hydrated ? dueCardKeys(cards, now).length : 0;
 
   // Objetivo del día y retos ya cumplidos pero sin cobrar.
@@ -67,14 +69,14 @@ export default function HomePage() {
   const greet = name ? `${slotWord}, ${name}` : slotWord;
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-5 pb-8 pt-5 xl:max-w-6xl">
+    <div className="mx-auto w-full max-w-2xl px-4 pb-8 pt-5 sm:px-5 xl:max-w-6xl">
       {/* saludo + titular editorial */}
       <motion.header
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={spring}
       >
-        <p className="truncate font-display text-xs font-extrabold uppercase tracking-[0.13em] text-primary-ink">
+        <p className="break-words font-display text-xs font-extrabold uppercase tracking-[0.13em] text-primary-ink">
           {greet}
         </p>
         <h1 className="mt-2 font-display text-[2.1rem] font-extrabold leading-[0.98] tracking-tight min-[380px]:text-[2.6rem] sm:text-6xl">
@@ -164,6 +166,7 @@ export default function HomePage() {
         </p>
         <LevelPath
           completed={completed}
+          skipped={skipped}
           currentUnitIdx={currentUnitIdx}
           startLevel={startLevel}
         />
@@ -188,10 +191,12 @@ function levelGroups() {
 
 function LevelPath({
   completed,
+  skipped,
   currentUnitIdx,
   startLevel,
 }: {
   completed: Set<string>;
+  skipped: Set<string>;
   currentUnitIdx: number;
   startLevel: Cefr | null;
 }) {
@@ -237,7 +242,7 @@ function LevelPath({
               onClick={() => setOpen((o) => ({ ...o, [g.level]: !isOpen }))}
               aria-expanded={isOpen}
               aria-label={t("a11y.toggle_level", { level: g.level })}
-              className="flex w-full items-center gap-3.5 p-4 text-left transition-colors hover:bg-primary-soft/40"
+              className="flex w-full items-center gap-3 p-3.5 text-left transition-colors hover:bg-primary-soft/40 sm:gap-3.5 sm:p-4"
             >
               <span
                 className={cn(
@@ -253,7 +258,7 @@ function LevelPath({
               </span>
 
               <span className="min-w-0 flex-1">
-                <span className="block truncate font-display text-base font-extrabold">
+                <span className="block line-clamp-1 font-display text-base font-extrabold">
                   {t(`home.level_${g.level.toLowerCase()}`)}
                 </span>
                 <span className="block text-xs font-bold text-muted">
@@ -294,7 +299,7 @@ function LevelPath({
                   transition={{ duration: 0.15, ease: "easeOut" }}
                   className="overflow-hidden"
                 >
-                  <div className="border-t border-border px-4 pb-1">
+                  <div className="border-t border-border px-3 pb-1 sm:px-4">
                     {g.units.map((unit, i) => (
                       <UnitRow
                         key={unit.id}
@@ -302,6 +307,7 @@ function LevelPath({
                         index={g.from + i}
                         label={String(i + 1).padStart(2, "0")}
                         completed={completed}
+                        skipped={skipped}
                         currentUnitIdx={currentUnitIdx}
                       />
                     ))}
@@ -370,7 +376,7 @@ function FeaturePanel({
         alt=""
         height={158}
         width={Math.round((158 * mascotCelebrate.width) / mascotCelebrate.height)}
-        className="pointer-events-none absolute -bottom-1.5 -right-2 select-none drop-shadow-xl"
+        className="pointer-events-none absolute bottom-3 right-3 h-[122px] w-auto max-w-[38%] select-none object-contain drop-shadow-xl sm:h-[150px]"
         priority
       />
     </motion.div>
@@ -502,6 +508,7 @@ function UnitRow({
   index,
   label,
   completed,
+  skipped,
   currentUnitIdx,
 }: {
   unit: (typeof curriculum)[number];
@@ -509,6 +516,8 @@ function UnitRow({
   /** Número visible (dentro del nivel, no global). */
   label?: string;
   completed: Set<string>;
+  /** Lecciones dadas por superadas en el test de nivel. */
+  skipped: Set<string>;
   /** Unidad en curso (ya respeta el test de nivel). */
   currentUnitIdx: number;
 }) {
@@ -531,18 +540,22 @@ function UnitRow({
           : "locked";
   const clickable = state !== "locked";
 
+  // Toda la unidad viene del test → se dice, no se finge que la practicaste.
+  const fromTest = unit.lessons.every((l) => skipped.has(l.id));
   const status =
     state === "done"
-      ? t("home.unit_done")
+      ? fromTest
+        ? t("home.unit_skipped")
+        : t("home.unit_done")
       : state === "locked"
         ? t("home.unit_locked")
         : t("home.unit_progress", { done: doneCount, total: unit.lessons.length });
 
   const row = (
-    <div className="flex items-center gap-4 border-b border-border py-4 last:border-b-0">
+    <div className="flex items-center gap-3 border-b border-border py-4 last:border-b-0 sm:gap-4">
       <span
         className={cn(
-          "w-9 shrink-0 font-display text-[1.75rem] font-extrabold leading-none",
+          "w-8 shrink-0 font-display text-[1.6rem] font-extrabold leading-none sm:w-9 sm:text-[1.75rem]",
           state === "current" ? "text-primary" : "text-border",
         )}
       >
@@ -551,7 +564,7 @@ function UnitRow({
       <div className="min-w-0 flex-1">
         <h3
           className={cn(
-            "truncate font-display text-lg font-extrabold",
+            "line-clamp-1 font-display text-lg font-extrabold",
             state === "locked" && "text-muted",
           )}
         >

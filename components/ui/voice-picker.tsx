@@ -31,7 +31,7 @@ export function VoicePicker({ className }: { className?: string }) {
           value={selected.name}
           onChange={(e) => setVoice(e.target.value)}
           aria-label={t("perfil.voice_title")}
-          className="min-w-0 flex-1 truncate rounded-pill border border-border bg-surface px-4 py-2.5 text-sm font-bold text-fg outline-none focus:border-primary"
+          className="w-0 min-w-0 flex-1 truncate rounded-pill border border-border bg-surface px-4 py-2.5 text-sm font-bold text-fg outline-none focus:border-primary"
         >
           {voices.map((v) => (
             <option key={v.name} value={v.name}>

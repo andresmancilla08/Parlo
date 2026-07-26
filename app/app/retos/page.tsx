@@ -65,7 +65,7 @@ export default function RetosPage() {
   const level = levelFromXp(hydrated ? xp : 0);
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-5 pb-8 pt-5">
+    <div className="mx-auto w-full max-w-2xl px-4 pb-8 pt-5 sm:px-5">
       <motion.header
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -84,9 +84,9 @@ export default function RetosPage() {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ ...spring, delay: 0.04 }}
-        className="mt-6 rounded-[26px] bg-gradient-panel p-6 text-white shadow-2xl shadow-[#171033]/40"
+        className="mt-6 rounded-[26px] bg-gradient-panel p-5 text-white shadow-2xl shadow-[#171033]/40 sm:p-6"
       >
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-4 sm:gap-5">
           <GoalRing fraction={goalFraction} label={`${done}`} sub={`/${goalXp}`} />
           <div className="min-w-0 flex-1">
             <p className="font-display text-xs font-extrabold uppercase tracking-[0.14em] text-gem">
@@ -97,7 +97,7 @@ export default function RetosPage() {
                 ? t("retos.goal_done")
                 : t("retos.goal_left", { n: goalXp - done })}
             </p>
-            <div className="mt-3 flex gap-4 text-sm font-bold text-white/75">
+            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-sm font-bold text-white/75">
               <span className="inline-flex items-center gap-1.5">
                 <IconFlame className="size-4 text-primary" />
                 {streak} · {t("retos.streak_label")}
@@ -121,7 +121,7 @@ export default function RetosPage() {
               onClick={() => setGoal(opt)}
               aria-pressed={goalXp === opt}
               className={cn(
-                "flex-1 rounded-pill py-2.5 font-display text-sm font-extrabold transition-transform active:scale-95",
+                "min-w-0 flex-1 rounded-pill py-2.5 font-display text-xs font-extrabold transition-transform active:scale-95 sm:text-sm",
                 goalXp === opt
                   ? "bg-primary text-primary-fg shadow-lg shadow-primary/30"
                   : "bg-white/12 text-white/80",
@@ -135,8 +135,8 @@ export default function RetosPage() {
 
       {/* nivel de avance */}
       <Card className="mt-4 p-5">
-        <div className="flex items-baseline justify-between gap-3">
-          <p className="font-display text-lg font-extrabold">
+        <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
+          <p className="whitespace-nowrap font-display text-lg font-extrabold">
             {t("retos.level_title", { n: level.level })}
             <span className="ml-2 text-sm font-bold text-accent-ink">
               {t(`retos.rank_${level.rank}`)}
@@ -200,7 +200,7 @@ export default function RetosPage() {
 
       {/* premios */}
       <Section title={t("retos.prizes")}>
-        <Card className="flex items-center gap-4 p-5">
+        <Card className="flex flex-col gap-3 p-5 sm:flex-row sm:items-center sm:gap-4">
           <span className="grid size-12 shrink-0 place-items-center rounded-full bg-accent-soft">
             <IconShieldCheck className="size-6 text-accent-ink" stroke={2.2} />
           </span>
@@ -215,7 +215,7 @@ export default function RetosPage() {
           </div>
           <Button
             variant="secondary"
-            className="shrink-0"
+            className="w-full shrink-0 sm:w-auto"
             disabled={!hydrated || gems < SHIELD_COST}
             onClick={buyShield}
           >
@@ -280,7 +280,7 @@ function ChallengeRow({
   return (
     <Card
       className={cn(
-        "relative p-4",
+        "relative p-3.5 sm:p-4",
         // El semanal se distingue por una banda gem: vale más y se ve.
         weekly && "border-l-4 border-l-gem",
         complete && !claimed && "border-accent bg-accent-soft",
@@ -300,7 +300,7 @@ function ChallengeRow({
           </motion.span>
         )}
       </AnimatePresence>
-      <div className="flex items-center gap-3.5">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2 sm:gap-x-3.5">
         <span
           className={cn(
             "grid size-10 shrink-0 place-items-center rounded-full",
@@ -317,9 +317,9 @@ function ChallengeRow({
           )}
         </span>
 
-        <div className="min-w-0 flex-1">
-          <p className="flex items-center gap-2 font-display text-sm font-extrabold">
-            <span className="truncate">
+        <div className="min-w-[9rem] flex-1">
+          <p className="flex items-center gap-2 font-display text-[0.8rem] font-extrabold sm:text-sm">
+            <span className="line-clamp-2">
               {t(`retos.metric_${challenge.metric}`, { n: challenge.target })}
             </span>
             {/* el periodo se dice con texto, no solo con el color de la banda */}
@@ -336,7 +336,7 @@ function ChallengeRow({
 
         {complete && !claimed ? (
           <Button
-            className="shrink-0 px-4 py-2 text-sm"
+            className="shrink-0 px-3 py-2 text-xs sm:px-4 sm:text-sm"
             onClick={() => {
               onClaim();
               setReward(true);
@@ -380,7 +380,7 @@ function GoalRing({
   const r = 34;
   const circ = 2 * Math.PI * r;
   return (
-    <div className="relative size-[84px] shrink-0">
+    <div className="relative size-[76px] shrink-0 sm:size-[84px]">
       <svg width={84} height={84} viewBox="0 0 84 84" aria-hidden>
         <circle cx="42" cy="42" r={r} fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="7" />
         {fraction > 0 && (

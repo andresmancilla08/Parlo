@@ -135,7 +135,7 @@ function Hero() {
           {/* Tablet: personaje grande a la derecha, alineado con el bloque de texto. */}
           <div
             aria-hidden
-            className="pointer-events-none absolute -bottom-2 right-0 hidden select-none sm:block lg:hidden"
+            className="pointer-events-none absolute bottom-0 right-0 hidden max-w-[45%] select-none object-contain sm:block lg:hidden"
           >
             <div className="absolute left-1/2 top-1/2 size-[300px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/20 blur-3xl" />
             <Mascot

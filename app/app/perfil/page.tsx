@@ -64,7 +64,7 @@ export default function PerfilPage() {
   const level = unitOfLesson(nextLesson.id)?.level ?? "A1";
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-5 pt-8">
+    <div className="mx-auto w-full max-w-2xl px-4 pt-8 sm:px-5">
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -74,8 +74,8 @@ export default function PerfilPage() {
         <span className="grid size-20 place-items-center rounded-full bg-primary font-display text-3xl font-extrabold uppercase text-primary-fg shadow-lg shadow-primary/25">
           {name.charAt(0) || "P"}
         </span>
-        <h1 className="mt-4 max-w-full truncate font-display text-xl font-extrabold">{name}</h1>
-        <p className="max-w-full truncate text-sm text-muted">{email}</p>
+        <h1 className="mt-4 max-w-full break-words font-display text-xl font-extrabold">{name}</h1>
+        <p className="max-w-full break-all text-sm text-muted">{email}</p>
         <span className="mt-3 rounded-pill bg-accent-soft px-3 py-1 text-sm font-bold text-accent-ink">
           {t("perfil.level", { level })}
         </span>
@@ -108,7 +108,7 @@ export default function PerfilPage() {
         </Card>
       </Link>
 
-      <div className="mt-6 grid grid-cols-3 gap-3">
+      <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3">
         <StatCard icon={IconFlame} value={String(hydrated ? streak : 0)} label={t("perfil.streak")} tint="text-primary" />
         <StatCard icon={IconSparkles} value={String(hydrated ? gems : 0)} label={t("perfil.gems")} tint="text-gem" />
         <StatCard icon={IconTrophy} value={String(hydrated ? earnedBadges : 0)} label={t("perfil.achievements")} tint="text-accent" />
@@ -118,7 +118,7 @@ export default function PerfilPage() {
         <p className="mb-3 text-sm font-semibold text-muted">
           {t("perfil.badges_title")}
         </p>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
           <BadgeTile
             src={badgeLevel}
             title={t("perfil.badge_level")}

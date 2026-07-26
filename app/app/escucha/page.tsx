@@ -69,7 +69,7 @@ function Picker({
 }) {
   const { t, i18n } = useTranslation();
   return (
-    <div className="mx-auto w-full max-w-2xl px-5 pb-8 pt-5">
+    <div className="mx-auto w-full max-w-2xl px-4 pb-8 pt-5 sm:px-5">
       <motion.header initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={spring}>
         <p className="font-display text-xs font-extrabold uppercase tracking-[0.13em] text-primary-ink">
           {t("escucha.kicker")}
@@ -112,7 +112,7 @@ function Picker({
                 <IconHeadphones className="size-5" stroke={2.2} />
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate font-display text-base font-extrabold">
+                <span className="block line-clamp-1 font-display text-base font-extrabold">
                   {localTitle(track, i18n.language)}
                 </span>
                 <span className="block text-xs font-bold text-muted">
