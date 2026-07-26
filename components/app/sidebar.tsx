@@ -36,8 +36,8 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "sticky top-0 hidden h-dvh shrink-0 flex-col overflow-y-auto overflow-x-hidden border-r border-border bg-surface/60 pb-8 pt-6 transition-[width] duration-150 md:flex",
-        collapsed ? "w-[4.5rem] px-2" : "w-60 px-4",
+        "sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-border bg-surface/60 pb-8 pt-6 transition-[width] duration-150 md:flex",
+        collapsed ? "w-[4.5rem] overflow-visible px-2" : "w-60 overflow-y-auto overflow-x-hidden px-4",
       )}
     >
       <div
@@ -77,13 +77,20 @@ export function Sidebar() {
               key={href}
               href={href}
               // Con el lateral plegado el nombre va en `title`: se ve al pasar el ratón.
-              title={collapsed ? t(labelKey) : undefined}
               aria-label={collapsed ? t(labelKey) : undefined}
               className={cn(
-                "relative flex items-center rounded-2xl py-3 font-display text-sm font-bold",
+                "group relative flex items-center rounded-2xl py-3 font-display text-sm font-bold",
                 collapsed ? "justify-center px-0" : "gap-3 px-3",
               )}
             >
+              {collapsed && (
+                <span
+                  role="tooltip"
+                  className="pointer-events-none absolute left-full top-1/2 z-50 ml-3 -translate-y-1/2 whitespace-nowrap rounded-xl bg-fg px-2.5 py-1.5 font-display text-xs font-bold text-bg opacity-0 shadow-xl transition-opacity duration-150 group-hover:opacity-100 group-focus-visible:opacity-100"
+                >
+                  {t(labelKey)}
+                </span>
+              )}
               {active && (
                 <motion.span
                   layoutId="sidebar-active"
@@ -116,13 +123,12 @@ export function Sidebar() {
         <ThemeToggle
           showLabel={!collapsed}
           className={
-            collapsed ? "size-11 justify-center px-0 [&_span]:hidden" : "w-full justify-start"
+            collapsed ? "size-11 justify-center px-0" : "w-full justify-start"
           }
         />
         <LangToggle
-          className={
-            collapsed ? "size-11 justify-center px-0 [&_span]:hidden" : "w-full justify-start"
-          }
+          iconOnly={collapsed}
+          className={collapsed ? "size-11 justify-center px-0" : "w-full justify-start"}
         />
       </div>
     </aside>

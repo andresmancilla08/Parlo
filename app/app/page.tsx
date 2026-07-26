@@ -344,15 +344,16 @@ function FeaturePanel({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ ...spring, delay: 0.04 }}
-      className="relative mt-6 overflow-hidden rounded-[26px] bg-gradient-panel p-6 text-white shadow-2xl shadow-[#171033]/40"
+      className="mt-6 flex items-end gap-3 rounded-[26px] bg-gradient-panel p-6 text-white shadow-2xl shadow-[#171033]/40"
     >
+      <div className="min-w-0 flex-1">
       <p className="font-display text-xs font-extrabold uppercase tracking-[0.14em] text-gem">
         {kicker}
       </p>
-      <h2 className="mt-2.5 max-w-[66%] font-display text-3xl font-extrabold leading-[1.02] tracking-tight">
+      <h2 className="mt-2.5 font-display text-3xl font-extrabold leading-[1.02] tracking-tight">
         {title}
       </h2>
-      <p className="mt-2 max-w-[64%] text-sm font-semibold text-white/70">{subtitle}</p>
+      <p className="mt-2 text-sm font-semibold text-white/70">{subtitle}</p>
 
       <Link
         href={href}
@@ -362,7 +363,7 @@ function FeaturePanel({
         <IconArrowRight className="size-5" />
       </Link>
 
-      <div className="mt-5 h-1.5 max-w-[64%] overflow-hidden rounded-pill bg-white/20">
+      <div className="mt-5 h-1.5 overflow-hidden rounded-pill bg-white/20">
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${Math.round(progress * 100)}%` }}
@@ -371,12 +372,15 @@ function FeaturePanel({
         />
       </div>
 
+      </div>
+
+      {/* Columna propia: nada de posición absoluta, así ningún borde la corta. */}
       <Image
         src={mascotCelebrate}
         alt=""
         height={158}
         width={Math.round((158 * mascotCelebrate.width) / mascotCelebrate.height)}
-        className="pointer-events-none absolute bottom-3 right-3 h-[122px] w-auto max-w-[38%] select-none object-contain drop-shadow-xl sm:h-[150px]"
+        className="pointer-events-none hidden h-[132px] w-auto shrink-0 select-none object-contain drop-shadow-xl min-[420px]:block sm:h-[158px]"
         priority
       />
     </motion.div>
