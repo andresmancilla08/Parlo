@@ -19,7 +19,8 @@
     "ruta": "Ruta",
     "tutor": "Tutor",
     "perfil": "Perfil",
-    "retos": "Retos"
+    "retos": "Retos",
+    "practica": "Practicar"
   },
   "landing": {
     "badge": "Tu tutor de inglés con IA, en español",
@@ -190,6 +191,33 @@
       "Let's do a job interview in English 💼",
       "Help me introduce myself 🙋"
     ]
+  },
+  "practica": {
+    "kicker": "Entrenar hablando",
+    "title": "Conversación con corrección",
+    "subtitle": "Habla como en la vida real. Si te equivocas, te corrijo antes de seguir y te explico por qué.",
+    "scenario_cafe": "En la cafetería",
+    "goal_cafe": "Pedir un café y algo de comer",
+    "scenario_intro": "Presentarte",
+    "goal_intro": "Nombre, de dónde eres, a qué te dedicas",
+    "scenario_travel": "En el aeropuerto",
+    "goal_travel": "Facturar y preguntar por el equipaje",
+    "scenario_doctor": "En el médico",
+    "goal_doctor": "Explicar qué te pasa",
+    "scenario_interview": "Entrevista de trabajo",
+    "goal_interview": "Experiencia, puntos fuertes y motivación",
+    "scenario_flat": "Ver un piso",
+    "goal_flat": "Preguntar por el alquiler y el barrio",
+    "free_title": "Charla libre",
+    "free_body": "Sin guion: hablamos de lo que quieras",
+    "privacy": "Tus mensajes se envían a la IA para corregirlos. No guardamos la conversación.",
+    "change": "Cambiar",
+    "placeholder": "Escribe en inglés…",
+    "thinking": "Pensando…",
+    "error": "No se pudo responder. Vuelve a enviarlo.",
+    "fix_kicker": "Antes de seguir",
+    "rewrite": "Reescribir",
+    "got_it": "Entendido"
   },
   "perfil": {
     "level": "Nivel {{level}}",

@@ -1,6 +1,7 @@
 import {
   IconHome2,
   IconMessageChatbot,
+  IconMessages,
   IconTargetArrow,
   IconUser,
   type Icon,
@@ -10,6 +11,7 @@ import {
 export const navItems: { href: string; labelKey: string; icon: Icon }[] = [
   { href: "/app", labelKey: "nav.ruta", icon: IconHome2 },
   { href: "/app/tutor", labelKey: "nav.tutor", icon: IconMessageChatbot },
+  { href: "/app/practica", labelKey: "nav.practica", icon: IconMessages },
   { href: "/app/retos", labelKey: "nav.retos", icon: IconTargetArrow },
   { href: "/app/perfil", labelKey: "nav.perfil", icon: IconUser },
 ];

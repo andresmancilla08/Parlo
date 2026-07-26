@@ -19,7 +19,8 @@
     "ruta": "Path",
     "tutor": "Tutor",
     "perfil": "Profile",
-    "retos": "Challenges"
+    "retos": "Challenges",
+    "practica": "Practise"
   },
   "landing": {
     "badge": "Your AI English tutor, explained in Spanish",
@@ -190,6 +191,33 @@
       "Let's do a job interview in English 💼",
       "Help me introduce myself 🙋"
     ]
+  },
+  "practica": {
+    "kicker": "Practice by talking",
+    "title": "Conversation with corrections",
+    "subtitle": "Talk like in real life. If you slip up, I correct you before moving on and explain why.",
+    "scenario_cafe": "At the coffee shop",
+    "goal_cafe": "Order a coffee and something to eat",
+    "scenario_intro": "Introducing yourself",
+    "goal_intro": "Name, where you're from, what you do",
+    "scenario_travel": "At the airport",
+    "goal_travel": "Check in and ask about luggage",
+    "scenario_doctor": "At the doctor's",
+    "goal_doctor": "Explain what's wrong",
+    "scenario_interview": "Job interview",
+    "goal_interview": "Experience, strengths and motivation",
+    "scenario_flat": "Viewing a flat",
+    "goal_flat": "Ask about the rent and the area",
+    "free_title": "Free chat",
+    "free_body": "No script: talk about anything",
+    "privacy": "Your messages are sent to the AI to be corrected. We don't store the conversation.",
+    "change": "Change",
+    "placeholder": "Write in English…",
+    "thinking": "Thinking…",
+    "error": "Couldn't reply. Send it again.",
+    "fix_kicker": "Before you continue",
+    "rewrite": "Rewrite",
+    "got_it": "Got it"
   },
   "perfil": {
     "level": "Level {{level}}",
