@@ -76,3 +76,20 @@
 - **Qué:** `BadgeTile` acepta `src` (PNG ilustrado) o `icon` (Tabler). La variante icono se dibuja como moneda: aro `bg-gem` + centro `bg-primary` + icono blanco.
 - **Por qué:** los logros nuevos (racha 30, primera conversación, escuchas) no tienen arte generado; la moneda mantiene la familia visual sin bloquear la feature.
 - **Estado:** vigente; si se genera arte para esos tres, basta pasar `src`.
+
+## Auth: Firebase con correo + PIN de 4 dígitos
+- **Qué:** Firebase Auth (proyecto `parlo-ecdb0`) con correo y PIN de 4 dígitos. Firebase exige 6+ caracteres, así que el PIN se completa con un sufijo fijo (`lib/firebase.ts:pinToPassword` → `pin + "00"`), el mismo patrón que Spendia (`hooks/useAuth.ts`).
+- **Por qué:** el PIN es la UX que el dueño quiere en todos sus productos; la entropía real es la del PIN (10⁴) y Firebase corta la fuerza bruta con `too-many-requests`.
+- **Descartado:** contraseña de 6+ (rompe la UX pedida); enlace mágico (obliga a salir de la app).
+- **Estado:** vigente. Falta activar el proveedor Email/Password en la consola (Spark no permite hacerlo por API).
+
+## `proxy.ts` es gate de UX, no de seguridad
+- **Qué:** la cookie `parlo_session` la escribe el cliente al iniciar sesión y sólo marca "hay sesión"; `proxy.ts` la usa para redirigir a `/login` sin parpadeo.
+- **Por qué:** con Firebase la sesión vive en el cliente (IndexedDB) y verificarla en el servidor exigiría `firebase-admin` + service account. Ninguna página de `/app` renderiza datos privados en servidor: la frontera real son las reglas de Firestore (`request.auth.uid`), que sí se validan en el servidor de Google.
+- **Descartado:** cookie httpOnly firmada tras verificar el ID token (más código y una clave más que custodiar, sin ganancia real).
+- **Estado:** vigente. Si algún día se renderizan datos privados en servidor, hay que verificar el ID token de verdad.
+
+## Progreso: local-first con sync a Firestore
+- **Qué:** el store sigue siendo la fuente de trabajo (zustand persist en localStorage). Al iniciar sesión, `lib/sync.ts` fusiona local↔`users/{uid}` y escribe con debounce de 1,5 s.
+- **Cómo fusiona:** gana lo más avanzado (máximo de xp/gemas/racha/contadores, unión de lecciones, máximo de estrellas, y por carta SRS la de `due` más reciente). Nunca se pierde lo hecho sin red.
+- **Estado:** vigente.
