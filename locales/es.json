@@ -335,5 +335,9 @@
     "step1": "Toca el botón Compartir de Safari",
     "step2": "Elige «Añadir a pantalla de inicio»",
     "step3": "Confirma con «Añadir»"
+  },
+  "menu": {
+    "account": "Tu cuenta",
+    "settings": "Ajustes"
   }
 }

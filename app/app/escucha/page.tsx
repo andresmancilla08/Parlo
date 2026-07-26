@@ -25,7 +25,7 @@ import { Card } from "@/components/ui/card";
 import { BackButton } from "@/components/ui/back-button";
 import { spring } from "@/lib/motion";
 import { cn } from "@/lib/utils";
-import mascotCelebrate from "@/public/brand/mascot-celebrate.png";
+import mascot from "@/public/brand/mascot.png";
 
 export default function EscuchaPage() {
   const router = useRouter();
@@ -182,10 +182,10 @@ function Session({
       <div className="mx-auto grid min-h-dvh w-full max-w-md place-items-center px-6 text-center">
         <motion.div initial={{ opacity: 0, scale: 0.94 }} animate={{ opacity: 1, scale: 1 }} transition={spring}>
           <Image
-            src={mascotCelebrate}
+            src={mascot}
             alt=""
             height={140}
-            width={Math.round((140 * mascotCelebrate.width) / mascotCelebrate.height)}
+            width={Math.round((140 * mascot.width) / mascot.height)}
             className="mx-auto"
             priority
           />

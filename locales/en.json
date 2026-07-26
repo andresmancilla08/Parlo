@@ -335,5 +335,9 @@
     "step1": "Tap Safari's Share button",
     "step2": "Choose “Add to Home Screen”",
     "step3": "Confirm with “Add”"
+  },
+  "menu": {
+    "account": "Your account",
+    "settings": "Settings"
   }
 }

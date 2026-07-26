@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { spring } from "@/lib/motion";
 import { cn } from "@/lib/utils";
-import mascotCelebrate from "@/public/brand/mascot-celebrate.png";
+import mascot from "@/public/brand/mascot.png";
 
 export default function TestPage() {
   const { t } = useTranslation();
@@ -118,10 +118,10 @@ function Outcome({ result }: { result: PlacementResult }) {
         transition={spring}
       >
         <Image
-          src={mascotCelebrate}
+          src={mascot}
           alt=""
           height={150}
-          width={Math.round((150 * mascotCelebrate.width) / mascotCelebrate.height)}
+          width={Math.round((150 * mascot.width) / mascot.height)}
           className="mx-auto"
           priority
         />

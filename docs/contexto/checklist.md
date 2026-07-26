@@ -159,6 +159,8 @@ Riesgos: calidad de voz desigual por dispositivo (mitigación: selector de voz +
 - **Sesión**: con cookie de presencia, `/`, `/login` y `/registro` redirigen a `/app`; sin ella, `/app/*` va a `/login`. `app/not-found.tsx` (server) manda a `/app` o a la landing según haya sesión.
 - **Volver**: `BackButton` (admite `href` o `onClick`) en todas las subvistas: conversación, escucha y lector.
 - Barra móvil: el pill activo lleva `0.5rem` de aire abajo más el área segura.
+- **Menú de cuenta** al pie del lateral (`components/app/sidebar-menu.tsx`): panel translúcido (vidrio: `bg-surface/70` + `backdrop-blur-2xl` + borde de luz) con apariencia, idioma, perfil y **cerrar sesión**, sin tener que ir al perfil. Cierra al pulsar fuera o con Escape. El `aside` va con `overflow-visible` para que el panel no se recorte.
+- **Mascota**: `mascot-celebrate.png` retirada de la app; se usa `mascot.png` (la del landing) en home, test, escucha y fin de lección. Ambas tenían un **velo semitransparente** (alpha 1-19: 13.710 y 19.124 px) que sobre fondo oscuro se veía como un recuadro; eliminado y lienzo recortado.
 
 ## 8. Decisiones de IA y voz (verificado 2026-07-26)
 

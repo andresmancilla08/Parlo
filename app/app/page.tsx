@@ -28,7 +28,7 @@ import { dueCardKeys, todayXp, useProgress } from "@/lib/progress";
 import { useAuth } from "@/lib/auth";
 import { useHydrated } from "@/lib/use-hydrated";
 import { PwaInstall } from "@/components/ui/pwa-install";
-import mascotCelebrate from "@/public/brand/mascot-celebrate.png";
+import mascot from "@/public/brand/mascot.png";
 
 export default function HomePage() {
   const { t, i18n } = useTranslation();
@@ -376,10 +376,10 @@ function FeaturePanel({
 
       {/* Columna propia: nada de posición absoluta, así ningún borde la corta. */}
       <Image
-        src={mascotCelebrate}
+        src={mascot}
         alt=""
         height={158}
-        width={Math.round((158 * mascotCelebrate.width) / mascotCelebrate.height)}
+        width={Math.round((158 * mascot.width) / mascot.height)}
         className="pointer-events-none hidden h-[132px] w-auto shrink-0 select-none object-contain drop-shadow-xl min-[420px]:block sm:h-[158px]"
         priority
       />

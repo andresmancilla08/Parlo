@@ -10,8 +10,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import Image from "next/image";
 import { Logo } from "@/components/ui/logo";
 import logoMark from "@/public/brand/logo-mark.png";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { LangToggle } from "@/components/ui/lang-toggle";
+import { SidebarMenu } from "@/components/app/sidebar-menu";
 import { navItems } from "@/lib/nav-items";
 import { cn } from "@/lib/utils";
 
@@ -36,8 +35,8 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "sticky top-0 hidden h-dvh shrink-0 flex-col border-r border-border bg-surface/60 pb-8 pt-6 transition-[width] duration-150 md:flex",
-        collapsed ? "w-[4.5rem] overflow-visible px-2" : "w-60 overflow-y-auto overflow-x-hidden px-4",
+        "sticky top-0 hidden h-dvh shrink-0 flex-col overflow-visible border-r border-border bg-surface/60 pb-8 pt-6 transition-[width] duration-150 md:flex",
+        collapsed ? "w-[4.5rem] px-2" : "w-60 px-4",
       )}
     >
       <div
@@ -119,17 +118,8 @@ export function Sidebar() {
         })}
       </nav>
 
-      <div className={cn("mt-auto flex flex-col gap-2 pt-6", collapsed && "items-center")}>
-        <ThemeToggle
-          showLabel={!collapsed}
-          className={
-            collapsed ? "size-11 justify-center px-0" : "w-full justify-start"
-          }
-        />
-        <LangToggle
-          iconOnly={collapsed}
-          className={collapsed ? "size-11 justify-center px-0" : "w-full justify-start"}
-        />
+      <div className="mt-auto pt-6">
+        <SidebarMenu collapsed={collapsed} />
       </div>
     </aside>
   );

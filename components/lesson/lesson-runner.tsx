@@ -18,7 +18,7 @@ import { speak } from "@/lib/tts";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { spring } from "@/lib/motion";
-import mascotCelebrate from "@/public/brand/mascot-celebrate.png";
+import mascot from "@/public/brand/mascot.png";
 
 function normalize(s: string): string {
   return s
@@ -397,10 +397,10 @@ function Complete({
         transition={spring}
       >
         <Image
-          src={mascotCelebrate}
+          src={mascot}
           alt=""
           height={160}
-          width={Math.round((160 * mascotCelebrate.width) / mascotCelebrate.height)}
+          width={Math.round((160 * mascot.width) / mascot.height)}
           className="mx-auto"
           priority
         />
