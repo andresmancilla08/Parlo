@@ -148,6 +148,7 @@ type ProgressState = {
   noteTutorMessage: () => void;
   noteListen: () => void;
   completeListening: (correct: number, total: number) => void;
+  addCard: (key: string) => void;
   setGoal: (xp: number) => void;
   setStartLevel: (level: Cefr) => void;
   claimChallenge: (challenge: Challenge) => void;
@@ -289,6 +290,10 @@ export const useProgress = create<ProgressState>()(
             ...(streak ?? {}),
           };
         }),
+
+      /** Guarda una palabra suelta (del lector) en el repaso espaciado. */
+      addCard: (key) =>
+        set((s) => (s.cards[key] ? {} : { cards: { ...s.cards, [key]: newCard(key, Date.now()) } })),
 
       setGoal: (xp) => set({ goalXp: xp }),
 

@@ -21,9 +21,9 @@ export default function manifest(): MetadataRoute.Manifest {
         icons: [{ src: "/icon-192.png", sizes: "192x192" }],
       },
       {
-        name: "Hablar con el tutor",
-        short_name: "Tutor",
-        url: "/app/tutor",
+        name: "Leer un documento",
+        short_name: "Leer",
+        url: "/app/leer",
         icons: [{ src: "/icon-192.png", sizes: "192x192" }],
       },
       {

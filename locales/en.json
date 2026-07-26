@@ -17,10 +17,10 @@
     "login": "Log in",
     "signup": "Get started",
     "ruta": "Path",
-    "tutor": "Tutor",
     "perfil": "Profile",
     "retos": "Challenges",
-    "practica": "Practise"
+    "practica": "Practise",
+    "leer": "Read"
   },
   "landing": {
     "badge": "Your AI English tutor, explained in Spanish",
@@ -181,20 +181,6 @@
     "banner_cta": "Take the test",
     "redo": "Retake the placement test"
   },
-  "tutor": {
-    "title": "Parlo Tutor",
-    "subtitle": "Speak, write and learn with AI",
-    "empty_title": "Let's practice English!",
-    "empty_body": "Write anything or pick a situation. I'll correct you and explain in Spanish.",
-    "placeholder": "Write in English…",
-    "error": "Something went wrong with the tutor. Please try again.",
-    "retry": "Retry",
-    "starters": [
-      "Hi! I want to practice ordering coffee ☕",
-      "Let's do a job interview in English 💼",
-      "Help me introduce myself 🙋"
-    ]
-  },
   "practica": {
     "kicker": "Practice by talking",
     "title": "Conversation with corrections",
@@ -245,6 +231,36 @@
     "again": "Another piece",
     "exit": "Exit",
     "home_cta": "Train your ear"
+  },
+  "leer": {
+    "kicker": "Your documents",
+    "title": "Read in English",
+    "subtitle": "Upload a text or PDF and read it with audio, translation and word meanings.",
+    "upload": "Upload a document",
+    "upload_hint": "TXT, MD or PDF · stays on your device",
+    "reading": "Reading the file…",
+    "library": "Your library",
+    "empty": "You haven't uploaded anything yet.",
+    "meta": "{{kb}} KB · {{n}} sentences",
+    "remove": "Remove document",
+    "privacy": "Documents are stored on this device only. Individual sentences are sent to the AI when you ask for a translation.",
+    "err_empty": "That file is empty.",
+    "err_type": "Unsupported format. Use TXT, MD or PDF.",
+    "err_scanned": "That PDF is a scanned image with no readable text.",
+    "err_read": "Couldn't read the file.",
+    "not_found": "That document is gone.",
+    "back": "Back to the library",
+    "search": "Search in the document",
+    "results": "{{n}} sentences found",
+    "show_es": "Show Spanish",
+    "only_en": "English only",
+    "play": "Read aloud",
+    "stop": "Stop reading",
+    "close": "Close",
+    "word_error": "Couldn't look up the word.",
+    "save_word": "Add to review",
+    "saved": "Added to review",
+    "home_cta": "Read a document"
   },
   "perfil": {
     "level": "Level {{level}}",

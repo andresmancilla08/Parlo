@@ -17,10 +17,10 @@
     "login": "Entrar",
     "signup": "Empezar gratis",
     "ruta": "Ruta",
-    "tutor": "Tutor",
     "perfil": "Perfil",
     "retos": "Retos",
-    "practica": "Practicar"
+    "practica": "Practicar",
+    "leer": "Leer"
   },
   "landing": {
     "badge": "Tu tutor de inglés con IA, en español",
@@ -181,20 +181,6 @@
     "banner_cta": "Hacer el test",
     "redo": "Rehacer el test de nivel"
   },
-  "tutor": {
-    "title": "Tutor Parlo",
-    "subtitle": "Habla, escribe y aprende con IA",
-    "empty_title": "¡Practiquemos inglés!",
-    "empty_body": "Escribe lo que quieras o elige una situación. Te corrijo y te explico en español.",
-    "placeholder": "Escribe en inglés…",
-    "error": "Algo salió mal con el tutor. Inténtalo de nuevo.",
-    "retry": "Reintentar",
-    "starters": [
-      "Hi! I want to practice ordering coffee ☕",
-      "Let's do a job interview in English 💼",
-      "Help me introduce myself 🙋"
-    ]
-  },
   "practica": {
     "kicker": "Entrenar hablando",
     "title": "Conversación con corrección",
@@ -245,6 +231,36 @@
     "again": "Otra pieza",
     "exit": "Salir",
     "home_cta": "Entrenar el oído"
+  },
+  "leer": {
+    "kicker": "Tus documentos",
+    "title": "Lee en inglés",
+    "subtitle": "Sube un texto o un PDF y léelo con voz, traducción y significado de cada palabra.",
+    "upload": "Subir un documento",
+    "upload_hint": "TXT, MD o PDF · se queda en tu dispositivo",
+    "reading": "Leyendo el archivo…",
+    "library": "Tu biblioteca",
+    "empty": "Todavía no has subido nada.",
+    "meta": "{{kb}} KB · {{n}} frases",
+    "remove": "Quitar el documento",
+    "privacy": "Los documentos se guardan solo en este dispositivo. Al pedir traducción se envían frases sueltas a la IA.",
+    "err_empty": "Ese archivo está vacío.",
+    "err_type": "Formato no admitido. Usa TXT, MD o PDF.",
+    "err_scanned": "Ese PDF es una imagen escaneada y no tiene texto que leer.",
+    "err_read": "No se pudo leer el archivo.",
+    "not_found": "Ese documento ya no está.",
+    "back": "Volver a la biblioteca",
+    "search": "Buscar en el documento",
+    "results": "{{n}} frases encontradas",
+    "show_es": "Ver en español",
+    "only_en": "Solo inglés",
+    "play": "Leer en voz alta",
+    "stop": "Parar la lectura",
+    "close": "Cerrar",
+    "word_error": "No se pudo consultar la palabra.",
+    "save_word": "Añadir al repaso",
+    "saved": "Añadida al repaso",
+    "home_cta": "Leer un documento"
   },
   "perfil": {
     "level": "Nivel {{level}}",
