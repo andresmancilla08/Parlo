@@ -220,7 +220,8 @@
     "error": "Couldn't reply. Send it again.",
     "fix_kicker": "Before you continue",
     "rewrite": "Rewrite",
-    "got_it": "Got it"
+    "got_it": "Got it",
+    "scenarios": "Talk to the AI"
   },
   "escucha": {
     "kicker": "Active listening",
@@ -289,7 +290,12 @@
     "export": "Download backup",
     "import": "Restore backup",
     "import_ok": "{{n}} songs restored",
-    "import_error": "That file isn't a valid backup."
+    "import_error": "That file isn't a valid backup.",
+    "src_fetch": "Fetch lyrics automatically",
+    "src_ok": "Lyrics fetched (licensed excerpt)",
+    "src_missing_key": "Musixmatch key not configured",
+    "src_not_found": "That song isn't in the source",
+    "src_error": "Couldn't fetch the lyrics"
   },
   "perfil": {
     "level": "Level {{level}}",

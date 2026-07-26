@@ -113,7 +113,12 @@ function Picker({
   onPick: (s: Song) => void;
 }) {
   const { t, i18n } = useTranslation();
-  const [adding, setAdding] = useState<{ open: boolean; preset?: string }>({ open: false });
+  const [adding, setAdding] = useState<{
+    open: boolean;
+    preset?: string;
+    /** Sugerencia desde la que se abrió (para mostrar el formulario ahí mismo). */
+    fromId?: string;
+  }>({ open: false });
   const remove = useUserSongs((s) => s.remove);
   const groups = suggestionsByLevel();
   const have = new Set(songs.map((s) => s.title.toLowerCase()));
@@ -170,7 +175,7 @@ function Picker({
         </Card>
       </button>
 
-      {adding.open && (
+      {adding.open && !adding.fromId && (
         <AddForm preset={adding.preset} onDone={() => setAdding({ open: false })} />
       )}
 
@@ -236,8 +241,23 @@ function Picker({
                 key={sug.id}
                 suggestion={sug}
                 done={have.has(sug.title.toLowerCase())}
-                onAdd={() => setAdding({ open: true, preset: `${sug.title} — ${sug.artist}` })}
-              />
+                open={adding.fromId === sug.id}
+                onAdd={() =>
+                  setAdding((prev) =>
+                    prev.fromId === sug.id
+                      ? { open: false }
+                      : { open: true, preset: `${sug.title} — ${sug.artist}`, fromId: sug.id },
+                  )
+                }
+              >
+                {adding.fromId === sug.id && (
+                  <AddForm
+                    preset={adding.preset}
+                    suggestion={sug}
+                    onDone={() => setAdding({ open: false })}
+                  />
+                )}
+              </SuggestionRow>
             ))}
           </div>
         </div>
@@ -250,31 +270,45 @@ function Picker({
 function SuggestionRow({
   suggestion,
   done,
+  open,
   onAdd,
+  children,
 }: {
   suggestion: SongSuggestion;
   done: boolean;
+  /** El formulario está abierto para esta canción. */
+  open: boolean;
   onAdd: () => void;
+  children?: React.ReactNode;
 }) {
   const { t } = useTranslation();
   return (
-    <Card className={cn("p-3", done && "opacity-60")}>
-      <div className="flex items-center gap-3">
-        <button
-          onClick={onAdd}
-          disabled={done}
-          className="min-w-0 flex-1 text-left active:scale-[0.99]"
-        >
+    <Card className={cn("p-3", done && "opacity-60", open && "border-primary")}>
+      <button
+        onClick={onAdd}
+        disabled={done}
+        className="flex w-full items-center gap-3 text-left active:scale-[0.99]"
+      >
+        <span className="min-w-0 flex-1">
           <span className="block line-clamp-1 text-sm font-extrabold">{suggestion.title}</span>
           <span className="block line-clamp-1 text-xs font-bold text-muted">
             {suggestion.artist} · {suggestion.year}
           </span>
           <span className="mt-0.5 block line-clamp-2 text-xs text-muted">{suggestion.why}</span>
-        </button>
-        <span className="shrink-0 text-xs font-extrabold text-primary-ink">
-          {done ? t("canciones.have") : t("canciones.put_lyrics")}
         </span>
-      </div>
+        <span
+          className={cn(
+            "shrink-0 rounded-pill px-3 py-1.5 text-xs font-extrabold",
+            done
+              ? "text-muted"
+              : open
+                ? "bg-primary text-primary-fg"
+                : "bg-primary-soft text-primary-ink",
+          )}
+        >
+          {done ? t("canciones.have") : open ? t("canciones.close") : t("canciones.put_lyrics")}
+        </span>
+      </button>
       {!done && (
         <div className="mt-2 flex flex-wrap gap-2">
           <a
@@ -297,6 +331,7 @@ function SuggestionRow({
           </a>
         </div>
       )}
+      {children}
     </Card>
   );
 }
@@ -412,10 +447,47 @@ function VideoField({ songId }: { songId: string }) {
   );
 }
 
-function AddForm({ onDone, preset }: { onDone: () => void; preset?: string }) {
+function AddForm({
+  onDone,
+  preset,
+  suggestion,
+}: {
+  onDone: () => void;
+  preset?: string;
+  /** Si viene del catálogo, se puede pedir la letra a la fuente con licencia. */
+  suggestion?: SongSuggestion;
+}) {
   const { t } = useTranslation();
   const add = useUserSongs((s) => s.add);
   const [title, setTitle] = useState(preset ?? "");
+  const [fetching, setFetching] = useState(false);
+  const [credit, setCredit] = useState<string | null>(null);
+  const [sourceMsg, setSourceMsg] = useState<string | null>(null);
+
+  /** Trae el fragmento con licencia de Musixmatch y rellena el cuadro. */
+  async function fetchLyrics() {
+    if (!suggestion) return;
+    setFetching(true);
+    setSourceMsg(null);
+    try {
+      const res = await fetch("/api/lyrics-source", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ title: suggestion.title, artist: suggestion.artist }),
+      });
+      if (res.status === 503) return setSourceMsg(t("canciones.src_missing_key"));
+      if (res.status === 404) return setSourceMsg(t("canciones.src_not_found"));
+      if (!res.ok) return setSourceMsg(t("canciones.src_error"));
+      const data = (await res.json()) as { lines: string[]; copyright: string };
+      setLyrics(data.lines.join("\n"));
+      setCredit(data.copyright);
+      setSourceMsg(t("canciones.src_ok"));
+    } catch {
+      setSourceMsg(t("canciones.src_error"));
+    } finally {
+      setFetching(false);
+    }
+  }
   const [url, setUrl] = useState("");
   const [lyrics, setLyrics] = useState("");
   const [duration, setDuration] = useState("");
@@ -432,7 +504,7 @@ function AddForm({ onDone, preset }: { onDone: () => void; preset?: string }) {
       setError(result.error === "url" ? t("canciones.err_url") : t("canciones.err_lyrics"));
       return;
     }
-    add(result);
+    add(credit ? { ...result, credit, source: "licensed" } : result);
     onDone();
   }
 
@@ -451,6 +523,22 @@ function AddForm({ onDone, preset }: { onDone: () => void; preset?: string }) {
         inputMode="url"
         className="w-full rounded-xl border border-border bg-surface px-3 py-2.5 text-sm font-semibold outline-none focus:border-primary"
       />
+      {suggestion && (
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="secondary"
+            className="shrink-0 px-3 py-2 text-xs"
+            disabled={fetching}
+            onClick={fetchLyrics}
+          >
+            <IconDownload className="size-4" />
+            {fetching ? t("practica.thinking") : t("canciones.src_fetch")}
+          </Button>
+          {sourceMsg && (
+            <span className="text-xs font-bold text-muted">{sourceMsg}</span>
+          )}
+        </div>
+      )}
       <textarea
         value={lyrics}
         onChange={(e) => setLyrics(e.target.value)}

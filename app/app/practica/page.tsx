@@ -3,9 +3,12 @@
 import { useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import Link from "next/link";
 import {
   IconArrowRight,
   IconBriefcase,
+  IconHeadphones,
+  IconMusic,
   IconCoffee,
   IconHome2,
   IconPlane,
@@ -78,7 +81,42 @@ function Picker({ onStart }: { onStart: (id: string | null) => void }) {
         <p className="mt-2 text-sm text-muted">{t("practica.subtitle")}</p>
       </motion.header>
 
+      {/* Los otros dos modos de práctica, visibles desde el primer momento */}
       <div className="mt-6 grid gap-2.5 sm:grid-cols-2">
+        <Link href="/app/canciones" className="active:scale-[0.99]">
+          <Card className="flex h-full items-center gap-3.5 border-primary/40 p-4">
+            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-ink">
+              <IconMusic className="size-5" stroke={2.2} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-display text-base font-extrabold">
+                {t("canciones.home_cta")}
+              </span>
+              <span className="block text-xs font-bold text-muted">{t("canciones.subtitle")}</span>
+            </span>
+            <IconArrowRight className="size-5 shrink-0 text-muted" />
+          </Card>
+        </Link>
+        <Link href="/app/escucha" className="active:scale-[0.99]">
+          <Card className="flex h-full items-center gap-3.5 p-4">
+            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent-ink">
+              <IconHeadphones className="size-5" stroke={2.2} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-display text-base font-extrabold">
+                {t("escucha.home_cta")}
+              </span>
+              <span className="block text-xs font-bold text-muted">{t("escucha.subtitle")}</span>
+            </span>
+            <IconArrowRight className="size-5 shrink-0 text-muted" />
+          </Card>
+        </Link>
+      </div>
+
+      <p className="mt-8 mb-2 font-display text-xs font-extrabold uppercase tracking-[0.14em] text-muted">
+        {t("practica.scenarios")}
+      </p>
+      <div className="grid gap-2.5 sm:grid-cols-2">
         {SCENARIOS.map((s) => {
           const Icon = SCENARIO_ICON[s.id] ?? IconUsers;
           return (

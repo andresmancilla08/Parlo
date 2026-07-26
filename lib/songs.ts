@@ -128,10 +128,7 @@ export function songFromUser(input: UserSongInput): Song | { error: string } {
   const youtubeId = youtubeIdFrom(input.youtubeUrl);
   if (!youtubeId) return { error: "url" };
 
-  const texts = input.lyrics
-    .split("\n")
-    .map((l) => l.trim())
-    .filter(Boolean);
+  const texts = cleanLyrics(input.lyrics);
   if (texts.length === 0) return { error: "lyrics" };
 
   const per = input.durationSec ? input.durationSec / texts.length : 3.5;
@@ -144,6 +141,20 @@ export function songFromUser(input: UserSongInput): Song | { error: string } {
     youtubeId,
     lines: texts.map((text, i) => ({ t: Math.round(i * per), text })),
   };
+}
+
+/**
+ * Limpia lo que se pega desde una web de letras: quita líneas vacías y las
+ * marcas de sección ([Verse 1], [Chorus], [Puente]…), que no se cantan.
+ */
+export function cleanLyrics(raw: string): string[] {
+  return raw
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .filter((l) => !/^[[(\u3010].{0,40}[\])\u3011]$/.test(l))
+    .map((l) => l.replace(/\s*[[(]\s*x\s*\d+\s*[\])]\s*$/i, "").trim())
+    .filter(Boolean);
 }
 
 /** Línea que suena en el segundo dado (la última que ya empezó). */

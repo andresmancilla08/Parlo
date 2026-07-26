@@ -220,7 +220,8 @@
     "error": "No se pudo responder. Vuelve a enviarlo.",
     "fix_kicker": "Antes de seguir",
     "rewrite": "Reescribir",
-    "got_it": "Entendido"
+    "got_it": "Entendido",
+    "scenarios": "Conversar con la IA"
   },
   "escucha": {
     "kicker": "Escucha activa",
@@ -289,7 +290,12 @@
     "export": "Descargar copia",
     "import": "Restaurar copia",
     "import_ok": "Restauradas {{n}} canciones",
-    "import_error": "Ese archivo no es una copia válida."
+    "import_error": "Ese archivo no es una copia válida.",
+    "src_fetch": "Traer letra automáticamente",
+    "src_ok": "Letra traída (fragmento con licencia)",
+    "src_missing_key": "Falta configurar la clave de Musixmatch",
+    "src_not_found": "Esa canción no está en la fuente",
+    "src_error": "No se pudo traer la letra"
   },
   "perfil": {
     "level": "Nivel {{level}}",
