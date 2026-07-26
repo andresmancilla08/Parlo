@@ -329,9 +329,9 @@ function GoalRing({
           />
         )}
       </svg>
-      <span className="absolute inset-0 grid place-items-center leading-none">
+      <span className="absolute inset-0 flex flex-col items-center justify-center leading-none">
         <span className="font-display text-xl font-extrabold">{label}</span>
-        <span className="mt-6 text-[0.65rem] font-bold text-white/60">{sub}</span>
+        <span className="mt-0.5 text-[0.68rem] font-bold text-white/60">{sub}</span>
       </span>
     </div>
   );
