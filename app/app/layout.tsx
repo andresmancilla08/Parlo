@@ -8,6 +8,7 @@ import { useProgressSync } from "@/lib/sync";
 import { AppBar } from "@/components/app/app-bar";
 import { BottomNav } from "@/components/app/bottom-nav";
 import { Sidebar } from "@/components/app/sidebar";
+import { VerifyBanner } from "@/components/app/verify-banner";
 
 /**
  * Rutas en MODO FOCO: mientras practicas no hay barras ni pestañas. La única
@@ -50,6 +51,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <Sidebar />
       <div className="flex min-h-dvh flex-1 flex-col">
         <AppBar />
+        {/* Fuera del modo foco: nunca interrumpe una lección a medias. */}
+        <VerifyBanner />
         <main className="flex-1 pb-24 md:pb-10">{children}</main>
       </div>
       <BottomNav />

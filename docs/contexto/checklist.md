@@ -31,6 +31,7 @@ Leyenda de prioridad: **P0** rompe o bloquea · **P1** siguiente entrega · **P2
 - Next.js 16 PWA web-only, Tailwind v4, Vercel Hobby (coste cero verificado), instalable (prompt nativo en Android + pasos en iOS), `safe-area`.
 - i18next **es/en** con paridad de claves y todas las pantallas con `t()`; tema claro/oscuro/sistema.
 - **Firebase real**: Auth correo + PIN de 4 dígitos (`pin+"00"`), Firestore `nam5`, reglas `users/{uid}`, sync local↔nube que conserva lo más avanzado.
+- **Verificación de correo** (§7c): envío al registrarse y aviso reenviable con enfriamiento; puerta suave, nunca bloquea aprender.
 - Seguridad: cabeceras HTTP, cookie de presencia + `proxy.ts` como gate de UX, reglas de Firestore como frontera real, rate-limit del tutor (15/min por IP), tope de 12k caracteres, CVEs de producción a cero.
 - SEO: OG image con `next/og`, `robots.ts`, `sitemap.ts`, metadatos.
 - Marca: paleta definitiva con tokens AA (`*-ink`), mascota loro, logo, favicon, iconos PWA, decorativos en parallax.
@@ -83,7 +84,7 @@ Harness de capturas (dev): `shot.mjs` (Chrome headless por CDP) entra con usuari
 4. ~~M7 · Test de nivel inicial~~ ✅ 12 ítems (4 por nivel), coloca en A1/A2/B1 y abre la ruta desde ahí.
 5. ~~M5 · Entrenador de conversación con corrección~~ ✅ escenarios + puerta de corrección con ejemplos en español.
 6. ~~M9 v1 · Lector de documentos con voz~~ ✅ hecho, y además **bidireccional** (§7).
-7. **Verificación de correo** (`sendEmailVerification`): hoy cualquiera se registra con un correo ajeno.
+7. ~~**Verificación de correo**~~ ✅ (§7c) `sendEmailVerification` al registrarse + aviso reenviable en la app.
 8. **Recordatorio diario** de la racha (Web Push o recordatorio local de la PWA).
 
 ### P2 — Expansión
@@ -161,6 +162,18 @@ Riesgos: calidad de voz desigual por dispositivo (mitigación: selector de voz +
 - Barra móvil: el pill activo lleva `0.5rem` de aire abajo más el área segura.
 - **Menú de cuenta** al pie del lateral (`components/app/sidebar-menu.tsx`): panel translúcido (vidrio: `bg-surface/70` + `backdrop-blur-2xl` + borde de luz) con apariencia, idioma, perfil y **cerrar sesión**, sin tener que ir al perfil. Cierra al pulsar fuera o con Escape. El `aside` va con `overflow-visible` para que el panel no se recorte.
 - **Mascota**: `mascot-celebrate.png` retirada de la app; se usa `mascot.png` (la del landing) en home, test, escucha y fin de lección. Ambas tenían un **velo semitransparente** (alpha 1-19: 13.710 y 19.124 px) que sobre fondo oscuro se veía como un recuadro; eliminado y lienzo recortado.
+
+## 7c. Verificación de correo (2026-07-27)
+
+`lib/auth.ts` + `components/app/verify-banner.tsx`.
+
+- Al **registrarse** se envía `sendEmailVerification` con la URL de retorno `${origin}/app` y el **idioma de la app** (`auth.languageCode` desde `parlo-lang`). Si el dominio no está en «Authorized domains» de Firebase, el SDK rechaza la URL de retorno (`auth/unauthorized-continue-uri`) → **se reintenta sin ella**, antes que dejar al usuario sin correo. El envío nunca bloquea el registro: si falla, el aviso de la app deja reenviarlo.
+- **Aviso reenviable** en `/app` (fuera del modo foco, así no interrumpe una lección): título, correo destino, `Reenviar` con **enfriamiento de 60 s persistido** en `localStorage` (`parlo-verify-sent`, sobrevive recargas) y `Ya lo hice` → `user.reload()`. Se puede cerrar y vuelve en la siguiente sesión (`sessionStorage`).
+- Al **volver a la pestaña** (`visibilitychange`) se relee el usuario: si abrió el enlace en el correo, el aviso desaparece solo sin pedir nada.
+- **Puerta suave a propósito**: aprender nunca se bloquea por el correo sin verificar. La frontera real de datos siguen siendo las reglas de Firestore (`request.auth.uid`); un correo verificado no añade permisos hoy.
+- Color **ámbar** (`bg-warning/12` + `border-warning/40`): el mint de éxito diría «todo en orden». Primer uso del token `warning` en la app.
+- Perfil: chip «Correo verificado» (`success-ink`) bajo la dirección cuando ya está verificado.
+- Verificado con capturas reales a 320/390/1440 en claro y oscuro, y con **envío real** contra Firebase (aviso «Correo enviado», enfriamiento en marcha, «Aún no está verificado» al comprobar antes de abrir el enlace).
 
 ## 8. Decisiones de IA y voz (verificado 2026-07-26)
 

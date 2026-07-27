@@ -2,7 +2,19 @@
   "common": {
     "back": "Back",
     "retry": "Retry",
-    "loading": "Loading…"
+    "loading": "Loading…",
+    "close": "Close"
+  },
+  "verify": {
+    "title": "Verify your email",
+    "body": "We sent a link to {{email}}. Open it to secure your account and keep your progress safe.",
+    "resend": "Resend email",
+    "resend_in": "Resend in {{s}}s",
+    "done": "I already did it",
+    "sent": "Email sent. Check your inbox and spam folder.",
+    "send_failed": "We couldn't send the email. Try again in a moment.",
+    "still_pending": "Not verified yet. Open the link in the email and come back.",
+    "verified": "Email verified"
   },
   "error": {
     "title": "Something went wrong",

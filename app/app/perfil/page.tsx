@@ -9,6 +9,7 @@ import badgeStreak from "@/public/brand/badge-streak.png";
 import badgeWords from "@/public/brand/badge-words.png";
 import {
   IconCalendarStar,
+  IconCircleCheck,
   IconEar,
   IconFlame,
   IconLogout,
@@ -35,6 +36,7 @@ export default function PerfilPage() {
   const { t } = useTranslation();
   const router = useRouter();
   const email = useAuth((s) => s.email);
+  const verified = useAuth((s) => s.emailVerified);
   const logout = useAuth((s) => s.logout);
   const hydrated = useHydrated();
   const streak = useProgress((s) => s.streak);
@@ -76,6 +78,12 @@ export default function PerfilPage() {
         </span>
         <h1 className="mt-4 max-w-full break-words font-display text-xl font-extrabold">{name}</h1>
         <p className="max-w-full break-all text-sm text-muted">{email}</p>
+        {verified && (
+          <span className="mt-1.5 inline-flex items-center gap-1 text-xs font-bold text-success-ink">
+            <IconCircleCheck className="size-4" />
+            {t("verify.verified")}
+          </span>
+        )}
         <span className="mt-3 rounded-pill bg-accent-soft px-3 py-1 text-sm font-bold text-accent-ink">
           {t("perfil.level", { level })}
         </span>

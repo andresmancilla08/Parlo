@@ -2,7 +2,19 @@
   "common": {
     "back": "Volver",
     "retry": "Reintentar",
-    "loading": "Cargando…"
+    "loading": "Cargando…",
+    "close": "Cerrar"
+  },
+  "verify": {
+    "title": "Verifica tu correo",
+    "body": "Te enviamos un enlace a {{email}}. Ábrelo para asegurar tu cuenta y no perder tu progreso.",
+    "resend": "Reenviar correo",
+    "resend_in": "Reenviar en {{s}} s",
+    "done": "Ya lo hice",
+    "sent": "Correo enviado. Revisa tu bandeja y la carpeta de spam.",
+    "send_failed": "No se pudo enviar el correo. Inténtalo de nuevo en un momento.",
+    "still_pending": "Aún no está verificado. Abre el enlace del correo y vuelve aquí.",
+    "verified": "Correo verificado"
   },
   "error": {
     "title": "Algo salió mal",
