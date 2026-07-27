@@ -3,8 +3,22 @@ rules_version = '2';
 // Parlo — cada persona sólo toca SU documento. No hay datos compartidos.
 service cloud.firestore {
   match /databases/{database}/documents {
+    // Usuario de servicio del cron de recordatorios (`/api/reminders`). La
+    // organización de GCP prohíbe crear claves de service account, así que el
+    // cron entra con este usuario de Firebase Auth en vez del Admin SDK.
+    function isCron() {
+      return request.auth != null && request.auth.uid == 'UgqGDgO64fSuLcw8r6bAQJG3L8q2';
+    }
+
     match /users/{uid} {
       allow read, write: if request.auth != null && request.auth.uid == uid;
+
+      // El cron necesita LEER para saber a quién avisar y en qué hora local...
+      allow read: if isCron();
+      // ...y sólo puede tocar el campo `reminder` (marcar `lastSent` o apagar
+      // una suscripción muerta). El progreso del usuario le queda vedado.
+      allow update: if isCron()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['reminder']);
 
       match /{document=**} {
         allow read, write: if request.auth != null && request.auth.uid == uid;

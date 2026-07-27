@@ -186,15 +186,27 @@ Riesgos: calidad de voz desigual por dispositivo (mitigación: selector de voz +
 - **Zonas horarias**: se guarda la **zona IANA** (`Intl…resolvedOptions().timeZone`) y la hora local elegida; el servidor calcula el día y la hora del usuario con `Intl` en cada pasada, así el horario de verano sale gratis. Zona inválida → cae a UTC en vez de romper el cron.
 - **Nunca duplica**: `reminder.lastSent` guarda el **día local** ya avisado. GitHub puede retrasar el disparo unos minutos: el aviso llega tarde, no dos veces.
 - **Suscripciones muertas**: un `404/410` de web-push apaga el recordatorio (`enabled: false`) para no reintentar cada hora.
-- **Servidor**: `firebase-admin` con `FIREBASE_SERVICE_ACCOUNT` (JSON en base64). Sin esa variable o sin claves VAPID el endpoint responde **503** explícito; sin secreto correcto, **401**.
+- **Servidor SIN Admin SDK**: la organización de GCP del proyecto tiene `constraints/iam.disableServiceAccountKeyCreation` **heredada**, así que no se pueden crear claves de service account (y no se debilita la política). En su lugar hay un **usuario de servicio de Firebase Auth** (`parlo-cron@parlo.invalid`, TLD reservado: no recibe correo) cuyas credenciales viven en `CRON_FIREBASE_EMAIL` / `CRON_FIREBASE_PASSWORD`; `lib/firestore-rest.ts` inicia sesión y habla con la **API REST de Firestore** con su idToken. `firebase-admin` se retiró de las dependencias.
+  - `firestore.rules` le da **lectura** de `users/{uid}` (necesaria para la query) y **escritura sólo del campo `reminder`**: `affectedKeys().hasOnly(['reminder'])`. El progreso no lo puede tocar.
+  - El `updateMask` va **anidado** (`reminder.lastSent`): con `updateMask=reminder` se reemplazaría el mapa entero y se perdería la suscripción.
+  - Los enteros llegan como **string** en la REST (`{integerValue:"20"}`): sin convertir, `hour` nunca casaría con la hora local. Cubierto en `lib/firestore-rest.check.ts`.
+- Sin claves VAPID o sin credenciales del cron, el endpoint responde **503** explícito; sin el secreto correcto, **401**. Los fallos de envío vuelven en `errors[]` de la respuesta (es lo único que ve quien dispara el cron).
 - **Cliente**: `pushManager.subscribe()` puede **quedarse colgado para siempre** si el servicio de push no responde (visto en Chrome headless) → `withTimeout` de 15 s, si no el interruptor gira sin fin. Estados de la UI: no compatible (iOS sin instalar la PWA), permiso denegado, error, apagado, activo con selector de hora. Sin claves VAPID en el despliegue la sección **no se muestra**.
 - Textos del aviso en `reminderText()` (el service worker no tiene i18next) y traducidos por `reminder.lang`.
-- Check runnable: `lib/reminders.check.ts` (día/hora local cruzando medianoche, ya practicó, ya avisado, apagado, zona inválida).
+- Checks runnables: `lib/reminders.check.ts` (día/hora local cruzando medianoche, ya practicó, ya avisado, apagado, zona inválida) y `lib/firestore-rest.check.ts` (decodificación de valores REST).
 
-**Configuración pendiente (una vez)**
-1. Service account de Firestore: `gcloud iam service-accounts create parlo-reminders --project=parlo-ecdb0` + rol `roles/datastore.user` + `keys create`, y el JSON en base64 → `FIREBASE_SERVICE_ACCOUNT`.
-2. Variables en Vercel (producción): `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `CRON_SECRET`, `FIREBASE_SERVICE_ACCOUNT`. Los valores de las tres primeras ya están en `.env.local` (generados con `web-push`).
-3. Secreto `CRON_SECRET` en el repositorio de GitHub (Settings → Secrets → Actions) para que el workflow pueda llamar al endpoint.
+**Verificado de punta a punta (2026-07-27, contra Firestore real)**
+- Login del usuario de servicio + query REST → `candidates: 1` (las reglas nuevas permiten la lectura).
+- En su hora local y sin practicar → web-push cifra y hace el POST real; con un endpoint ficticio FCM responde 404 → `dropped: 1` y el recordatorio queda apagado, con el resto del mapa (`subscription`, `hour`, `timeZone`, `lang`) **intacto**.
+- Fuera de su hora local → `skipped: 1`, no se envía nada.
+- Guards: 401 sin secreto, 503 sin configurar.
+- UI del ajuste en 320/390 y claro/oscuro, con el estado activo y el selector de hora.
+
+**Configuración: hecha, salvo un paso**
+- ✅ Variables en Vercel (producción): `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `CRON_SECRET`, `CRON_FIREBASE_EMAIL`, `CRON_FIREBASE_PASSWORD`. Los valores están en `.env.local` (gitignored).
+- ✅ Reglas de Firestore desplegadas con el uid del usuario de servicio.
+- ⏳ Secreto `CRON_SECRET` en el repositorio de GitHub (Settings → Secrets → Actions) para que el workflow pueda llamar al endpoint.
+- Nota: la service account `parlo-reminders@parlo-ecdb0` que se creó al explorar la vía del Admin SDK **ya no se usa** (se puede borrar junto con su binding `roles/datastore.user`).
 
 ## 8. Decisiones de IA y voz (verificado 2026-07-26)
 
