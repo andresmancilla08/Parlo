@@ -29,6 +29,7 @@ import { Card } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { LangToggle } from "@/components/ui/lang-toggle";
 import { VoicePicker } from "@/components/ui/voice-picker";
+import { ReminderSetting } from "@/components/app/reminder-setting";
 import { spring } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
@@ -166,6 +167,11 @@ export default function PerfilPage() {
           <span className="flex-1 text-sm font-bold">{t("test.redo")}</span>
         </Card>
       </Link>
+
+      <div className="mt-8">
+        <p className="mb-2 text-sm font-semibold text-muted">{t("reminder.section")}</p>
+        <ReminderSetting />
+      </div>
 
       <div className="mt-8">
         <p className="mb-2 text-sm font-semibold text-muted">

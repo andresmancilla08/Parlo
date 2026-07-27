@@ -5,6 +5,15 @@
     "loading": "Cargando…",
     "close": "Cerrar"
   },
+  "reminder": {
+    "section": "Recordatorio",
+    "title": "Recuérdame practicar",
+    "on": "Aviso diario a las {{hour}} si no has practicado.",
+    "off": "Un aviso al día para no perder la racha.",
+    "unsupported": "Este navegador no admite avisos. En iPhone, instala Parlo en la pantalla de inicio.",
+    "denied": "Bloqueaste las notificaciones. Actívalas para Parlo en los ajustes del navegador.",
+    "error": "No se pudo activar el aviso. Revisa tu conexión e inténtalo otra vez."
+  },
   "verify": {
     "title": "Verifica tu correo",
     "body": "Te enviamos un enlace a {{email}}. Ábrelo para asegurar tu cuenta y no perder tu progreso.",

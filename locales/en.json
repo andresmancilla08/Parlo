@@ -5,6 +5,15 @@
     "loading": "Loading…",
     "close": "Close"
   },
+  "reminder": {
+    "section": "Reminder",
+    "title": "Remind me to practise",
+    "on": "Daily nudge at {{hour}} if you haven't practised.",
+    "off": "One nudge a day so you don't lose your streak.",
+    "unsupported": "This browser doesn't support notifications. On iPhone, add Parlo to your home screen.",
+    "denied": "You blocked notifications. Enable them for Parlo in your browser settings.",
+    "error": "We couldn't turn the reminder on. Check your connection and try again."
+  },
   "verify": {
     "title": "Verify your email",
     "body": "We sent a link to {{email}}. Open it to secure your account and keep your progress safe.",

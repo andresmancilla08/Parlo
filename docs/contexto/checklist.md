@@ -32,6 +32,7 @@ Leyenda de prioridad: **P0** rompe o bloquea · **P1** siguiente entrega · **P2
 - i18next **es/en** con paridad de claves y todas las pantallas con `t()`; tema claro/oscuro/sistema.
 - **Firebase real**: Auth correo + PIN de 4 dígitos (`pin+"00"`), Firestore `nam5`, reglas `users/{uid}`, sync local↔nube que conserva lo más avanzado.
 - **Verificación de correo** (§7c): envío al registrarse y aviso reenviable con enfriamiento; puerta suave, nunca bloquea aprender.
+- **Recordatorio de racha** (§7d): Web Push con VAPID, hora local elegida por el usuario y cron horario externo; pendiente de configurar secretos.
 - Seguridad: cabeceras HTTP, cookie de presencia + `proxy.ts` como gate de UX, reglas de Firestore como frontera real, rate-limit del tutor (15/min por IP), tope de 12k caracteres, CVEs de producción a cero.
 - SEO: OG image con `next/og`, `robots.ts`, `sitemap.ts`, metadatos.
 - Marca: paleta definitiva con tokens AA (`*-ink`), mascota loro, logo, favicon, iconos PWA, decorativos en parallax.
@@ -41,7 +42,7 @@ Leyenda de prioridad: **P0** rompe o bloquea · **P1** siguiente entrega · **P2
 - Explicación **siempre en español** en cada ejercicio (el diferenciador).
 - SRS SM-2 por ejercicio; repaso con distractores del vocabulario aprendido.
 - Audio (Web Speech) en el enunciado, **en cada opción de respuesta** y en la respuesta correcta del feedback; se omite cuando las opciones están en español (`lib/curriculum/speech.ts`).
-- Checks runnables: `lib/curriculum/data.check.ts`, `lib/gamification.check.ts`, `lib/srs.check.ts`, `lib/rate-limit.check.ts`.
+- Checks runnables: `lib/curriculum/data.check.ts`, `lib/gamification.check.ts`, `lib/srs.check.ts`, `lib/rate-limit.check.ts`, `lib/reminders.check.ts`.
 
 **Gamificación (v1, 2026-07-26)**
 - Objetivo diario de XP configurable (20/50/100) que da gemas y **manda sobre la racha**.
@@ -85,7 +86,7 @@ Harness de capturas (dev): `shot.mjs` (Chrome headless por CDP) entra con usuari
 5. ~~M5 · Entrenador de conversación con corrección~~ ✅ escenarios + puerta de corrección con ejemplos en español.
 6. ~~M9 v1 · Lector de documentos con voz~~ ✅ hecho, y además **bidireccional** (§7).
 7. ~~**Verificación de correo**~~ ✅ (§7c) `sendEmailVerification` al registrarse + aviso reenviable en la app.
-8. **Recordatorio diario** de la racha (Web Push o recordatorio local de la PWA).
+8. ~~**Recordatorio diario** de la racha~~ ✅ (§7d) Web Push + cron horario de GitHub Actions. **Falta configurar** la service account y los secretos (§7d, «Configuración pendiente»).
 
 ### P2 — Expansión
 9. **M6b · fuente de letras con licencia** (§6): integrar **Musixmatch API** (plan gratis = ~30% de la letra + atribución) para no depender de que el usuario pegue la letra. Necesita que Andrés cree su key gratuita. Letras completas de catálogo actual = licencia de pago.
@@ -174,6 +175,26 @@ Riesgos: calidad de voz desigual por dispositivo (mitigación: selector de voz +
 - Color **ámbar** (`bg-warning/12` + `border-warning/40`): el mint de éxito diría «todo en orden». Primer uso del token `warning` en la app.
 - Perfil: chip «Correo verificado» (`success-ink`) bajo la dirección cuando ya está verificado.
 - Verificado con capturas reales a 320/390/1440 en claro y oscuro, y con **envío real** contra Firebase (aviso «Correo enviado», enfriamiento en marcha, «Aún no está verificado» al comprobar antes de abrir el enlace).
+
+## 7d. Recordatorio diario de racha (2026-07-27)
+
+`lib/reminders.ts` (lógica pura) · `lib/push.ts` (cliente) · `app/api/reminders/route.ts` (cron) · `components/app/reminder-setting.tsx` (ajuste en el perfil) · `app/sw.ts` (recibir y abrir) · `.github/workflows/reminder.yml`.
+
+**Mecanismo**: Web Push con VAPID. El navegador se suscribe y la suscripción se guarda en `users/{uid}.reminder` (mismo doc que el progreso: las reglas ya lo protegen). Un **cron horario de GitHub Actions** llama a `POST /api/reminders` con `Authorization: Bearer $CRON_SECRET`; el endpoint recorre los usuarios con `reminder.enabled == true` y avisa a quien esté **en su hora local** y **hoy no haya practicado**.
+
+- **Por qué cron externo y no Vercel Cron**: en Hobby el cron corre **una vez al día**, así que sólo cubriría un huso horario. El endpoint es agnóstico: cualquier cron horario sirve.
+- **Zonas horarias**: se guarda la **zona IANA** (`Intl…resolvedOptions().timeZone`) y la hora local elegida; el servidor calcula el día y la hora del usuario con `Intl` en cada pasada, así el horario de verano sale gratis. Zona inválida → cae a UTC en vez de romper el cron.
+- **Nunca duplica**: `reminder.lastSent` guarda el **día local** ya avisado. GitHub puede retrasar el disparo unos minutos: el aviso llega tarde, no dos veces.
+- **Suscripciones muertas**: un `404/410` de web-push apaga el recordatorio (`enabled: false`) para no reintentar cada hora.
+- **Servidor**: `firebase-admin` con `FIREBASE_SERVICE_ACCOUNT` (JSON en base64). Sin esa variable o sin claves VAPID el endpoint responde **503** explícito; sin secreto correcto, **401**.
+- **Cliente**: `pushManager.subscribe()` puede **quedarse colgado para siempre** si el servicio de push no responde (visto en Chrome headless) → `withTimeout` de 15 s, si no el interruptor gira sin fin. Estados de la UI: no compatible (iOS sin instalar la PWA), permiso denegado, error, apagado, activo con selector de hora. Sin claves VAPID en el despliegue la sección **no se muestra**.
+- Textos del aviso en `reminderText()` (el service worker no tiene i18next) y traducidos por `reminder.lang`.
+- Check runnable: `lib/reminders.check.ts` (día/hora local cruzando medianoche, ya practicó, ya avisado, apagado, zona inválida).
+
+**Configuración pendiente (una vez)**
+1. Service account de Firestore: `gcloud iam service-accounts create parlo-reminders --project=parlo-ecdb0` + rol `roles/datastore.user` + `keys create`, y el JSON en base64 → `FIREBASE_SERVICE_ACCOUNT`.
+2. Variables en Vercel (producción): `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `CRON_SECRET`, `FIREBASE_SERVICE_ACCOUNT`. Los valores de las tres primeras ya están en `.env.local` (generados con `web-push`).
+3. Secreto `CRON_SECRET` en el repositorio de GitHub (Settings → Secrets → Actions) para que el workflow pueda llamar al endpoint.
 
 ## 8. Decisiones de IA y voz (verificado 2026-07-26)
 
