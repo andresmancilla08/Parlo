@@ -242,7 +242,6 @@ Plan en dos capas (coste recurrente 0):
 ## 9. Bloqueado en Andrés
 - Arte de las insignias nuevas y poses de la mascota (pensar/saludar/oops).
 - Decisión de licencia para M6 (§6) y si acepta empezar por podcasts/transcripciones.
-- Rotar la API key de Gemini (se pegó en texto plano en el chat).
 
 ## 10. Cómo se verifica cada cambio
 1. `node --experimental-strip-types lib/curriculum/data.check.ts` (y el check del módulo que se toque).
