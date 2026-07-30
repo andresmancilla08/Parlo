@@ -83,6 +83,22 @@ function Picker({
         <p className="mt-2 text-sm text-muted">{t("escucha.subtitle")}</p>
       </motion.header>
 
+      {/* Antes de practicar, la estrategia: escuchar sin traducir es una
+          técnica que se enseña, no algo que salga solo. */}
+      <div className="mt-6 rounded-2xl border border-border bg-card p-4">
+        <p className="font-display text-xs font-extrabold uppercase tracking-[0.13em] text-accent-ink">
+          {t("escucha.how_title")}
+        </p>
+        <ul className="mt-2 space-y-1.5">
+          {["how_1", "how_2", "how_3"].map((k) => (
+            <li key={k} className="flex gap-2 text-sm font-semibold text-fg/85">
+              <span className="text-accent-ink">·</span>
+              {t(`escucha.${k}`)}
+            </li>
+          ))}
+        </ul>
+      </div>
+
       <p className="mt-6 mb-2 font-display text-xs font-extrabold uppercase tracking-[0.14em] text-muted">
         {t("escucha.difficulty")}
       </p>

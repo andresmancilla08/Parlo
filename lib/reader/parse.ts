@@ -21,7 +21,23 @@ export async function parseFile(file: File): Promise<ParseResult> {
     return { text, title };
   }
 
+  if (file.name.toLowerCase().endsWith(".docx")) {
+    const text = await docxToText(file);
+    return text.trim() ? { text, title } : { error: "empty" };
+  }
+
   return { error: "type" };
+}
+
+/**
+ * DOCX con mammoth, también en diferido. Se pide texto plano (no HTML): el
+ * lector segmenta por frases y el formato no aporta nada.
+ * El `.doc` viejo (binario) NO está soportado: es otro formato.
+ */
+async function docxToText(file: File): Promise<string> {
+  const mammoth = await import("mammoth/mammoth.browser");
+  const { value } = await mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() });
+  return value.replace(/\n{3,}/g, "\n\n").trim();
 }
 
 /** pdf.js se carga sólo cuando hace falta: pesa y no todos suben PDFs. */

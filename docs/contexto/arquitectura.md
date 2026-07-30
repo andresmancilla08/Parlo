@@ -23,7 +23,7 @@ PWA web que enseña inglés a hispanohablantes con currículo por niveles + tuto
 - `docs/` — `roadmap-mvp.md` y `docs/contexto/`.
 
 ## Flujo de datos
-- **Aprendizaje:** currículo curado (semilla) → **teoría** (`getTeach`) → lección → ejercicios → progreso/SRS en Firestore.
+- **Aprendizaje:** currículo curado A1→B2 (24 unidades) → **teoría** (`getTeach`) → lección → ejercicios → progreso/SRS en Firestore.
   Cada lección enseña ANTES de evaluar: `/app/leccion?id=…` arranca en la fase «Aprende» y sólo entra a los
   ejercicios al terminarla (o si `progress.taught` ya la contiene). `?mode=teoria|practica` fuerza una u otra.
 - **IA (tutor/corrección):** cliente → Route Handler `/api/...` → Gemini vía AI SDK (streaming) → respuesta. La clave de IA vive solo en el servidor.

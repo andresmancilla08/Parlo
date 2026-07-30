@@ -19,7 +19,7 @@ export type PlacementItem = {
 };
 
 /** Niveles por los que pasa el test, en orden. */
-export const PLACEMENT_LEVELS: Cefr[] = ["A1", "A2", "B1"];
+export const PLACEMENT_LEVELS: Cefr[] = ["A1", "A2", "B1", "B2"];
 
 /** Ítems por nivel (un bloque). */
 export const BLOCK = 5;
@@ -178,6 +178,58 @@ export const PLACEMENT_ITEMS: PlacementItem[] = [
     explain:
       "Enjoy, avoid, finish y mind piden -ing. Otros verbos (want, decide) piden «to».",
     full: "I really enjoy reading books.",
+  },
+
+  // ---------------- B2 ----------------
+  {
+    id: "p-b2-1",
+    level: "B2",
+    prompt: "«My brother, ___ lives in Paris, is a chef.»",
+    options: ["who", "that", "which", "what"],
+    answer: "who",
+    explain:
+      "En las oraciones entre comas (explicativas) nunca se usa «that»: sólo who para personas y which para cosas.",
+    full: "My brother, who lives in Paris, is a chef.",
+  },
+  {
+    id: "p-b2-2",
+    level: "B2",
+    prompt: "«I had my car ___ yesterday.» (lo llevé al taller)",
+    options: ["repaired", "repair", "repairing", "to repair"],
+    answer: "repaired",
+    explain:
+      "«Have + objeto + participio» = que otro lo haga por ti. «I repaired my car» sería que lo arreglaste tú.",
+    full: "I had my car repaired yesterday.",
+  },
+  {
+    id: "p-b2-3",
+    level: "B2",
+    prompt: "«He stopped ___ two years ago.» (lo dejó)",
+    options: ["smoking", "to smoke", "smoke", "smoked"],
+    answer: "smoking",
+    explain:
+      "«Stop + -ing» = dejar de hacerlo. «Stop to smoke» sería parar PARA fumar: cambia el significado entero.",
+    full: "He stopped smoking two years ago.",
+  },
+  {
+    id: "p-b2-4",
+    level: "B2",
+    prompt: "«It ___ that prices will rise.» (se espera)",
+    options: ["is expected", "expects", "is expecting", "expected"],
+    answer: "is expected",
+    explain:
+      "El «se» impersonal del español se dice con pasiva: it is said / it is expected / it is believed.",
+    full: "It is expected that prices will rise.",
+  },
+  {
+    id: "p-b2-5",
+    level: "B2",
+    prompt: "«She insisted ___ paying for dinner.»",
+    options: ["on", "in", "to", "for"],
+    answer: "on",
+    explain:
+      "«Insist ON», y tras preposición el verbo va en -ing: insist on paying. Nunca «insist to pay».",
+    full: "She insisted on paying for dinner.",
   },
 ];
 

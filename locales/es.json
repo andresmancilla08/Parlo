@@ -153,7 +153,8 @@
     "level_locked": "Se abre al terminar {{prev}}",
     "unit_skipped": "Superada en el test",
     "feature_learn": "Aprender y practicar",
-    "feature_theory_chip": "Primero la teoría"
+    "feature_theory_chip": "Primero la teoría",
+    "level_b2": "Precisión y matiz"
   },
   "retos": {
     "kicker": "Tu avance",
@@ -252,7 +253,11 @@
     "listening": "Te escucho… habla en inglés",
     "mic_denied": "El navegador bloqueó el micrófono. Actívalo en los permisos del sitio.",
     "mic_failed": "No se pudo usar el micrófono. Prueba otra vez o escribe la respuesta.",
-    "starters_title": "Prueba a empezar así"
+    "starters_title": "Prueba a empezar así",
+    "brief_kicker": "Antes de empezar",
+    "brief_phrases": "Frases que te van a servir",
+    "brief_tip": "Consejo",
+    "brief_start": "Empezar la conversación"
   },
   "escucha": {
     "kicker": "Escucha activa",
@@ -276,14 +281,18 @@
     "again": "Otra pieza",
     "exit": "Salir",
     "home_cta": "Entrenar el oído",
-    "play_slow": "Escuchar despacio"
+    "play_slow": "Escuchar despacio",
+    "how_title": "Cómo sacarle partido",
+    "how_1": "Escucha la frase entera antes de escribir nada: el sentido general primero.",
+    "how_2": "Si se te escapa una palabra, dale a la tortuga: la misma frase, más lenta.",
+    "how_3": "No traduzcas mentalmente. Si entiendes la idea, vas bien."
   },
   "leer": {
     "kicker": "Tus documentos",
     "title": "Lee en inglés",
     "subtitle": "Sube un texto o un PDF y léelo con voz, traducción y significado de cada palabra.",
     "upload": "Subir un documento",
-    "upload_hint": "TXT, MD o PDF · se queda en tu dispositivo",
+    "upload_hint": "TXT, MD, PDF o DOCX · se queda en tu dispositivo",
     "reading": "Leyendo el archivo…",
     "library": "Tu biblioteca",
     "empty": "Todavía no has subido nada.",
@@ -291,7 +300,7 @@
     "remove": "Quitar el documento",
     "privacy": "Los documentos se guardan solo en este dispositivo. Al pedir traducción se envían frases sueltas a la IA.",
     "err_empty": "Ese archivo está vacío.",
-    "err_type": "Formato no admitido. Usa TXT, MD o PDF.",
+    "err_type": "Formato no admitido. Usa TXT, MD, PDF o DOCX.",
     "err_scanned": "Ese PDF es una imagen escaneada y no tiene texto que leer.",
     "err_read": "No se pudo leer el archivo.",
     "not_found": "Ese documento ya no está.",
@@ -404,5 +413,26 @@
     "open": "Ver la teoría",
     "wrong_label": "No se dice",
     "right_label": "Se dice"
+  },
+  "pronunciacion": {
+    "kicker": "Pronunciación",
+    "listen_first": "Escúchala y luego repítela",
+    "record": "Grabar mi voz",
+    "again": "Intentar otra vez",
+    "hint": "Pulsa el micro y lee la frase en voz alta",
+    "listening": "Te escucho…",
+    "next": "Otra frase",
+    "rating_great": "¡Clavado!",
+    "rating_good": "Casi perfecto",
+    "rating_retry": "Vuelve a intentarlo",
+    "score_detail": "{{correct}} de {{total}} palabras se entendieron bien",
+    "heard": "Se oyó: «{{text}}»",
+    "empty_title": "Aún no hay frases",
+    "empty_body": "Haz una lección primero: practicarás la pronunciación de lo que acabas de aprender.",
+    "empty_cta": "Ir a mi lección",
+    "unsupported_title": "Tu navegador no escucha",
+    "unsupported_body": "Este navegador no permite reconocer la voz. Prueba en Chrome, Edge o Safari; mientras tanto, entrena el oído.",
+    "home_cta": "Practicar pronunciación",
+    "home_sub": "Lee en voz alta y comprueba si se te entiende"
   }
 }

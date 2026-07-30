@@ -18,7 +18,13 @@ import {
   IconUsers,
   type Icon,
 } from "@tabler/icons-react";
-import { SCENARIOS, scenarioById, type CoachCorrection, type CoachTurn } from "@/lib/coach";
+import {
+  SCENARIOS,
+  scenarioById,
+  type CoachCorrection,
+  type CoachTurn,
+  type Scenario,
+} from "@/lib/coach";
 import { useProgress } from "@/lib/progress";
 import { firstPendingLesson, unitOfLesson } from "@/lib/curriculum";
 import { speak } from "@/lib/tts";
@@ -27,7 +33,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { BackButton } from "@/components/ui/back-button";
 import { SpeakControls } from "@/components/ui/speak-controls";
-import { spring } from "@/lib/motion";
+import { rise, spring, stagger } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
 const SCENARIO_ICON: Record<string, Icon> = {
@@ -50,14 +56,30 @@ const FREE_STARTERS = [
 
 export default function PracticaPage() {
   const [scenarioId, setScenarioId] = useState<string | null>(null);
-  const [started, setStarted] = useState(false);
+  // «picker» → «brief» (se enseña) → «chat» (se practica). La charla libre no
+  // tiene guion que preparar, así que salta el briefing.
+  const [phase, setPhase] = useState<"picker" | "brief" | "chat">("picker");
+  const chosen = scenarioById(scenarioId);
 
-  if (!started) {
+  if (phase === "picker") {
     return (
       <Picker
         onStart={(id) => {
           setScenarioId(id);
-          setStarted(true);
+          setPhase(id ? "brief" : "chat");
+        }}
+      />
+    );
+  }
+
+  if (phase === "brief" && chosen) {
+    return (
+      <Briefing
+        scenario={chosen}
+        onStart={() => setPhase("chat")}
+        onBack={() => {
+          setScenarioId(null);
+          setPhase("picker");
         }}
       />
     );
@@ -67,11 +89,83 @@ export default function PracticaPage() {
     <Conversation
       scenarioId={scenarioId}
       onExit={() => {
-        setStarted(false);
+        setPhase("picker");
         setScenarioId(null);
       }}
       key={scenarioId ?? "free"}
     />
+  );
+}
+
+/* ---------------- briefing: se enseña antes de conversar ---------------- */
+
+function Briefing({
+  scenario,
+  onStart,
+  onBack,
+}: {
+  scenario: Scenario;
+  onStart: () => void;
+  onBack: () => void;
+}) {
+  const { t } = useTranslation();
+  const noteListen = useProgress((s) => s.noteListen);
+
+  return (
+    <div className="mx-auto w-full max-w-2xl px-4 pb-8 pt-5 sm:px-5">
+      <motion.header
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={spring}
+        className="flex items-start gap-3"
+      >
+        <div className="min-w-0 flex-1">
+          <p className="font-display text-xs font-extrabold uppercase tracking-[0.13em] text-accent-ink">
+            {t("practica.brief_kicker")}
+          </p>
+          <h1 className="mt-1.5 font-display text-3xl font-extrabold leading-tight tracking-tight">
+            {t(`practica.scenario_${scenario.id}`)}
+          </h1>
+          <p className="mt-1 text-sm text-muted">
+            {scenario.level} · {t(`practica.goal_${scenario.id}`)}
+          </p>
+        </div>
+        <BackButton onClick={onBack} className="shrink-0 px-3 py-1.5 text-xs" />
+      </motion.header>
+
+      <p className="mt-6 mb-2 font-display text-xs font-extrabold uppercase tracking-[0.14em] text-muted">
+        {t("practica.brief_phrases")}
+      </p>
+      <motion.div variants={stagger} initial="hidden" animate="show" className="grid gap-2.5">
+        {scenario.prep.map((line) => (
+          <motion.div key={line.en} variants={rise}>
+            <Card className="flex items-center gap-3 p-3.5">
+              <span className="min-w-0 flex-1">
+                <span className="block font-display text-base font-extrabold leading-snug">
+                  {line.en}
+                </span>
+                <span className="mt-0.5 block text-sm font-semibold text-muted">{line.es}</span>
+              </span>
+              <SpeakControls text={line.en} onPlay={noteListen} />
+            </Card>
+          </motion.div>
+        ))}
+      </motion.div>
+
+      <div className="mt-4 rounded-2xl bg-accent-soft p-4">
+        <p className="font-display text-xs font-extrabold uppercase tracking-[0.13em] text-accent-ink">
+          {t("practica.brief_tip")}
+        </p>
+        <p className="mt-1 text-sm leading-relaxed text-accent-ink/90">{scenario.tipEs}</p>
+      </div>
+
+      <div className="mt-6">
+        <Button fullWidth shimmer onClick={onStart}>
+          {t("practica.brief_start")}
+          <IconArrowRight className="size-5" />
+        </Button>
+      </div>
+    </div>
   );
 }
 
@@ -91,8 +185,8 @@ function Picker({ onStart }: { onStart: (id: string | null) => void }) {
         <p className="mt-2 text-sm text-muted">{t("practica.subtitle")}</p>
       </motion.header>
 
-      {/* El otro modo de práctica, visible desde el primer momento */}
-      <div className="mt-6 grid gap-2.5">
+      {/* Los otros modos de práctica, visibles desde el primer momento */}
+      <div className="mt-6 grid gap-2.5 sm:grid-cols-2">
         <Link href="/app/escucha" className="active:scale-[0.99]">
           <Card className="flex h-full items-center gap-3.5 p-4">
             <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent-ink">
@@ -103,6 +197,22 @@ function Picker({ onStart }: { onStart: (id: string | null) => void }) {
                 {t("escucha.home_cta")}
               </span>
               <span className="block text-xs font-bold text-muted">{t("escucha.subtitle")}</span>
+            </span>
+            <IconArrowRight className="size-5 shrink-0 text-muted" />
+          </Card>
+        </Link>
+        <Link href="/app/pronunciacion" className="active:scale-[0.99]">
+          <Card className="flex h-full items-center gap-3.5 p-4">
+            <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-ink">
+              <IconMicrophone className="size-5" stroke={2.2} />
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block font-display text-base font-extrabold">
+                {t("pronunciacion.home_cta")}
+              </span>
+              <span className="block text-xs font-bold text-muted">
+                {t("pronunciacion.home_sub")}
+              </span>
             </span>
             <IconArrowRight className="size-5 shrink-0 text-muted" />
           </Card>

@@ -71,3 +71,18 @@
 - **Síntoma:** en Practicar no aparece el botón de micrófono.
 - **Causa real:** Firefox no implementa `SpeechRecognition`; es correcto que no se muestre.
 - **Solución:** ninguna, es a propósito. El campo de texto sigue funcionando igual.
+
+## El desborde de 3px al cambiar de pantalla no es un bug
+- **Síntoma:** `scrollWidth` 3px mayor que `clientWidth` justo tras pulsar «Siguiente».
+- **Causa real:** la tarjeta entra animada desde `x: 24`; mientras dura, el documento es más ancho.
+- **Solución:** medir con la interfaz quieta (≥1,5 s). Con animación en curso, el dato miente.
+
+## El combo de aciertos empujaba el título (ya corregido)
+- **Síntoma:** a partir del tercer acierto seguido, la página desbordaba 23px en móvil.
+- **Causa real:** el chip «3 seguidas» y el título competían en una fila con `pl-12` y sin `min-w-0`.
+- **Solución:** título con `min-w-0 flex-1 line-clamp-1`; el chip `shrink-0`. Patrón a repetir siempre que se añada algo al lado de un texto largo.
+
+## Los tipos de mammoth no valen para el navegador
+- **Síntoma:** `TS7016: Could not find a declaration file for module 'mammoth/mammoth.browser'`.
+- **Causa real:** el paquete tipa el build de Node (que importa `fs`); el de navegador va sin tipos.
+- **Solución:** `types/mammoth-browser.d.ts` declara sólo `extractRawText`. No cambiar el import a `"mammoth"` a secas: eso mete Node en el bundle del cliente.

@@ -23,10 +23,11 @@ import {
 } from "@tabler/icons-react";
 import { optionsSpeakable, type Exercise } from "@/lib/curriculum";
 import { useProgress, type GradedItem, type LessonResult } from "@/lib/progress";
-import { speak } from "@/lib/tts";
+import { RATE_SLOW, speak } from "@/lib/tts";
 import { playComplete, playCorrect, playWrong } from "@/lib/sfx";
 import { Button } from "@/components/ui/button";
 import { SpeakControls } from "@/components/ui/speak-controls";
+import { IconTurtle } from "@/components/ui/icon-turtle";
 import { cn } from "@/lib/utils";
 import { spring } from "@/lib/motion";
 import mascot from "@/public/brand/mascot.png";
@@ -319,17 +320,33 @@ function ChooseView({
               {opt}
             </button>
             {speakable && (
-              <button
-                type="button"
-                onClick={() => {
-                  speak(opt);
-                  noteListen();
-                }}
-                aria-label={t("a11y.listen_option", { text: opt })}
-                className="grid w-14 shrink-0 place-items-center rounded-2xl border-2 border-border bg-card text-accent-ink transition-colors hover:border-accent active:scale-95"
-              >
-                <IconVolume className="size-5" />
-              </button>
+              // Normal arriba, tortuga abajo: la columna entera es zona
+              // táctil, así que cada mitad sigue siendo cómoda de pulsar.
+              <div className="flex w-14 shrink-0 flex-col overflow-hidden rounded-2xl border-2 border-border bg-card">
+                <button
+                  type="button"
+                  onClick={() => {
+                    speak(opt);
+                    noteListen();
+                  }}
+                  aria-label={t("a11y.listen_option", { text: opt })}
+                  className="grid flex-1 place-items-center text-accent-ink transition-colors hover:bg-accent-soft active:scale-95"
+                >
+                  <IconVolume className="size-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    speak(opt, "en", RATE_SLOW);
+                    noteListen();
+                  }}
+                  aria-label={t("a11y.listen_slow", { text: opt })}
+                  title={t("common.slow")}
+                  className="grid flex-1 place-items-center border-t-2 border-border text-accent-ink transition-colors hover:bg-accent-soft active:scale-95"
+                >
+                  <IconTurtle className="size-6" />
+                </button>
+              </div>
             )}
           </div>
         );

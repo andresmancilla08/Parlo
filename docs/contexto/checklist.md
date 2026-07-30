@@ -21,8 +21,8 @@ Leyenda de prioridad: **P0** rompe o bloquea · **P1** siguiente entrega · **P2
 | M6 | Escucha activa con huecos | ✅ v1 (piezas propias de Parlo) | `app/app/escucha`, `lib/listening.ts` |
 | M6b | Canciones con letra | ⛔ **RETIRADO 2026-07-26**: sin licencia no se pueden servir letras de catálogo actual a los usuarios, y el repertorio libre (Jamendo/dominio público) no convence. Queda entero en el historial de git |
 | M7 | Test de nivel inicial (colocación CEFR) | ✅ **v2 adaptativo** | `app/app/test`, `lib/placement.ts` |
-| M8 | Pronunciación (grabar y comparar) | ⛔ idea | — |
-| M9 | **Lector de documentos propios con voz** | ✅ v1 **bidireccional** | `app/app/leer`, `lib/reader/*`, `app/api/translate` |
+| M8 | **Pronunciación (leer en voz alta y puntuar)** | ✅ v1 | `app/app/pronunciacion`, `lib/pronunciation.ts` |
+| M9 | **Lector de documentos propios con voz** | ✅ v2 (DOCX + traducción en voz) | `app/app/leer`, `lib/reader/*`, `app/api/translate` |
 
 ---
 
@@ -54,6 +54,14 @@ Leyenda de prioridad: **P0** rompe o bloquea · **P1** siguiente entrega · **P2
 - **Voz**: botón tortuga (lento) en teoría, feedback, escucha y lector; **dictado por voz** en Practicar; la respuesta del coach **se lee sola la primera vez**.
 - **Animaciones/progreso**: la barra mide lo respondido (no el índice), combo de aciertos seguidos, XP con contador ascendente, confeti al terminar y `MotionConfig reducedMotion="user"` global.
 - Checks nuevos: `lib/curriculum/teach.check.ts` (54 lecciones · 216 pasos · 216 ejemplos) y `lib/placement.check.ts` reescrito.
+
+**Currículo completo A1→B2 y destrezas cerradas (2026-07-30)**
+- **B2 completo**: 6 unidades nuevas (relativos, hipotético avanzado, pasiva avanzada, conectores y matiz, patrones verbales, sonar natural) → **24 unidades / 72 lecciones / 360 ejercicios**, todas con teoría (288 pasos).
+- **Test de nivel hasta B2**: 4 bloques adaptativos de 5 ítems (20 en total).
+- **M8 · Pronunciación** (`/app/pronunciacion`): se lee la frase en voz alta, el reconocedor del navegador transcribe y `lib/pronunciation.ts` compara por subsecuencia común: marca qué palabras se entendieron, da % y XP. Las frases salen de la teoría de las lecciones ya hechas. Check propio con 15 asserts.
+- **M9 v2**: **DOCX** (mammoth en diferido) y **traducción en voz** (la frase traducida se escucha en el otro idioma, normal o lenta).
+- **Briefing antes de practicar**: cada escenario del coach enseña 3 frases con audio + un consejo antes de conversar; la escucha explica la estrategia (`escucha.how_*`).
+- **Tortuga en las opciones** de la lección: altavoz arriba, lento abajo, en la misma columna.
 
 **Gamificación (v1, 2026-07-26)**
 - Objetivo diario de XP configurable (20/50/100) que da gemas y **manda sobre la racha**.
@@ -100,17 +108,17 @@ Harness de capturas (dev): `shot.mjs` (Chrome headless por CDP) entra con usuari
 8. ~~**Recordatorio diario** de la racha~~ ✅ (§7d) Web Push + cron horario de GitHub Actions, **configurado y probado de punta a punta** (2026-07-29).
 
 ### P2 — Expansión
-9. **M6b · fuente de letras con licencia** (§6): integrar **Musixmatch API** (plan gratis = ~30% de la letra + atribución) para no depender de que el usuario pegue la letra. Necesita que Andrés cree su key gratuita. Letras completas de catálogo actual = licencia de pago.
-10. **M9 v2** (§7): EPUB/DOCX, **traducción en voz**, vocabulario del documento al SRS, búsqueda dentro del documento.
-11. **Contenido B2** (6 unidades) y más ejercicios por lección en A2/B1.
+9. ~~M6b · fuente de letras con licencia~~ ⛔ **descartado**: el módulo de canciones se retiró el 2026-07-26 y no se reabre sin licencia.
+10. **M9 v3**: EPUB (necesita epub.js o un lector de zip propio) y vocabulario del documento entero al SRS de una vez. DOCX, traducción en voz y búsqueda ✅ hechos.
+11. ~~Contenido B2~~ ✅ hecho (2026-07-30). Queda **ampliar a 7-8 ejercicios por lección** en A2/B1 (hoy 5) y, más adelante, C1.
 12. **Arte propio** de las 3 insignias nuevas y poses extra de la mascota (las genera Andrés).
-13. **M8 · Pronunciación**: grabar, comparar con la referencia y puntuar.
+13. ~~M8 · Pronunciación~~ ✅ v1 (2026-07-30). **v2**: comparar fonema a fonema o puntuar entonación exigiría un modelo de audio (coste) — aparcado.
 14. Liga/ranking entre amigos (opt-in) y retos compartidos.
 
 ### P3 — Aparcado
 15. Recuperación de PIN (el flujo estándar de Firebase pide 6+ caracteres y rompe `pin+"00"`; haría falta página propia y dominio).
 16. Dominio propio (por ahora se queda la URL de Vercel).
-17. `docs/roadmap-mvp.md` está desactualizado (menciona Claude y stack viejo) → reescribir o retirar.
+17. ~~`docs/roadmap-mvp.md` desactualizado~~ ✅ reescrito el 2026-07-30.
 
 ---
 

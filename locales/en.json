@@ -153,7 +153,8 @@
     "level_locked": "Unlocks after {{prev}}",
     "unit_skipped": "Passed in the test",
     "feature_learn": "Learn and practise",
-    "feature_theory_chip": "Theory first"
+    "feature_theory_chip": "Theory first",
+    "level_b2": "Precision and nuance"
   },
   "retos": {
     "kicker": "Your progress",
@@ -252,7 +253,11 @@
     "listening": "Listening… speak in English",
     "mic_denied": "Your browser blocked the microphone. Allow it in the site permissions.",
     "mic_failed": "Couldn't use the microphone. Try again or type your answer.",
-    "starters_title": "Try starting like this"
+    "starters_title": "Try starting like this",
+    "brief_kicker": "Before you start",
+    "brief_phrases": "Phrases that will help you",
+    "brief_tip": "Tip",
+    "brief_start": "Start the conversation"
   },
   "escucha": {
     "kicker": "Active listening",
@@ -276,14 +281,18 @@
     "again": "Another piece",
     "exit": "Exit",
     "home_cta": "Train your ear",
-    "play_slow": "Listen slowly"
+    "play_slow": "Listen slowly",
+    "how_title": "How to get the most out of it",
+    "how_1": "Listen to the whole sentence before writing anything: get the gist first.",
+    "how_2": "If a word escapes you, tap the turtle: same sentence, slower.",
+    "how_3": "Do not translate in your head. If you get the idea, you are doing fine."
   },
   "leer": {
     "kicker": "Your documents",
     "title": "Read in English",
     "subtitle": "Upload a text or PDF and read it with audio, translation and word meanings.",
     "upload": "Upload a document",
-    "upload_hint": "TXT, MD or PDF · stays on your device",
+    "upload_hint": "TXT, MD, PDF or DOCX · stays on your device",
     "reading": "Reading the file…",
     "library": "Your library",
     "empty": "You haven't uploaded anything yet.",
@@ -291,7 +300,7 @@
     "remove": "Remove document",
     "privacy": "Documents are stored on this device only. Individual sentences are sent to the AI when you ask for a translation.",
     "err_empty": "That file is empty.",
-    "err_type": "Unsupported format. Use TXT, MD or PDF.",
+    "err_type": "Format not supported. Use TXT, MD, PDF or DOCX.",
     "err_scanned": "That PDF is a scanned image with no readable text.",
     "err_read": "Couldn't read the file.",
     "not_found": "That document is gone.",
@@ -404,5 +413,26 @@
     "open": "See the theory",
     "wrong_label": "Don't say",
     "right_label": "Say"
+  },
+  "pronunciacion": {
+    "kicker": "Pronunciation",
+    "listen_first": "Listen, then repeat it",
+    "record": "Record my voice",
+    "again": "Try again",
+    "hint": "Tap the mic and read the sentence out loud",
+    "listening": "Listening…",
+    "next": "Another sentence",
+    "rating_great": "Spot on!",
+    "rating_good": "Almost perfect",
+    "rating_retry": "Give it another go",
+    "score_detail": "{{correct}} of {{total}} words came through clearly",
+    "heard": "Heard: «{{text}}»",
+    "empty_title": "No sentences yet",
+    "empty_body": "Do a lesson first: you will practise the pronunciation of what you have just learnt.",
+    "empty_cta": "Go to my lesson",
+    "unsupported_title": "This browser cannot listen",
+    "unsupported_body": "This browser does not support speech recognition. Try Chrome, Edge or Safari; meanwhile, train your ear.",
+    "home_cta": "Practise pronunciation",
+    "home_sub": "Read out loud and check if you are understood"
   }
 }

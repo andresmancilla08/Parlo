@@ -119,3 +119,23 @@
 - **Dictado (`lib/dictation.ts`):** en Practicar se puede responder hablando con `SpeakRecognition` (Web Speech). No está en las definiciones del DOM: se tipa lo mínimo en el propio archivo. Firefox no la implementa → el botón no se muestra (`useSyncExternalStore`, nunca `setState` en efecto).
 - **Autoplay:** la respuesta del coach se lee sola la primera vez y luego se repite a demanda. Al enviar se corta el micro para que el reconocimiento no se oiga a sí mismo.
 - **Estado:** vigente.
+
+## Pronunciación sin analizar audio (M8)
+- **Qué:** el usuario lee la frase, el reconocedor del navegador la transcribe y `lib/pronunciation.ts` compara la transcripción con la referencia por **subsecuencia común más larga**, marcando qué palabras se entendieron.
+- **Por qué así:** puntuar pronunciación «de verdad» (fonemas, entonación) exige un modelo de audio de pago. El criterio que sí importa al usuario —¿se me entiende?— lo responde gratis el propio reconocedor: si la máquina te entiende, un humano también.
+- **Detalles:** las contracciones se expanden antes de comparar (`I'm` = `I am`), porque eso no es un fallo de pronunciación; la LCS evita que una palabra de más descuadre el resto. Las frases salen de la teoría de las lecciones ya hechas: se practica lo aprendido.
+- **Descartado:** grabar y subir audio a un servicio (coste + privacidad); comparar por posición (una palabra extra rompía la alineación entera).
+- **Estado:** vigente. Cubierto por `lib/pronunciation.check.ts`.
+
+## Briefing antes de conversar y de escuchar
+- **Qué:** cada escenario del coach define `prep` (3 frases con traducción) y `tipEs`, que se muestran ANTES de la conversación. La escucha explica su estrategia en el propio listado.
+- **Por qué:** la regla «enseñar antes de evaluar» valía sólo para lecciones; conversar sin preparación deja al usuario en blanco y la sesión se vuelve una prueba, no una clase.
+- **Excepción:** la charla libre no tiene briefing (no hay guion que preparar), pero sí tres arranques sugeridos.
+- **Estado:** vigente.
+
+## DOCX sí, EPUB todavía no
+- **Qué:** el lector acepta TXT/MD/CSV/PDF y ahora **DOCX** con `mammoth/mammoth.browser` cargado en diferido.
+- **Por qué mammoth y no otra cosa:** extrae texto plano sin arrastrar dependencias de Node al bundle. Sus tipos apuntan al build de Node (que importa `fs`), así que el build de navegador se declara en `types/mammoth-browser.d.ts`.
+- **EPUB queda fuera:** es un zip con XHTML; haría falta epub.js (pesado) o un lector de zip propio. No compensa hasta que alguien lo pida.
+- **`.doc` (binario, pre-2007) no está soportado** y no se va a soportar.
+- **Estado:** vigente.

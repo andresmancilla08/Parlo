@@ -15,7 +15,7 @@ import { VerifyBanner } from "@/components/app/verify-banner";
  * salida es la «X» del propio ejercicio (si no, se compite con la navegación
  * y se abandona la lección a medias).
  */
-const FOCUS_ROUTES = ["/app/leccion", "/app/repaso", "/app/test"];
+const FOCUS_ROUTES = ["/app/leccion", "/app/repaso", "/app/test", "/app/pronunciacion"];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();

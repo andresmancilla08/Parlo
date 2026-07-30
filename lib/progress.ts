@@ -152,6 +152,7 @@ type ProgressState = {
   noteTutorMessage: () => void;
   noteListen: () => void;
   completeListening: (correct: number, total: number) => void;
+  completeSpeaking: (correct: number, total: number) => void;
   addCard: (key: string) => void;
   setGoal: (xp: number) => void;
   setStartLevel: (level: Cefr) => void;
@@ -297,6 +298,23 @@ export const useProgress = create<ProgressState>()(
           return {
             xp: s.xp + gain,
             listens: s.listens + total,
+            lastActiveDay: todayStr(),
+            days,
+            ...(streak ?? {}),
+          };
+        }),
+
+      /**
+       * Pronunciación: 2 XP por palabra que el reconocedor captó bien. Cuenta
+       * como aciertos del día (retos), no como escuchas: aquí se HABLA.
+       */
+      completeSpeaking: (correct) =>
+        set((s) => {
+          const gain = correct * 2;
+          const { days, today } = addToday(s.days, { xp: gain, correct });
+          const streak = bumpStreak(s, today.xp);
+          return {
+            xp: s.xp + gain,
             lastActiveDay: todayStr(),
             days,
             ...(streak ?? {}),

@@ -26,3 +26,8 @@
 - **`taught`:** lista de lecciones cuya teoría ya se vio (parte del progreso sincronizado).
 - **Tortuga:** botón de audio lento (`RATE_SLOW`), al lado del altavoz normal.
 - **Bloque (test de nivel):** los 5 ítems de un nivel; se aprueba con 3 y da paso al bloque siguiente.
+
+## Añadidos 2026-07-30
+- **Briefing:** las frases y el consejo que se enseñan antes de un escenario de conversación (`Scenario.prep` y `tipEs`).
+- **LCS (pronunciación):** subsecuencia común más larga; así se alinea lo que dijiste con la frase de referencia sin que una palabra de más lo descuadre todo.
+- **B2 en Parlo:** no es «más gramática», es precisión y naturalidad — relativos, matiz, collocations y registro.

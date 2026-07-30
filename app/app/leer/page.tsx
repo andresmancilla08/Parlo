@@ -21,6 +21,7 @@ import { detectLang, targetLang } from "@/lib/reader/detect";
 import { RATE_SLOW, speak } from "@/lib/tts";
 import { useProgress } from "@/lib/progress";
 import { IconTurtle } from "@/components/ui/icon-turtle";
+import { SpeakControls } from "@/components/ui/speak-controls";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { BackButton } from "@/components/ui/back-button";
@@ -104,7 +105,7 @@ function Library() {
         </Card>
         <input
           type="file"
-          accept=".txt,.md,.markdown,.csv,.log,application/pdf,text/plain"
+          accept=".txt,.md,.markdown,.csv,.log,.docx,application/pdf,text/plain"
           className="hidden"
           disabled={busy}
           onChange={(e) => {
@@ -367,7 +368,12 @@ function Reader({ id }: { id: string }) {
               </button>
             </p>
             {showEs && es[s.i] && (
-              <p className="mt-0.5 text-sm font-semibold text-muted">{es[s.i]}</p>
+              // La traducción también se escucha, en la voz del OTRO idioma:
+              // oír la frase en los dos idiomas es media clase de vocabulario.
+              <p className="mt-0.5 flex flex-wrap items-center gap-2 text-sm font-semibold text-muted">
+                <span className="min-w-0">{es[s.i]}</span>
+                <SpeakControls text={es[s.i]} lang={to} size="sm" onPlay={noteListen} />
+              </p>
             )}
           </div>
         ))}

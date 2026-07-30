@@ -6,13 +6,15 @@ import assert from "node:assert";
 import { a1 } from "./levels/a1.ts";
 import { a2 } from "./levels/a2.ts";
 import { b1 } from "./levels/b1.ts";
+import { b2 } from "./levels/b2.ts";
 import { a1Teach } from "./teach/a1.ts";
 import { a2Teach } from "./teach/a2.ts";
 import { b1Teach } from "./teach/b1.ts";
+import { b2Teach } from "./teach/b2.ts";
 import type { TeachMap } from "./teach/types.ts";
 
-const curriculum = [...a1, ...a2, ...b1];
-const teach: TeachMap = { ...a1Teach, ...a2Teach, ...b1Teach };
+const curriculum = [...a1, ...a2, ...b1, ...b2];
+const teach: TeachMap = { ...a1Teach, ...a2Teach, ...b1Teach, ...b2Teach };
 const lessonIds = new Set(curriculum.flatMap((u) => u.lessons.map((l) => l.id)));
 
 // La teoría no puede apuntar a lecciones que no existen (typo en el id).

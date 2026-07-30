@@ -7,9 +7,10 @@ import assert from "node:assert";
 import { a1 } from "./levels/a1.ts";
 import { a2 } from "./levels/a2.ts";
 import { b1 } from "./levels/b1.ts";
+import { b2 } from "./levels/b2.ts";
 import { optionsSpeakable } from "./speech.ts";
 
-const curriculum = [...a1, ...a2, ...b1];
+const curriculum = [...a1, ...a2, ...b1, ...b2];
 const SPANISH_CHARS = /[áéíóúñüÁÉÍÓÚÑ¿¡]/;
 let mute = 0;
 
