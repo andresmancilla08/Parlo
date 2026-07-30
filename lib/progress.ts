@@ -58,6 +58,8 @@ export type ProgressSnapshot = {
   startLevel: Cefr | null;
   /** Lecciones dadas por superadas en el test (se pueden rehacer cuando quiera). */
   skipped: string[];
+  /** Lecciones cuya teoría ya se ha visto (la fase «Aprende»). */
+  taught: string[];
 };
 
 /**
@@ -139,11 +141,13 @@ type ProgressState = {
   lastGoalDay: string | null; // último día en que se cumplió el objetivo
   startLevel: Cefr | null; // nivel de arranque según el test de nivel
   skipped: string[]; // superadas en el test, no practicadas
+  taught: string[]; // teoría ya vista (fase «Aprende»)
   hydrated: boolean;
 
   snapshot: () => ProgressSnapshot;
   hydrateFrom: (data: ProgressSnapshot) => void;
   completeLesson: (lessonId: string, result: LessonResult) => void;
+  noteTaught: (lessonId: string) => void;
   reviewCards: (results: { key: string; quality: number }[]) => void;
   noteTutorMessage: () => void;
   noteListen: () => void;
@@ -174,6 +178,7 @@ const initial = {
   lastGoalDay: null as string | null,
   startLevel: null as Cefr | null,
   skipped: [] as string[],
+  taught: [] as string[],
 };
 
 export const useProgress = create<ProgressState>()(
@@ -201,6 +206,7 @@ export const useProgress = create<ProgressState>()(
           lastGoalDay: s.lastGoalDay,
           startLevel: s.startLevel,
           skipped: s.skipped,
+          taught: s.taught,
         };
       },
 
@@ -237,6 +243,12 @@ export const useProgress = create<ProgressState>()(
             ...(streak ?? {}),
           };
         }),
+
+      /** La teoría ya se vio: la próxima vez se entra directo a practicar. */
+      noteTaught: (lessonId) =>
+        set((s) =>
+          s.taught.includes(lessonId) ? {} : { taught: [...s.taught, lessonId] },
+        ),
 
       reviewCards: (results) =>
         set((s) => {

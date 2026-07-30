@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import {
   IconArrowRight,
+  IconBulb,
   IconChevronDown,
   IconHeadphones,
   IconCircleCheck,
@@ -46,9 +47,11 @@ export default function HomePage() {
   const claims = useProgress((s) => s.claims);
   const startLevel = useProgress((s) => s.startLevel);
   const skippedArr = useProgress((s) => s.skipped);
+  const taughtArr = useProgress((s) => s.taught);
 
   const completed = new Set(hydrated ? completedArr : []);
   const skipped = new Set(hydrated ? skippedArr : []);
+  const taught = new Set(hydrated ? taughtArr : []);
   const dueCount = hydrated ? dueCardKeys(cards, now).length : 0;
 
   // Objetivo del día y retos ya cumplidos pero sin cobrar.
@@ -97,7 +100,9 @@ export default function HomePage() {
             title={localTitle(current, i18n.language)}
             subtitle={`${currentUnit.level} · ${localTitle(currentUnit, i18n.language)}`}
             href={`/app/leccion?id=${current.id}`}
-            cta={t("home.feature_continue")}
+            // Si la teoría aún no se ha visto, se dice: primero se aprende.
+            cta={taught.has(current.id) ? t("home.feature_continue") : t("home.feature_learn")}
+            chip={taught.has(current.id) ? undefined : t("home.feature_theory_chip")}
             progress={unitFraction(currentUnit.id, completed)}
           />
         ) : (
@@ -330,6 +335,7 @@ function FeaturePanel({
   subtitle,
   href,
   cta,
+  chip,
   progress,
 }: {
   kicker: string;
@@ -337,6 +343,8 @@ function FeaturePanel({
   subtitle: string;
   href: string;
   cta: string;
+  /** Aviso corto sobre el CTA (p. ej. que se empieza por la teoría). */
+  chip?: string;
   progress: number;
 }) {
   return (
@@ -354,6 +362,13 @@ function FeaturePanel({
         {title}
       </h2>
       <p className="mt-2 text-sm font-semibold text-white/70">{subtitle}</p>
+
+      {chip && (
+        <span className="mt-3 inline-flex items-center gap-1.5 rounded-pill bg-white/15 px-3 py-1 font-display text-[0.7rem] font-extrabold uppercase tracking-[0.1em] text-gem">
+          <IconBulb className="size-3.5" stroke={2.4} />
+          {chip}
+        </span>
+      )}
 
       <Link
         href={href}

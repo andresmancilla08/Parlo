@@ -90,11 +90,16 @@ export const useVoicePref = create<VoiceState>()(
 
 /* ---------------- hablar ---------------- */
 
+/** Velocidad normal (algo por debajo de 1: se entiende mejor aprendiendo). */
+export const RATE_NORMAL = 0.95;
+/** Modo tortuga: palabra a palabra, para pillar los sonidos que se comen. */
+export const RATE_SLOW = 0.55;
+
 /**
  * Lee `text`. Usa la voz elegida en el perfil; si no hay, la mejor puntuada.
- * `rate` algo por debajo de 1 se entiende mejor cuando estás aprendiendo.
+ * `rate` baja a `RATE_SLOW` cuando se pulsa la tortuga.
  */
-export function speak(text: string, lang: "en" | "es" = "en") {
+export function speak(text: string, lang: "en" | "es" = "en", rate = RATE_NORMAL) {
   const s = synth();
   if (!s || !text.trim()) return;
   refresh(); // en Chrome la lista llega tarde la primera vez
@@ -108,7 +113,7 @@ export function speak(text: string, lang: "en" | "es" = "en") {
   const u = new SpeechSynthesisUtterance(text);
   u.voice = voice;
   u.lang = voice?.lang ?? (lang === "en" ? "en-US" : "es-ES");
-  u.rate = 0.95;
+  u.rate = rate;
   u.pitch = 1;
   u.volume = 1;
   s.speak(u);

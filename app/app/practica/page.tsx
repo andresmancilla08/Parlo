@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
@@ -10,20 +10,23 @@ import {
   IconHeadphones,
   IconCoffee,
   IconHome2,
+  IconMicrophone,
   IconPlane,
+  IconPlayerStopFilled,
   IconSend2,
   IconStethoscope,
   IconUsers,
-  IconVolume,
   type Icon,
 } from "@tabler/icons-react";
 import { SCENARIOS, scenarioById, type CoachCorrection, type CoachTurn } from "@/lib/coach";
 import { useProgress } from "@/lib/progress";
 import { firstPendingLesson, unitOfLesson } from "@/lib/curriculum";
 import { speak } from "@/lib/tts";
+import { useDictation } from "@/lib/dictation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { BackButton } from "@/components/ui/back-button";
+import { SpeakControls } from "@/components/ui/speak-controls";
 import { spring } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
@@ -37,6 +40,13 @@ const SCENARIO_ICON: Record<string, Icon> = {
 };
 
 type Turn = { role: "user" | "assistant"; content: string };
+
+/** Arranques para la charla libre (en inglés: es lo que se va a escribir). */
+const FREE_STARTERS = [
+  "Hi! Can we talk about my weekend?",
+  "I want to practise ordering food in English.",
+  "Ask me questions about my job.",
+];
 
 export default function PracticaPage() {
   const [scenarioId, setScenarioId] = useState<string | null>(null);
@@ -172,6 +182,22 @@ function Conversation({
   const [lastSent, setLastSent] = useState("");
   const listEnd = useRef<HTMLDivElement>(null);
 
+  // Dictado: lo que ya estaba escrito se conserva y el habla se añade detrás.
+  const dictationBase = useRef("");
+  const mic = useDictation("en-US", (text, final) => {
+    const merged = dictationBase.current ? `${dictationBase.current} ${text}` : text;
+    setInput(merged);
+    if (final) dictationBase.current = merged;
+  });
+
+  // La respuesta de la IA se lee sola la PRIMERA vez (después, con el botón).
+  const spoken = useRef(0);
+  useEffect(() => {
+    const last = turns.at(-1);
+    if (turns.length > spoken.current && last?.role === "assistant") speak(last.content);
+    spoken.current = turns.length;
+  }, [turns]);
+
   // Nivel aproximado para el prompt: el de la unidad que está haciendo.
   const pending = firstPendingLesson(new Set(completed), startLevel);
   const level = pending ? unitOfLesson(pending.id)?.level ?? "A2" : "B1";
@@ -179,6 +205,10 @@ function Conversation({
   async function send(text: string) {
     const clean = text.trim();
     if (!clean || busy) return;
+    // Se corta el micro: si no, el reconocimiento se oiría a sí mismo cuando
+    // la respuesta se lea en voz alta.
+    mic.stop();
+    dictationBase.current = "";
     const next: Turn[] = [...turns, { role: "user", content: clean }];
     setTurns(next);
     setInput("");
@@ -241,6 +271,28 @@ function Conversation({
       </header>
 
       <div className="mt-4 flex-1 space-y-3">
+        {/* Charla libre: sin escenario no hay primer turno, y una pantalla en
+            blanco no invita a hablar. Tres arranques y a andar. */}
+        {turns.length === 0 && (
+          <div className="pt-2">
+            <p className="mb-2 font-display text-xs font-extrabold uppercase tracking-[0.13em] text-muted">
+              {t("practica.starters_title")}
+            </p>
+            <div className="grid gap-2">
+              {FREE_STARTERS.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => send(s)}
+                  className="rounded-2xl border border-border bg-card px-4 py-3 text-left text-sm font-semibold transition-colors hover:border-primary/40 active:scale-[0.99]"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {turns.map((turn, i) => (
           <div
             key={i}
@@ -256,14 +308,7 @@ function Conversation({
             >
               <p className="text-sm font-semibold leading-relaxed">{turn.content}</p>
               {turn.role === "assistant" && (
-                <button
-                  type="button"
-                  onClick={() => speak(turn.content)}
-                  aria-label={t("a11y.listen_option", { text: turn.content })}
-                  className="mt-1.5 grid size-8 place-items-center rounded-full bg-accent-soft text-accent-ink transition-transform active:scale-95"
-                >
-                  <IconVolume className="size-4" />
-                </button>
+                <SpeakControls text={turn.content} size="sm" className="mt-1.5" />
               )}
             </div>
           </div>
@@ -299,16 +344,9 @@ function Conversation({
                   <p className="text-sm font-bold text-danger-ink line-through decoration-danger/60">
                     {c.original}
                   </p>
-                  <p className="mt-0.5 flex items-center gap-2 text-sm font-extrabold text-success-ink">
+                  <p className="mt-0.5 flex flex-wrap items-center gap-2 text-sm font-extrabold text-success-ink">
                     {c.corrected}
-                    <button
-                      type="button"
-                      onClick={() => speak(c.corrected)}
-                      aria-label={t("a11y.listen_option", { text: c.corrected })}
-                      className="grid size-7 place-items-center rounded-full bg-accent-soft text-accent-ink"
-                    >
-                      <IconVolume className="size-3.5" />
-                    </button>
+                    <SpeakControls text={c.corrected} size="sm" />
                   </p>
                   <p className="mt-1 text-sm leading-relaxed text-fg/80">{c.why}</p>
                   {c.examples?.length > 0 && (
@@ -342,15 +380,59 @@ function Conversation({
             e.preventDefault();
             send(input);
           }}
-          className="sticky bottom-0 mt-3 flex gap-2 bg-bg/90 py-2 backdrop-blur"
+          className="sticky bottom-0 mt-3 bg-bg/90 py-2 backdrop-blur"
         >
+          {mic.listening && (
+            <p className="mb-1.5 flex items-center gap-2 text-xs font-bold text-primary-ink">
+              <motion.span
+                animate={{ opacity: [1, 0.35, 1] }}
+                transition={{ duration: 1.1, repeat: Infinity }}
+                className="size-2 rounded-full bg-danger"
+              />
+              {t("practica.listening")}
+            </p>
+          )}
+          {mic.error && (
+            <p role="alert" className="mb-1.5 text-xs font-bold text-danger-ink">
+              {t(mic.error === "denied" ? "practica.mic_denied" : "practica.mic_failed")}
+            </p>
+          )}
+          <div className="flex gap-2">
           <input
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              setInput(e.target.value);
+              dictationBase.current = e.target.value;
+            }}
             placeholder={t("practica.placeholder")}
             disabled={busy}
             className="min-w-0 flex-1 rounded-2xl border border-border bg-surface px-4 py-3 text-sm font-semibold outline-none placeholder:text-muted focus:border-primary"
           />
+          {mic.supported && (
+            <motion.button
+              type="button"
+              whileTap={{ scale: 0.95 }}
+              onClick={() => {
+                if (!mic.listening) dictationBase.current = input.trim();
+                mic.toggle();
+              }}
+              disabled={busy}
+              aria-label={t(mic.listening ? "a11y.mic_stop" : "a11y.mic_start")}
+              aria-pressed={mic.listening}
+              className={cn(
+                "grid size-11 shrink-0 place-items-center rounded-2xl transition-colors",
+                mic.listening
+                  ? "bg-danger text-white"
+                  : "border border-border bg-surface text-primary-ink hover:border-primary",
+              )}
+            >
+              {mic.listening ? (
+                <IconPlayerStopFilled className="size-4" />
+              ) : (
+                <IconMicrophone className="size-5" />
+              )}
+            </motion.button>
+          )}
           <motion.button
             type="submit"
             whileTap={{ scale: 0.95 }}
@@ -365,6 +447,7 @@ function Conversation({
           >
             <IconSend2 className="size-5" />
           </motion.button>
+          </div>
         </form>
       )}
     </div>

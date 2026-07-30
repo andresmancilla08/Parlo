@@ -28,6 +28,7 @@ import {
   type Metric,
 } from "@/lib/gamification";
 import { todayXp, useProgress } from "@/lib/progress";
+import { playReward } from "@/lib/sfx";
 import { useHydrated } from "@/lib/use-hydrated";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -179,7 +180,10 @@ export default function RetosPage() {
               challenge={c}
               progress={hydrated ? challengeProgress(c, days, now) : 0}
               claimed={Boolean(claims[c.key])}
-              onClaim={() => claimChallenge(c)}
+              onClaim={() => {
+                claimChallenge(c);
+                playReward();
+              }}
             />
           ))}
       </Section>
@@ -193,7 +197,10 @@ export default function RetosPage() {
               challenge={c}
               progress={hydrated ? challengeProgress(c, days, now) : 0}
               claimed={Boolean(claims[c.key])}
-              onClaim={() => claimChallenge(c)}
+              onClaim={() => {
+                claimChallenge(c);
+                playReward();
+              }}
             />
           ))}
       </Section>
@@ -217,7 +224,10 @@ export default function RetosPage() {
             variant="secondary"
             className="w-full shrink-0 sm:w-auto"
             disabled={!hydrated || gems < SHIELD_COST}
-            onClick={buyShield}
+            onClick={() => {
+              buyShield();
+              playReward();
+            }}
           >
             <IconSparkles className="size-4 text-gem" />
             {SHIELD_COST}

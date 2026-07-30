@@ -1,6 +1,6 @@
 # Parlo — Mapa maestro (estado · pendientes · plan)
 
-Fuente de verdad del proyecto. Actualizado **2026-07-26**.
+Fuente de verdad del proyecto. Actualizado **2026-07-29**.
 Producción: <https://parlo-lilac.vercel.app> (auto-deploy en cada push a `main`).
 
 Leyenda de prioridad: **P0** rompe o bloquea · **P1** siguiente entrega · **P2** deseable · **P3** aparcado.
@@ -13,13 +13,14 @@ Leyenda de prioridad: **P0** rompe o bloquea · **P1** siguiente entrega · **P2
 |---|--------|--------|-----------|
 | M0 | Plataforma (PWA, tema, i18n, auth, sync, seguridad, SEO) | ✅ operativo | `app/`, `lib/firebase.ts`, `lib/sync.ts`, `proxy.ts` |
 | M1 | Currículo + motor de lecciones (choose/bank/type, explicación en español) | ✅ operativo | `lib/curriculum/`, `components/lesson/` |
+| M1b | **Fase «Aprende» (teoría antes de practicar)** | ✅ v1 · 54/54 lecciones | `lib/curriculum/teach/`, `components/lesson/lesson-teach.tsx` |
 | M2 | Repaso espaciado (SRS SM-2) | ✅ operativo | `lib/srs.ts`, `app/app/repaso` |
 | M3 | Progreso y gamificación (XP, gemas, racha, objetivo diario, retos, premios, niveles, logros) | ✅ v1 | `lib/progress.ts`, `lib/gamification.ts`, `app/app/retos` |
 | M4 | Tutor IA conversacional | 🔀 **unificado en M5** (Practicar → Charla libre); pantalla y endpoint retirados | — |
 | M5 | **Entrenador de conversación con corrección** | ✅ v1 | `app/app/practica`, `app/api/coach`, `lib/coach.ts` |
 | M6 | Escucha activa con huecos | ✅ v1 (piezas propias de Parlo) | `app/app/escucha`, `lib/listening.ts` |
 | M6b | Canciones con letra | ⛔ **RETIRADO 2026-07-26**: sin licencia no se pueden servir letras de catálogo actual a los usuarios, y el repertorio libre (Jamendo/dominio público) no convence. Queda entero en el historial de git |
-| M7 | Test de nivel inicial (colocación CEFR) | ✅ v1 | `app/app/test`, `lib/placement.ts` |
+| M7 | Test de nivel inicial (colocación CEFR) | ✅ **v2 adaptativo** | `app/app/test`, `lib/placement.ts` |
 | M8 | Pronunciación (grabar y comparar) | ⛔ idea | — |
 | M9 | **Lector de documentos propios con voz** | ✅ v1 **bidireccional** | `app/app/leer`, `lib/reader/*`, `app/api/translate` |
 
@@ -43,6 +44,16 @@ Leyenda de prioridad: **P0** rompe o bloquea · **P1** siguiente entrega · **P2
 - SRS SM-2 por ejercicio; repaso con distractores del vocabulario aprendido.
 - Audio (Web Speech) en el enunciado, **en cada opción de respuesta** y en la respuesta correcta del feedback; se omite cuando las opciones están en español (`lib/curriculum/speech.ts`).
 - Checks runnables: `lib/curriculum/data.check.ts`, `lib/gamification.check.ts`, `lib/srs.check.ts`, `lib/rate-limit.check.ts`, `lib/reminders.check.ts`.
+
+**Enseñar antes de evaluar (2026-07-29)**
+- **Fase «Aprende» en las 54 lecciones**: 216 pasos escritos a mano (idea · tabla · error típico de hispanohablante · ejemplos bilingües con audio normal y lento). `lib/curriculum/teach/`.
+- El flujo entra por la teoría y pasa a los ejercicios al terminarla; `progress.taught` (sincronizado) evita repetirla, y la bombilla de la barra la abre en cualquier momento **sin perder el ejercicio en curso**.
+- Home: la lección de hoy avisa «Primero la teoría» y el CTA cambia a «Aprender y practicar».
+- **Test de nivel v2**: bloques de 5 por nivel, adaptativo (para al primer bloque no superado), opción «No lo sé», pantalla entre bloques y resultado que **explica cada fallo** con audio; se puede elegir empezar desde A1.
+- **Sonidos** (`lib/sfx.ts`, WebAudio, sin ficheros): acierto, error, fin de lección y recompensa; interruptor en el perfil.
+- **Voz**: botón tortuga (lento) en teoría, feedback, escucha y lector; **dictado por voz** en Practicar; la respuesta del coach **se lee sola la primera vez**.
+- **Animaciones/progreso**: la barra mide lo respondido (no el índice), combo de aciertos seguidos, XP con contador ascendente, confeti al terminar y `MotionConfig reducedMotion="user"` global.
+- Checks nuevos: `lib/curriculum/teach.check.ts` (54 lecciones · 216 pasos · 216 ejemplos) y `lib/placement.check.ts` reescrito.
 
 **Gamificación (v1, 2026-07-26)**
 - Objetivo diario de XP configurable (20/50/100) que da gemas y **manda sobre la racha**.

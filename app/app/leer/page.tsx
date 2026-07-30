@@ -18,8 +18,9 @@ import { parseFile } from "@/lib/reader/parse";
 import { deleteDoc, getDoc, listDocs, saveDoc, type StoredDoc } from "@/lib/reader/store";
 import { buildIndex, cleanWord, search, toSentences, toWords } from "@/lib/reader/segment";
 import { detectLang, targetLang } from "@/lib/reader/detect";
-import { speak } from "@/lib/tts";
+import { RATE_SLOW, speak } from "@/lib/tts";
 import { useProgress } from "@/lib/progress";
+import { IconTurtle } from "@/components/ui/icon-turtle";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { BackButton } from "@/components/ui/back-button";
@@ -227,10 +228,10 @@ function Reader({ id }: { id: string }) {
     [doc],
   );
 
-  function readOne(i: number) {
+  function readOne(i: number, rate?: number) {
     setCurrent(i);
     remember(i);
-    speak(sentences[i].text, lang);
+    speak(sentences[i].text, lang, rate);
     noteListen();
   }
 
@@ -355,6 +356,14 @@ function Reader({ id }: { id: string }) {
                 className="ml-1.5 inline-grid size-7 place-items-center rounded-full bg-accent-soft align-middle text-accent-ink"
               >
                 <IconVolume className="size-3.5" />
+              </button>
+              <button
+                onClick={() => readOne(s.i, RATE_SLOW)}
+                aria-label={t("a11y.listen_slow", { text: s.text.slice(0, 40) })}
+                title={t("common.slow")}
+                className="ml-1 inline-grid size-7 place-items-center rounded-full bg-accent-soft align-middle text-accent-ink"
+              >
+                <IconTurtle className="size-4" />
               </button>
             </p>
             {showEs && es[s.i] && (
@@ -484,6 +493,14 @@ function WordCard({
           className="grid size-10 shrink-0 place-items-center rounded-full bg-accent-soft text-accent-ink"
         >
           <IconVolume className="size-5" />
+        </button>
+        <button
+          onClick={() => speak(word, lang, RATE_SLOW)}
+          aria-label={t("a11y.listen_slow", { text: word })}
+          title={t("common.slow")}
+          className="grid size-10 shrink-0 place-items-center rounded-full bg-accent-soft text-accent-ink"
+        >
+          <IconTurtle className="size-6" />
         </button>
         <button
           onClick={onClose}

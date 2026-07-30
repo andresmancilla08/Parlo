@@ -20,3 +20,9 @@
 - **Parlo:** el producto (de "hablar", raíz romance). Mascota: loro 🦜.
 - **Gemas:** moneda interna (se gana con actividad, se gasta en tienda: congelar racha, temas).
 - **Racha (streak):** días seguidos con actividad mínima.
+
+## Añadidos 2026-07-29
+- **Teoría / fase «Aprende»:** los `TeachStep[]` que se ven antes de practicar. Cuatro tipos: `idea` (el porqué), `table` (patrón), `pitfall` (error típico de hispanohablante, con su par mal/bien) y `examples` (frases bilingües con audio).
+- **`taught`:** lista de lecciones cuya teoría ya se vio (parte del progreso sincronizado).
+- **Tortuga:** botón de audio lento (`RATE_SLOW`), al lado del altavoz normal.
+- **Bloque (test de nivel):** los 5 ítems de un nivel; se aprueba con 3 y da paso al bloque siguiente.

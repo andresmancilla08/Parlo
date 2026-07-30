@@ -17,11 +17,15 @@ PWA web que enseña inglés a hispanohablantes con currículo por niveles + tuto
 ## Mapa de carpetas
 - `app/` — rutas (App Router), `layout.tsx`, `globals.css`, `manifest.ts`, `sw.ts`, `register-pwa.tsx`.
 - `components/ui/` — componentes visuales reutilizables.
-- `lib/` — `firebase.ts` (init cliente), `utils.ts` (`cn`).
+- `components/lesson/` — `lesson-teach.tsx` (fase «Aprende») y `lesson-runner.tsx` (práctica).
+- `lib/curriculum/` — `levels/*` (ejercicios) y `teach/*` (teoría por lección, mapa `lessonId → TeachStep[]`).
+- `lib/` — `firebase.ts` (init cliente), `utils.ts` (`cn`), `sfx.ts` (sonidos WebAudio), `dictation.ts` (voz→texto), `tts.ts` (texto→voz, normal y lenta).
 - `docs/` — `roadmap-mvp.md` y `docs/contexto/`.
 
 ## Flujo de datos
-- **Aprendizaje:** currículo curado (semilla) → lección → ejercicios → progreso/SRS en Firestore.
+- **Aprendizaje:** currículo curado (semilla) → **teoría** (`getTeach`) → lección → ejercicios → progreso/SRS en Firestore.
+  Cada lección enseña ANTES de evaluar: `/app/leccion?id=…` arranca en la fase «Aprende» y sólo entra a los
+  ejercicios al terminarla (o si `progress.taught` ya la contiene). `?mode=teoria|practica` fuerza una u otra.
 - **IA (tutor/corrección):** cliente → Route Handler `/api/...` → Gemini vía AI SDK (streaming) → respuesta. La clave de IA vive solo en el servidor.
 - **PWA:** `manifest.ts` sirve `/manifest.webmanifest`; `sw.ts` precachea y da offline parcial (solo en producción).
 

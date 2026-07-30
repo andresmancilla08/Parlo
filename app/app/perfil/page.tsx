@@ -17,6 +17,8 @@ import {
   IconSparkles,
   IconTargetArrow,
   IconTrophy,
+  IconVolume,
+  IconVolumeOff,
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth";
@@ -30,6 +32,7 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { LangToggle } from "@/components/ui/lang-toggle";
 import { VoicePicker } from "@/components/ui/voice-picker";
 import { ReminderSetting } from "@/components/app/reminder-setting";
+import { playCorrect, useSfx } from "@/lib/sfx";
 import { spring } from "@/lib/motion";
 import { cn } from "@/lib/utils";
 
@@ -180,6 +183,8 @@ export default function PerfilPage() {
         <VoicePicker />
       </div>
 
+      <SoundSetting />
+
       <div className="mt-8">
         <p className="mb-2 text-sm font-semibold text-muted">
           {t("perfil.appearance")}
@@ -202,6 +207,56 @@ export default function PerfilPage() {
         <IconLogout className="size-5" />
         {t("perfil.logout")}
       </Button>
+    </div>
+  );
+}
+
+/** Interruptor de los sonidos de acierto/error (suena al encenderlos). */
+function SoundSetting() {
+  const { t } = useTranslation();
+  const hydrated = useHydrated();
+  const on = useSfx((s) => s.on);
+  const setOn = useSfx((s) => s.setOn);
+  const active = hydrated ? on : true;
+
+  return (
+    <div className="mt-8">
+      <p className="mb-2 text-sm font-semibold text-muted">{t("perfil.sound_title")}</p>
+      <Card className="flex items-center gap-3 p-4">
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent-ink">
+          {active ? <IconVolume className="size-5" /> : <IconVolumeOff className="size-5" />}
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-display text-sm font-extrabold">
+            {t(active ? "perfil.sound_on" : "perfil.sound_off")}
+          </span>
+          <span className="block text-xs font-bold text-muted">{t("perfil.sound_hint")}</span>
+        </span>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={active}
+          aria-label={t("perfil.sound_title")}
+          onClick={() => {
+            const next = !active;
+            setOn(next);
+            if (next) playCorrect(); // se oye lo que acabas de activar
+          }}
+          className={cn(
+            "relative h-7 w-12 shrink-0 rounded-pill transition-colors",
+            active ? "bg-primary" : "bg-border",
+          )}
+        >
+          <motion.span
+            layout
+            transition={spring}
+            className={cn(
+              "absolute top-1 size-5 rounded-full bg-white shadow",
+              active ? "left-6" : "left-1",
+            )}
+          />
+        </button>
+      </Card>
     </div>
   );
 }

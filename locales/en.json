@@ -3,7 +3,8 @@
     "back": "Back",
     "retry": "Retry",
     "loading": "Loading…",
-    "close": "Close"
+    "close": "Close",
+    "slow": "Slower"
   },
   "reminder": {
     "section": "Reminder",
@@ -150,7 +151,9 @@
     "level_b1": "Intermediate",
     "level_units": "{{done}} of {{total}} units",
     "level_locked": "Unlocks after {{prev}}",
-    "unit_skipped": "Passed in the test"
+    "unit_skipped": "Passed in the test",
+    "feature_learn": "Learn and practise",
+    "feature_theory_chip": "Theory first"
   },
   "retos": {
     "kicker": "Your progress",
@@ -190,7 +193,7 @@
   },
   "test": {
     "kicker": "Placement test",
-    "hint": "Pick the one that sounds right. Wrong answers don't count against you.",
+    "hint": "Pick what you think. If you don't know, say so: it places you better than guessing.",
     "exit": "Leave the test",
     "result_kicker": "Your starting point",
     "result_score": "{{correct}} of {{total}} correct",
@@ -200,7 +203,24 @@
     "banner_title": "Already know some English?",
     "banner_body": "Take the placement test and start where you belong, not from zero.",
     "banner_cta": "Take the test",
-    "redo": "Retake the placement test"
+    "redo": "Retake the placement test",
+    "idk": "I don't know",
+    "intro_title": "Let's find your starting point",
+    "intro_body": "Blocks of {{n}} questions, from easy to hard. You stop as soon as it gets tough.",
+    "intro_point1": "You start where you belong, not from zero.",
+    "intro_point2": "If you don't know something, say so: no penalty.",
+    "intro_point3": "At the end we explain every mistake.",
+    "intro_cta": "Start the test",
+    "block": "{{level}} block",
+    "block_pass_title": "{{level}} passed!",
+    "block_pass_body": "{{correct}} of {{total}} correct. Moving up to {{next}}.",
+    "block_top_body": "{{correct}} of {{total}} in {{level}}: that is the highest level we have today.",
+    "block_stop_title": "We stop here",
+    "block_stop_body": "{{correct}} of {{total}} in {{level}}. That is exactly where there is something to learn.",
+    "block_next": "Continue with {{level}}",
+    "block_see": "See result",
+    "review_title": "Worth reviewing",
+    "start_from_scratch": "I prefer to start from {{level}}"
   },
   "practica": {
     "kicker": "Practice by talking",
@@ -228,7 +248,11 @@
     "fix_kicker": "Before you continue",
     "rewrite": "Rewrite",
     "got_it": "Got it",
-    "scenarios": "Talk to the AI"
+    "scenarios": "Talk to the AI",
+    "listening": "Listening… speak in English",
+    "mic_denied": "Your browser blocked the microphone. Allow it in the site permissions.",
+    "mic_failed": "Couldn't use the microphone. Try again or type your answer.",
+    "starters_title": "Try starting like this"
   },
   "escucha": {
     "kicker": "Active listening",
@@ -251,7 +275,8 @@
     "done_score": "{{correct}} of {{total}} gaps ({{pct}}%)",
     "again": "Another piece",
     "exit": "Exit",
-    "home_cta": "Train your ear"
+    "home_cta": "Train your ear",
+    "play_slow": "Listen slowly"
   },
   "leer": {
     "kicker": "Your documents",
@@ -304,7 +329,11 @@
     "voice_test": "Test the voice",
     "voice_none": "Your browser has no English voices installed.",
     "voice_hint": "Only basic voices are installed. You can download a better English voice in your system settings.",
-    "voice_better": "It would sound better with “{{name}}”"
+    "voice_better": "It would sound better with “{{name}}”",
+    "sound_title": "Sounds",
+    "sound_hint": "A chime when you get it right, another when you miss.",
+    "sound_on": "On",
+    "sound_off": "Muted"
   },
   "leccion": {
     "check": "Check",
@@ -317,7 +346,9 @@
     "gems": "Gems",
     "finish": "Finish",
     "not_found": "We couldn't find that lesson.",
-    "back": "Back to path"
+    "back": "Back to path",
+    "combo": "{{n}} in a row",
+    "review_theory": "Review the theory"
   },
   "repaso": {
     "title": "Review",
@@ -346,7 +377,10 @@
     "listen_option": "Listen to “{{text}}”",
     "toggle_level": "Show or hide level {{level}}",
     "collapse_menu": "Collapse the menu",
-    "expand_menu": "Expand the menu"
+    "expand_menu": "Expand the menu",
+    "listen_slow": "Listen to «{{text}}» slowly",
+    "mic_start": "Answer by speaking",
+    "mic_stop": "Stop recording"
   },
   "pwa": {
     "title": "Install Parlo on your phone",
@@ -360,5 +394,15 @@
   "menu": {
     "account": "Your account",
     "settings": "Settings"
+  },
+  "teach": {
+    "kicker": "Learn",
+    "next": "Next",
+    "back": "Previous",
+    "practice": "Practise this",
+    "skip": "Skip to practice",
+    "open": "See the theory",
+    "wrong_label": "Don't say",
+    "right_label": "Say"
   }
 }

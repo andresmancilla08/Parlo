@@ -93,3 +93,29 @@
 - **Qué:** el store sigue siendo la fuente de trabajo (zustand persist en localStorage). Al iniciar sesión, `lib/sync.ts` fusiona local↔`users/{uid}` y escribe con debounce de 1,5 s.
 - **Cómo fusiona:** gana lo más avanzado (máximo de xp/gemas/racha/contadores, unión de lecciones, máximo de estrellas, y por carta SRS la de `due` más reciente). Nunca se pierde lo hecho sin red.
 - **Estado:** vigente.
+
+## Enseñar SIEMPRE antes de evaluar (fase «Aprende»)
+- **Qué:** cada lección abre con teoría (`TeachStep[]`: idea · tabla · error típico · ejemplos con audio) y sólo después entran los ejercicios. `progress.taught` recuerda la teoría vista: la segunda vez se entra directo a practicar, con la bombilla de la barra superior para consultarla sin perder el ejercicio en curso.
+- **Por qué:** la app era puramente evaluativa; se aprendía por descarte. El diferenciador de Parlo es entender el porqué, y eso exige explicar antes de preguntar.
+- **Dónde vive:** `lib/curriculum/teach/{a1,a2,b1}.ts` como mapa `lessonId → TeachStep[]`, NO dentro de `levels/*.ts`.
+- **Por qué separado:** los archivos de nivel ya rondan las 1.100 líneas; insertar teoría dentro de cada lección los haría inmanejables y arriesga romper ejercicios al editar. El mapa se cruza por id y `teach.check.ts` valida que no falte ninguna ni sobre ninguna.
+- **Red de seguridad:** `getTeach()` deriva teoría del vocabulario y de los `explain` si una lección no la tuviera; así ninguna práctica puede llegar sin enseñanza previa.
+- **Estado:** vigente. 54/54 lecciones con teoría escrita a mano (216 pasos).
+
+## Test de nivel adaptativo por bloques
+- **Qué:** bloques de 5 ítems por nivel (A1 → A2 → B1). Se sube mientras se acierten ≥3; al primer bloque no superado el test para. Hay opción explícita «No lo sé» y al final se explican TODOS los fallos con audio.
+- **Por qué:** los 12 ítems fijos anteriores obligaban a quien empieza de cero a contestar preguntas de B1 (frustrante y sin información nueva). Adivinar además colocaba a gente donde no le tocaba: «No lo sé» limpia esa señal.
+- **Extra:** el resultado ofrece empezar en el nivel propuesto o «prefiero empezar desde A1» (subir de nivel marca las lecciones anteriores como superadas, y no todo el mundo quiere saltárselas).
+- **Estado:** vigente. Cubierto por `lib/placement.check.ts`.
+
+## Sonidos sintetizados (WebAudio), no ficheros
+- **Qué:** acierto, error, fin de lección y recompensa se generan con osciladores en `lib/sfx.ts`; interruptor en el perfil (`parlo-sfx`, por defecto encendido).
+- **Por qué:** cero bytes que descargar, cero assets que mantener y ningún problema de licencia. El `AudioContext` se crea en el primer sonido, que siempre nace de un toque del usuario (los navegadores bloquean el audio sin gesto previo).
+- **Descartado:** MP3/OGG en `public/` (peso + licencias) y librerías de audio (innecesarias para cuatro tonos).
+- **Estado:** vigente.
+
+## Voz: tortuga, dictado y autoplay del coach
+- **Tortuga (`RATE_SLOW = 0.55`):** cada frase se puede oír a velocidad normal o lenta (`SpeakControls`). Está en teoría, feedback de la práctica, escucha, lector y coach.
+- **Dictado (`lib/dictation.ts`):** en Practicar se puede responder hablando con `SpeakRecognition` (Web Speech). No está en las definiciones del DOM: se tipa lo mínimo en el propio archivo. Firefox no la implementa → el botón no se muestra (`useSyncExternalStore`, nunca `setState` en efecto).
+- **Autoplay:** la respuesta del coach se lee sola la primera vez y luego se repite a demanda. Al enviar se corta el micro para que el reconocimiento no se oiga a sí mismo.
+- **Estado:** vigente.

@@ -1,6 +1,9 @@
 import type { Cefr } from "@/lib/curriculum/types";
 
-// Test de nivel: 12 ítems (4 por nivel) que se recorren de menos a más.
+// Test de nivel ADAPTATIVO: bloques de 5 ítems por nivel, de menos a más. Se
+// sube de bloque mientras se aprueba; en cuanto un nivel falla, el test para.
+// Así quien empieza de cero contesta 5 preguntas en vez de 15, y quien sabe
+// llega hasta donde de verdad se le atraganta.
 // No es un examen oficial: sirve para no obligar a empezar en A1 a quien ya
 // sabe. La explicación sigue siendo SIEMPRE en español, como el resto de Parlo.
 
@@ -11,13 +14,24 @@ export type PlacementItem = {
   options: string[];
   answer: string;
   explain: string;
+  /** Frase completa y correcta en inglés, para poder escucharla al repasar. */
+  full?: string;
 };
 
 /** Niveles por los que pasa el test, en orden. */
 export const PLACEMENT_LEVELS: Cefr[] = ["A1", "A2", "B1"];
 
-/** Aciertos necesarios (de 4) para dar un nivel por superado. */
+/** Ítems por nivel (un bloque). */
+export const BLOCK = 5;
+
+/** Aciertos necesarios (de 5) para dar un nivel por superado. */
 export const PASS = 3;
+
+/**
+ * Respuesta «no lo sé». Cuenta como fallo, pero evita el ruido de adivinar:
+ * acertar a ciegas coloca a alguien donde no le toca y arruina el arranque.
+ */
+export const DONT_KNOW = "__idk__";
 
 export const PLACEMENT_ITEMS: PlacementItem[] = [
   // ---------------- A1 ----------------
@@ -28,6 +42,7 @@ export const PLACEMENT_ITEMS: PlacementItem[] = [
     options: ["My", "I", "Me", "Mine"],
     answer: "My",
     explain: "«My» es el posesivo (mi). «I» es el sujeto y «me» el objeto.",
+    full: "My name is Ana.",
   },
   {
     id: "p-a1-2",
@@ -36,6 +51,7 @@ export const PLACEMENT_ITEMS: PlacementItem[] = [
     options: ["is", "are", "am", "be"],
     answer: "is",
     explain: "Con he/she/it el verbo «to be» es «is».",
+    full: "She is a teacher.",
   },
   {
     id: "p-a1-3",
@@ -44,6 +60,7 @@ export const PLACEMENT_ITEMS: PlacementItem[] = [
     options: ["children", "childs", "childes", "child"],
     answer: "children",
     explain: "Plural irregular: child → children (igual que man → men).",
+    full: "I have two children.",
   },
   {
     id: "p-a1-4",
@@ -52,6 +69,16 @@ export const PLACEMENT_ITEMS: PlacementItem[] = [
     options: ["are", "is", "have", "has"],
     answer: "are",
     explain: "«There is» para singular y «there are» para plural.",
+    full: "There are two books on the table.",
+  },
+  {
+    id: "p-a1-5",
+    level: "A1",
+    prompt: "«I ___ from Spain.»",
+    options: ["am", "is", "are", "be"],
+    answer: "am",
+    explain: "Con «I» el verbo «to be» es siempre «am»: I am, I'm.",
+    full: "I am from Spain.",
   },
 
   // ---------------- A2 ----------------
@@ -63,6 +90,7 @@ export const PLACEMENT_ITEMS: PlacementItem[] = [
     answer: "went",
     explain:
       "«Yesterday» cierra el tiempo, así que va pasado simple: go → went (irregular).",
+    full: "Yesterday I went to the cinema.",
   },
   {
     id: "p-a2-2",
@@ -71,6 +99,7 @@ export const PLACEMENT_ITEMS: PlacementItem[] = [
     options: ["faster", "more fast", "fastest", "fast"],
     answer: "faster",
     explain: "Adjetivo corto → comparativo con -er: fast → faster.",
+    full: "This car is faster than mine.",
   },
   {
     id: "p-a2-3",
@@ -79,6 +108,7 @@ export const PLACEMENT_ITEMS: PlacementItem[] = [
     options: ["have", "has", "am", "did"],
     answer: "have",
     explain: "Presente perfecto: have/has + participio. Con «I» va «have».",
+    full: "I have never been to Japan.",
   },
   {
     id: "p-a2-4",
@@ -87,6 +117,17 @@ export const PLACEMENT_ITEMS: PlacementItem[] = [
     options: ["like", "likes", "liked", "liking"],
     answer: "like",
     explain: "Tras «doesn't» el verbo va en forma base: la -s ya está en «doesn't».",
+    full: "She doesn't like coffee.",
+  },
+  {
+    id: "p-a2-5",
+    level: "A2",
+    prompt: "«There isn't ___ milk in the fridge.»",
+    options: ["any", "some", "a", "many"],
+    answer: "any",
+    explain:
+      "En negativas e interrogativas se usa «any»; «some» va en afirmativas. Y «milk» es incontable, así que «many» no encaja.",
+    full: "There isn't any milk in the fridge.",
   },
 
   // ---------------- B1 ----------------
@@ -98,6 +139,7 @@ export const PLACEMENT_ITEMS: PlacementItem[] = [
     answer: "had",
     explain:
       "Segundo condicional: if + pasado, would + base. Tras «if» nunca va «would».",
+    full: "If I had more time, I would travel.",
   },
   {
     id: "p-b1-2",
@@ -107,6 +149,7 @@ export const PLACEMENT_ITEMS: PlacementItem[] = [
     answer: "was watching",
     explain:
       "La acción larga de fondo va en pasado continuo; la que interrumpe, en pasado simple.",
+    full: "I was watching TV when she called.",
   },
   {
     id: "p-b1-3",
@@ -115,6 +158,7 @@ export const PLACEMENT_ITEMS: PlacementItem[] = [
     options: ["would", "will", "is going", "can"],
     answer: "would",
     explain: "En estilo indirecto «will» retrocede a «would».",
+    full: "She said she would come later.",
   },
   {
     id: "p-b1-4",
@@ -123,35 +167,70 @@ export const PLACEMENT_ITEMS: PlacementItem[] = [
     options: ["was built", "built", "is built", "was build"],
     answer: "was built",
     explain: "Pasiva en pasado: was/were + participio (build → built).",
+    full: "This bridge was built in 1890.",
+  },
+  {
+    id: "p-b1-5",
+    level: "B1",
+    prompt: "«I really enjoy ___ books.»",
+    options: ["reading", "to read", "read", "readed"],
+    answer: "reading",
+    explain:
+      "Enjoy, avoid, finish y mind piden -ing. Otros verbos (want, decide) piden «to».",
+    full: "I really enjoy reading books.",
   },
 ];
+
+/** Los 5 ítems de un nivel, en orden. */
+export function itemsForLevel(level: Cefr): PlacementItem[] {
+  return PLACEMENT_ITEMS.filter((i) => i.level === level);
+}
+
+/** Siguiente nivel del test, o `null` si ya era el último. */
+export function nextLevel(level: Cefr): Cefr | null {
+  const i = PLACEMENT_LEVELS.indexOf(level);
+  return i < 0 ? null : PLACEMENT_LEVELS[i + 1] ?? null;
+}
+
+/** Resultado de UN bloque: aciertos y si se supera el nivel. */
+export function blockResult(
+  level: Cefr,
+  answers: Record<string, string>,
+): { correct: number; total: number; passed: boolean } {
+  const items = itemsForLevel(level);
+  const correct = items.filter((i) => answers[i.id] === i.answer).length;
+  return { correct, total: items.length, passed: correct >= PASS };
+}
 
 export type PlacementResult = {
   /** Nivel por el que conviene empezar. */
   level: Cefr;
-  /** Aciertos por nivel, para explicar el resultado. */
+  /** Aciertos por nivel intentado, para explicar el resultado. */
   byLevel: Record<string, { correct: number; total: number }>;
   correct: number;
   total: number;
+  /** Ítems fallados (o marcados «no lo sé»): son el repaso recomendado. */
+  missed: PlacementItem[];
 };
 
 /**
- * Coloca al usuario: se sube de nivel mientras se superen los ítems de ese
- * nivel (≥ PASS de 4). Se empieza en el primer nivel NO superado, porque es
- * donde queda algo que aprender.
+ * Coloca al usuario: se sube de nivel mientras se superen los bloques
+ * (≥ PASS de BLOCK). Se empieza en el primer nivel NO superado, porque es
+ * donde queda algo que aprender. Los niveles que no se llegaron a hacer (el
+ * test paró antes) no cuentan.
  */
 export function placementResult(answers: Record<string, string>): PlacementResult {
   const byLevel: Record<string, { correct: number; total: number }> = {};
-  for (const item of PLACEMENT_ITEMS) {
-    const bucket = (byLevel[item.level] ??= { correct: 0, total: 0 });
-    bucket.total++;
-    if (answers[item.id] === item.answer) bucket.correct++;
-  }
-
   let level: Cefr = PLACEMENT_LEVELS[0];
+
   for (const [i, lvl] of PLACEMENT_LEVELS.entries()) {
-    const b = byLevel[lvl];
-    if (b && b.correct >= PASS) {
+    const items = itemsForLevel(lvl);
+    const attempted = items.some((it) => it.id in answers);
+    if (!attempted) break; // el test paró aquí: lo de arriba ni se preguntó
+
+    const r = blockResult(lvl, answers);
+    byLevel[lvl] = { correct: r.correct, total: r.total };
+    if (r.passed) {
       // superado: se propone el siguiente (o este mismo si era el último)
       level = PLACEMENT_LEVELS[i + 1] ?? lvl;
     } else {
@@ -160,6 +239,13 @@ export function placementResult(answers: Record<string, string>): PlacementResul
     }
   }
 
-  const correct = Object.values(byLevel).reduce((a, b) => a + b.correct, 0);
-  return { level, byLevel, correct, total: PLACEMENT_ITEMS.length };
+  const answered = PLACEMENT_ITEMS.filter((i) => i.id in answers);
+  const missed = answered.filter((i) => answers[i.id] !== i.answer);
+  return {
+    level,
+    byLevel,
+    correct: answered.length - missed.length,
+    total: answered.length,
+    missed,
+  };
 }

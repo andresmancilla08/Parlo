@@ -3,11 +3,20 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import {
+  AnimatePresence,
+  animate,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useTransform,
+} from "framer-motion";
 import { useTranslation } from "react-i18next";
 import {
   IconArrowRight,
+  IconBulb,
   IconCheck,
+  IconFlame,
   IconStarFilled,
   IconVolume,
   IconX,
@@ -15,7 +24,9 @@ import {
 import { optionsSpeakable, type Exercise } from "@/lib/curriculum";
 import { useProgress, type GradedItem, type LessonResult } from "@/lib/progress";
 import { speak } from "@/lib/tts";
+import { playComplete, playCorrect, playWrong } from "@/lib/sfx";
 import { Button } from "@/components/ui/button";
+import { SpeakControls } from "@/components/ui/speak-controls";
 import { cn } from "@/lib/utils";
 import { spring } from "@/lib/motion";
 import mascot from "@/public/brand/mascot.png";
@@ -35,9 +46,17 @@ type Props = {
   exercises: Exercise[];
   onComplete: (r: LessonResult) => void;
   exitHref?: string;
+  /** Abre la teoría de la lección sin perder el ejercicio en curso. */
+  onTeach?: () => void;
 };
 
-export function LessonRunner({ title, exercises, onComplete, exitHref = "/app" }: Props) {
+export function LessonRunner({
+  title,
+  exercises,
+  onComplete,
+  exitHref = "/app",
+  onTeach,
+}: Props) {
   const { t } = useTranslation();
   const router = useRouter();
   const [step, setStep] = useState(0);
@@ -48,6 +67,8 @@ export function LessonRunner({ title, exercises, onComplete, exitHref = "/app" }
   const total = exercises.length;
   const ex = exercises[step];
   const correctCount = graded.filter((g) => g.ok).length;
+  // Aciertos seguidos AHORA mismo (se corta al primer fallo).
+  const combo = graded.reduce((n, g) => (g.ok ? n + 1 : 0), 0);
 
   function handleGraded(ok: boolean) {
     setGraded((g) => [...g, { ok, srsKey: exercises[step].srsKey }]);
@@ -87,23 +108,50 @@ export function LessonRunner({ title, exercises, onComplete, exitHref = "/app" }
         >
           <IconX className="size-5" />
         </button>
+        {/* La barra mide lo RESPONDIDO, no el índice: al comprobar avanza. */}
         <div className="h-3 flex-1 overflow-hidden rounded-pill bg-border/60">
           <motion.div
             className="h-full rounded-pill bg-primary"
             initial={false}
-            animate={{ width: `${(step / total) * 100}%` }}
+            animate={{ width: `${(graded.length / total) * 100}%` }}
             transition={{ duration: 0.3, ease: "easeOut" }}
           />
         </div>
+        {onTeach && (
+          <button
+            onClick={onTeach}
+            aria-label={t("teach.open")}
+            title={t("teach.open")}
+            className="grid size-9 shrink-0 place-items-center rounded-full bg-accent-soft text-accent-ink transition-transform active:scale-95"
+          >
+            <IconBulb className="size-5" />
+          </button>
+        )}
         <span className="w-10 shrink-0 text-right text-sm font-bold tabular-nums text-muted">
           {step + 1}/{total}
         </span>
       </div>
 
       {/* qué estás practicando (mismo kicker editorial que la home) */}
-      <p className="mt-3 pl-12 font-display text-[0.7rem] font-extrabold uppercase tracking-[0.14em] text-muted">
-        {title}
-      </p>
+      <div className="mt-3 flex items-center justify-between gap-3 pl-12">
+        <p className="font-display text-[0.7rem] font-extrabold uppercase tracking-[0.14em] text-muted">
+          {title}
+        </p>
+        <AnimatePresence>
+          {combo >= 3 && (
+            <motion.span
+              initial={{ opacity: 0, scale: 0.7 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.7 }}
+              transition={spring}
+              className="inline-flex shrink-0 items-center gap-1 rounded-pill bg-gem/15 px-2.5 py-1 font-display text-xs font-extrabold text-gem"
+            >
+              <IconFlame className="size-3.5" stroke={2.4} />
+              {t("leccion.combo", { n: combo })}
+            </motion.span>
+          )}
+        </AnimatePresence>
+      </div>
 
       <AnimatePresence mode="wait">
         <motion.div
@@ -156,6 +204,9 @@ function ExerciseView({
     setOk(result);
     setChecked(true);
     onGraded(result);
+    // El sonido sale del toque del usuario: los navegadores lo permiten.
+    if (result) playCorrect();
+    else playWrong();
   }
 
   const correctText =
@@ -204,17 +255,7 @@ function ExerciseView({
                     <span className="font-extrabold">{correctText}</span>
                   </span>
                   {(ex.kind !== "choose" || optionsSpeakable(ex)) && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        speak(correctText);
-                        noteListen();
-                      }}
-                      aria-label={t("a11y.listen_option", { text: correctText })}
-                      className="grid size-9 place-items-center rounded-full bg-accent-soft text-accent-ink transition-transform active:scale-95"
-                    >
-                      <IconVolume className="size-4" />
-                    </button>
+                    <SpeakControls text={correctText} onPlay={noteListen} />
                   )}
                 </p>
               )}
@@ -389,8 +430,13 @@ function Complete({
   const stars = acc === 1 ? 3 : acc >= 0.8 ? 2 : 1;
   const xp = correct * 10;
 
+  useEffect(() => {
+    playComplete();
+  }, []);
+
   return (
-    <div className="mx-auto grid min-h-dvh w-full max-w-md place-items-center px-6 text-center">
+    <div className="relative mx-auto grid min-h-dvh w-full max-w-md place-items-center px-6 text-center">
+      <Confetti />
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -425,7 +471,7 @@ function Complete({
           {t("leccion.done_score", { correct, total })}
         </p>
         <div className="mt-6 flex justify-center gap-3">
-          <Stat label="XP" value={`+${xp}`} />
+          <Stat label="XP" value={<CountUp to={xp} prefix="+" />} />
           <Stat label={t("leccion.gems")} value={acc >= 0.8 ? "+5" : "+0"} />
         </div>
         <div className="mt-8">
@@ -439,11 +485,57 @@ function Complete({
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="rounded-2xl border border-border bg-card px-5 py-3">
       <p className="font-display text-xl font-extrabold text-primary">{value}</p>
       <p className="text-xs text-muted">{label}</p>
+    </div>
+  );
+}
+
+/** Cifra que sube desde 0: el XP se siente ganado, no impreso. */
+function CountUp({ to, prefix = "" }: { to: number; prefix?: string }) {
+  const reduce = useReducedMotion();
+  const value = useMotionValue(reduce ? to : 0);
+  const text = useTransform(value, (v) => `${prefix}${Math.round(v)}`);
+
+  useEffect(() => {
+    if (reduce) return;
+    const controls = animate(value, to, { duration: 0.7, ease: "easeOut" });
+    return () => controls.stop();
+  }, [reduce, to, value]);
+
+  return <motion.span>{text}</motion.span>;
+}
+
+/** Celebración corta y barata: 14 piezas con los colores de marca. */
+function Confetti() {
+  const reduce = useReducedMotion();
+  if (reduce) return null;
+
+  const pieces = Array.from({ length: 14 }, (_, i) => i);
+  const colors = ["bg-primary", "bg-accent", "bg-gem"];
+
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      {pieces.map((i) => {
+        const left = 8 + (i * 84) / 13;
+        const delay = (i % 5) * 0.06;
+        return (
+          <motion.span
+            key={i}
+            initial={{ y: -40, opacity: 0, rotate: 0 }}
+            animate={{ y: "60vh", opacity: [0, 1, 1, 0], rotate: i % 2 ? 220 : -220 }}
+            transition={{ duration: 1.5, delay, ease: "easeIn" }}
+            style={{ left: `${left}%` }}
+            className={cn(
+              "absolute top-0 size-2.5 rounded-[3px]",
+              colors[i % colors.length],
+            )}
+          />
+        );
+      })}
     </div>
   );
 }

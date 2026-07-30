@@ -19,7 +19,9 @@ import {
 } from "@/lib/listening";
 import { localTitle } from "@/lib/curriculum";
 import { useProgress } from "@/lib/progress";
-import { speak } from "@/lib/tts";
+import { RATE_SLOW, speak } from "@/lib/tts";
+import { playComplete, playCorrect, playWrong } from "@/lib/sfx";
+import { IconTurtle } from "@/components/ui/icon-turtle";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { BackButton } from "@/components/ui/back-button";
@@ -147,6 +149,7 @@ function Session({
   const { t } = useTranslation();
   const router = useRouter();
   const completeListening = useProgress((s) => s.completeListening);
+  const noteListen = useProgress((s) => s.noteListen);
 
   const [index, setIndex] = useState(0);
   const [guesses, setGuesses] = useState<Record<number, string>>({});
@@ -162,12 +165,15 @@ function Session({
     const hits = blanks.filter((i) => sameWord(guesses[i] ?? "", tokens[i])).length;
     setScore((s) => ({ correct: s.correct + hits, total: s.total + blanks.length }));
     setChecked(true);
+    if (hits === blanks.length) playCorrect();
+    else playWrong();
     speak(line); // se vuelve a oír la frase completa con la solución delante
   }
 
   function next() {
     if (index + 1 >= track.lines.length) {
       completeListening(score.correct, score.total);
+      playComplete();
       setDone(true);
       return;
     }
@@ -219,7 +225,9 @@ function Session({
           <motion.div
             className="h-full rounded-pill bg-primary"
             initial={false}
-            animate={{ width: `${(index / track.lines.length) * 100}%` }}
+            animate={{
+              width: `${((index + (checked ? 1 : 0)) / track.lines.length) * 100}%`,
+            }}
             transition={{ duration: 0.3, ease: "easeOut" }}
           />
         </div>
@@ -233,14 +241,32 @@ function Session({
       </p>
 
       <div className="mt-8 flex flex-1 flex-col justify-center">
-        <button
-          type="button"
-          onClick={() => speak(line)}
-          className="mx-auto grid size-20 place-items-center rounded-full bg-primary text-primary-fg shadow-xl shadow-primary/25 transition-transform active:scale-95"
-          aria-label={t("escucha.play")}
-        >
-          <IconVolume className="size-9" />
-        </button>
+        {/* Normal y «tortuga»: la misma frase despacio deja oír lo que se come. */}
+        <div className="flex items-center justify-center gap-4">
+          <button
+            type="button"
+            onClick={() => {
+              speak(line);
+              noteListen();
+            }}
+            className="grid size-20 place-items-center rounded-full bg-primary text-primary-fg shadow-xl shadow-primary/25 transition-transform active:scale-95"
+            aria-label={t("escucha.play")}
+          >
+            <IconVolume className="size-9" />
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              speak(line, "en", RATE_SLOW);
+              noteListen();
+            }}
+            className="grid size-14 place-items-center rounded-full border-2 border-border bg-card text-accent-ink transition-colors hover:border-accent active:scale-95"
+            aria-label={t("escucha.play_slow")}
+            title={t("common.slow")}
+          >
+            <IconTurtle className="size-8" />
+          </button>
+        </div>
         <p className="mt-2 text-center text-xs font-bold text-muted">{t("escucha.play_hint")}</p>
 
         {/* la frase con huecos */}

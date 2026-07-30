@@ -34,6 +34,7 @@ function sanitize(s: Partial<ProgressSnapshot> | undefined): ProgressSnapshot {
     lastGoalDay: s?.lastGoalDay ?? null,
     startLevel: s?.startLevel ?? null,
     skipped: s?.skipped ?? [],
+    taught: s?.taught ?? [],
   };
 }
 
@@ -78,6 +79,7 @@ function merge(local: ProgressSnapshot, remote: ProgressSnapshot): ProgressSnaps
     // El test de nivel se hace una vez: vale el que exista (local manda).
     startLevel: local.startLevel ?? remote.startLevel,
     skipped: [...new Set([...local.skipped, ...remote.skipped])],
+    taught: [...new Set([...local.taught, ...remote.taught])],
     lastActiveDay: maxDay(local.lastActiveDay, remote.lastActiveDay),
     completed: [...new Set([...local.completed, ...remote.completed])],
     stars,

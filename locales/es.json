@@ -3,7 +3,8 @@
     "back": "Volver",
     "retry": "Reintentar",
     "loading": "Cargando…",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "slow": "Más despacio"
   },
   "reminder": {
     "section": "Recordatorio",
@@ -150,7 +151,9 @@
     "level_b1": "Intermedio",
     "level_units": "{{done}} de {{total}} unidades",
     "level_locked": "Se abre al terminar {{prev}}",
-    "unit_skipped": "Superada en el test"
+    "unit_skipped": "Superada en el test",
+    "feature_learn": "Aprender y practicar",
+    "feature_theory_chip": "Primero la teoría"
   },
   "retos": {
     "kicker": "Tu avance",
@@ -190,7 +193,7 @@
   },
   "test": {
     "kicker": "Test de nivel",
-    "hint": "Elige la que te suene mejor. No se penaliza fallar.",
+    "hint": "Elige lo que creas. Si no lo sabes, dilo: coloca mejor que adivinar.",
     "exit": "Salir del test",
     "result_kicker": "Tu punto de partida",
     "result_score": "{{correct}} de {{total}} correctas",
@@ -200,7 +203,24 @@
     "banner_title": "¿Ya sabes algo de inglés?",
     "banner_body": "Haz el test de nivel y empieza donde te toca, no desde cero.",
     "banner_cta": "Hacer el test",
-    "redo": "Rehacer el test de nivel"
+    "redo": "Rehacer el test de nivel",
+    "idk": "No lo sé",
+    "intro_title": "Veamos por dónde empezar",
+    "intro_body": "Bloques de {{n}} preguntas, de menos a más. Paras en cuanto se te atragante.",
+    "intro_point1": "Empiezas donde te toca, no desde cero.",
+    "intro_point2": "Si no sabes algo, dilo: no se penaliza.",
+    "intro_point3": "Al final te explicamos cada fallo.",
+    "intro_cta": "Empezar el test",
+    "block": "Bloque {{level}}",
+    "block_pass_title": "¡{{level}} superado!",
+    "block_pass_body": "{{correct}} de {{total}} correctas. Subimos a {{next}}.",
+    "block_top_body": "{{correct}} de {{total}} en {{level}}: has llegado a lo más alto que tenemos hoy.",
+    "block_stop_title": "Paramos aquí",
+    "block_stop_body": "{{correct}} de {{total}} en {{level}}. Justo ahí es donde hay algo que aprender.",
+    "block_next": "Seguir con {{level}}",
+    "block_see": "Ver resultado",
+    "review_title": "Lo que conviene repasar",
+    "start_from_scratch": "Prefiero empezar desde {{level}}"
   },
   "practica": {
     "kicker": "Entrenar hablando",
@@ -228,7 +248,11 @@
     "fix_kicker": "Antes de seguir",
     "rewrite": "Reescribir",
     "got_it": "Entendido",
-    "scenarios": "Conversar con la IA"
+    "scenarios": "Conversar con la IA",
+    "listening": "Te escucho… habla en inglés",
+    "mic_denied": "El navegador bloqueó el micrófono. Actívalo en los permisos del sitio.",
+    "mic_failed": "No se pudo usar el micrófono. Prueba otra vez o escribe la respuesta.",
+    "starters_title": "Prueba a empezar así"
   },
   "escucha": {
     "kicker": "Escucha activa",
@@ -251,7 +275,8 @@
     "done_score": "{{correct}} de {{total}} huecos ({{pct}}%)",
     "again": "Otra pieza",
     "exit": "Salir",
-    "home_cta": "Entrenar el oído"
+    "home_cta": "Entrenar el oído",
+    "play_slow": "Escuchar despacio"
   },
   "leer": {
     "kicker": "Tus documentos",
@@ -304,7 +329,11 @@
     "voice_test": "Probar la voz",
     "voice_none": "Tu navegador no tiene voces en inglés instaladas.",
     "voice_hint": "Solo hay voces básicas instaladas. En los ajustes del sistema puedes descargar una voz inglesa de mejor calidad.",
-    "voice_better": "Se oiría mejor con «{{name}}»"
+    "voice_better": "Se oiría mejor con «{{name}}»",
+    "sound_title": "Sonidos",
+    "sound_hint": "Un pitido al acertar y otro al fallar.",
+    "sound_on": "Activados",
+    "sound_off": "Silencio"
   },
   "leccion": {
     "check": "Comprobar",
@@ -317,7 +346,9 @@
     "gems": "Gemas",
     "finish": "Terminar",
     "not_found": "No encontramos esa lección.",
-    "back": "Volver a la ruta"
+    "back": "Volver a la ruta",
+    "combo": "{{n}} seguidas",
+    "review_theory": "Repasar la teoría"
   },
   "repaso": {
     "title": "Repaso",
@@ -346,7 +377,10 @@
     "listen_option": "Escuchar «{{text}}»",
     "toggle_level": "Mostrar u ocultar el nivel {{level}}",
     "collapse_menu": "Contraer el menú",
-    "expand_menu": "Expandir el menú"
+    "expand_menu": "Expandir el menú",
+    "listen_slow": "Escuchar «{{text}}» despacio",
+    "mic_start": "Responder hablando",
+    "mic_stop": "Dejar de grabar"
   },
   "pwa": {
     "title": "Instala Parlo en tu móvil",
@@ -360,5 +394,15 @@
   "menu": {
     "account": "Tu cuenta",
     "settings": "Ajustes"
+  },
+  "teach": {
+    "kicker": "Aprende",
+    "next": "Siguiente",
+    "back": "Anterior",
+    "practice": "Practicar esto",
+    "skip": "Saltar a practicar",
+    "open": "Ver la teoría",
+    "wrong_label": "No se dice",
+    "right_label": "Se dice"
   }
 }

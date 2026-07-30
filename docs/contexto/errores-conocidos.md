@@ -53,3 +53,21 @@
 - **Síntoma:** `This model models/gemini-2.5-flash is no longer available to new users`.
 - **Causa real:** Google retiró los modelos 2.5 para cuentas creadas después de cierta fecha. La clave es válida; el modelo no está disponible para esa cuenta. `models.list` los sigue listando, así que listar NO sirve para saber si puedes usarlos: hay que probar `generateContent`.
 - **Solución:** usar el alias `gemini-flash-latest` (verificado). Alternativas que también responden: `gemini-3-flash-preview`, `gemini-3.1-flash-lite`. `gemini-2.0-flash` devuelve cuota agotada.
+
+## Check de la teoría y del test de nivel
+- **Cómo correr:** `node --experimental-strip-types lib/curriculum/teach.check.ts` y `… lib/placement.check.ts`. El primero exige que TODA lección tenga teoría propia (≥3 pasos, uno de ejemplos) y que ningún ejemplo en inglés lleve caracteres españoles (se pronuncia con voz inglesa).
+
+## Medir desborde horizontal con animaciones en curso
+- **Síntoma:** `scrollWidth` 3px mayor que `clientWidth` justo después de cambiar de paso o de pantalla.
+- **Causa real:** la tarjeta entra desde `x: 24`; mientras dura la animación el documento es más ancho. No es un defecto de layout.
+- **Solución:** medir con la animación terminada (≥1,5 s tras el clic). Si sale desborde con la interfaz quieta, entonces sí es real.
+
+## El dev server del puerto 3000 puede ser OTRO proyecto
+- **Síntoma:** las capturas de «Parlo» muestran una pantalla de login que no es la de Parlo.
+- **Causa real:** en esta máquina hay varios proyectos y el :3000 suele estar ocupado por otro.
+- **Solución:** para validar visualmente, `pnpm build` y `pnpm exec next start -p 3100`, y apuntar el harness a `http://localhost:3100`. Comprobarlo con `curl -s localhost:3100/login | grep inputmode` (el PIN de 4 dígitos solo existe en Parlo).
+
+## El dictado por voz no existe en Firefox
+- **Síntoma:** en Practicar no aparece el botón de micrófono.
+- **Causa real:** Firefox no implementa `SpeechRecognition`; es correcto que no se muestre.
+- **Solución:** ninguna, es a propósito. El campo de texto sigue funcionando igual.
