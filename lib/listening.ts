@@ -64,6 +64,38 @@ export const TRACKS: ListeningTrack[] = [
       "Looking back, I should have asked more questions that day.",
     ],
   },
+  {
+    id: "meeting",
+    level: "B2",
+    titleEs: "Una reunión que se tuerce",
+    titleEn: "A meeting that goes wrong",
+    lines: [
+      "Thanks everyone for making the time today.",
+      "As you can see, the numbers are somewhat disappointing.",
+      "Sales tend to drop in August, but not this much.",
+      "I'm not entirely sure the campaign was the problem.",
+      "The report should have been finished last Friday.",
+      "Having reviewed the data, I'd rather wait before deciding.",
+      "Let's touch base again once we have the full picture.",
+      "In the meantime, could you send me a ballpark figure?",
+    ],
+  },
+  {
+    id: "podcast",
+    level: "C1",
+    titleEs: "Un pódcast sobre el sueño",
+    titleEn: "A podcast about sleep",
+    lines: [
+      "It is widely acknowledged that sleep affects memory.",
+      "Rarely do we give it the attention it deserves.",
+      "A growing body of research links poor sleep to stress.",
+      "The findings indicate that consistency matters more than duration.",
+      "Arguably, going to bed at the same time is the single best habit.",
+      "Notwithstanding the evidence, most of us keep scrolling at midnight.",
+      "Had I known this ten years ago, I would have slept a lot more.",
+      "On balance, the advice is simple: protect the hours before bed.",
+    ],
+  },
 ];
 
 export type Difficulty = {

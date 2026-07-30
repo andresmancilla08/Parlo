@@ -9,8 +9,10 @@ import {
   IconBriefcase,
   IconHeadphones,
   IconCoffee,
+  IconContract,
   IconHome2,
   IconMicrophone,
+  IconNews,
   IconPlane,
   IconPlayerStopFilled,
   IconSend2,
@@ -26,7 +28,7 @@ import {
   type Scenario,
 } from "@/lib/coach";
 import { useProgress } from "@/lib/progress";
-import { firstPendingLesson, unitOfLesson } from "@/lib/curriculum";
+import { firstPendingLesson, TOP_LEVEL, unitOfLesson } from "@/lib/curriculum";
 import { speak } from "@/lib/tts";
 import { useDictation } from "@/lib/dictation";
 import { Button } from "@/components/ui/button";
@@ -43,6 +45,8 @@ const SCENARIO_ICON: Record<string, Icon> = {
   doctor: IconStethoscope,
   interview: IconBriefcase,
   flat: IconHome2,
+  negotiation: IconContract,
+  debate: IconNews,
 };
 
 type Turn = { role: "user" | "assistant"; content: string };
@@ -310,7 +314,7 @@ function Conversation({
 
   // Nivel aproximado para el prompt: el de la unidad que está haciendo.
   const pending = firstPendingLesson(new Set(completed), startLevel);
-  const level = pending ? unitOfLesson(pending.id)?.level ?? "A2" : "B1";
+  const level = pending ? (unitOfLesson(pending.id)?.level ?? "A2") : TOP_LEVEL;
 
   async function send(text: string) {
     const clean = text.trim();

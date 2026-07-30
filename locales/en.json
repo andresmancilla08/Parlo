@@ -59,7 +59,7 @@
     "features": {
       "levels": {
         "title": "Learn by levels",
-        "body": "From A1 to C2 with a clear path — never lost, never skipping steps."
+        "body": "From A1 to C1 with a clear path, without getting lost or skipping steps."
       },
       "converse": {
         "title": "Talk from day one",
@@ -258,7 +258,11 @@
     "brief_kicker": "Before you start",
     "brief_phrases": "Phrases that will help you",
     "brief_tip": "Tip",
-    "brief_start": "Start the conversation"
+    "brief_start": "Start the conversation",
+    "scenario_negotiation": "Negotiating a contract",
+    "goal_negotiation": "Price, deadlines and terms",
+    "scenario_debate": "Debate with a journalist",
+    "goal_debate": "Defend your view and push back"
   },
   "escucha": {
     "kicker": "Active listening",

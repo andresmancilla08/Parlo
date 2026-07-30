@@ -57,6 +57,8 @@ Leyenda de prioridad: **P0** rompe o bloquea · **P1** siguiente entrega · **P2
 - Checks nuevos: `lib/curriculum/teach.check.ts` (54 lecciones · 216 pasos · 216 ejemplos) y `lib/placement.check.ts` reescrito.
 
 **Currículo A1→C1 y liga (2026-07-30, v0.7.0)**
+- **El techo de nivel ya no está escrito a mano**: `LEVELS_WITH_CONTENT` y `TOP_LEVEL` se derivan del currículo. Los usan la landing (antes prometía C2 sin tenerlo), el prompt del coach cuando ya no quedan lecciones y el test de nivel. Añadir C2 será escribir el contenido y nada más.
+- **Escucha y conversación con nivel alto**: 2 pistas nuevas (B2 «una reunión que se tuerce», C1 «pódcast sobre el sueño») y 2 escenarios nuevos del coach (B2 negociar un contrato, C1 debate con periodista), con su briefing.
 - **C1 completo**: 6 unidades nuevas (inversión y énfasis · matices modales · frases compactas y nominalización · lenguaje idiomático · registro académico · precisión léxica) con teoría → **30 unidades / 90 lecciones / 558 ejercicios / 360 pasos de teoría**. Test de nivel con 5.º bloque C1 (25 ítems).
 - **M10 · Liga entre amigos** (`/app/liga`): privada, opt-in, hasta 20 personas, se entra por código de 6 caracteres. Se comparte SÓLO alias + XP de la semana; las reglas de Firestore garantizan que cada quien toca únicamente su entrada de `members` y su documento de `scores`. Ranking semanal que se reinicia el lunes; salir borra tu marcador. Probado contra Firestore real.
 - **M9 v3**: **EPUB** (zip + spine del OPF con `fflate`, en diferido) y **volcado del vocabulario del documento al SRS** (las 20 palabras más repetidas que no sean funcionales, nombres propios ni conocidas). Ambos probados de punta a punta subiendo un EPUB real por CDP.

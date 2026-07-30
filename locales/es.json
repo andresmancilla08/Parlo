@@ -59,7 +59,7 @@
     "features": {
       "levels": {
         "title": "Aprende por niveles",
-        "body": "Desde A1 hasta C2 con un camino claro, sin perderte ni saltarte pasos."
+        "body": "Desde A1 hasta C1 con un camino claro, sin perderte ni saltarte pasos."
       },
       "converse": {
         "title": "Conversa desde el primer día",
@@ -258,7 +258,11 @@
     "brief_kicker": "Antes de empezar",
     "brief_phrases": "Frases que te van a servir",
     "brief_tip": "Consejo",
-    "brief_start": "Empezar la conversación"
+    "brief_start": "Empezar la conversación",
+    "scenario_negotiation": "Negociar un contrato",
+    "goal_negotiation": "Precio, plazos y condiciones",
+    "scenario_debate": "Debate con una periodista",
+    "goal_debate": "Defender tu opinión y rebatir"
   },
   "escucha": {
     "kicker": "Escucha activa",

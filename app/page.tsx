@@ -1,6 +1,7 @@
 "use client";
 
 import Image, { type StaticImageData } from "next/image";
+import { LEVELS_WITH_CONTENT } from "@/lib/curriculum";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import {
@@ -295,7 +296,8 @@ function Method() {
   );
 }
 
-const levels = ["A1", "A2", "B1", "B2", "C1", "C2"];
+// Los niveles que se anuncian son los que existen: nada de prometer C2.
+const levels = LEVELS_WITH_CONTENT;
 
 function Levels() {
   const { t } = useTranslation();

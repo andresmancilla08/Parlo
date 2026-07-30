@@ -119,6 +119,38 @@ export const SCENARIOS: Scenario[] = [
     tipEs:
       "Para preguntar precios, «how much»; para cantidades contables, «how many». Y «bills» son luz, agua y gas, no facturas del banco.",
   },
+  {
+    id: "negotiation",
+    level: "B2",
+    roleEn: "a supplier negotiating a contract with the user",
+    situationEn:
+      "the user negotiates price, deadlines and terms, pushing back politely",
+    openerEn:
+      "Thanks for your time. I've looked at your proposal — I'm afraid the price is higher than we expected.",
+    prep: [
+      { en: "That's higher than we had in mind.", es: "Es más de lo que teníamos previsto." },
+      { en: "Would you be flexible on the deadline?", es: "¿Tendrías flexibilidad con el plazo?" },
+      { en: "I'd rather we agreed on a fixed fee.", es: "Preferiría que acordáramos una tarifa fija." },
+    ],
+    tipEs:
+      "Negociar en inglés es suavizar: «that's a bit high» en vez de «that's expensive», y «would you be able to…?» en vez de «you must». Cuanto más rodeo, más firme puedes ser sin romper nada.",
+  },
+  {
+    id: "debate",
+    level: "C1",
+    roleEn: "a journalist interviewing the user about a controversial topic",
+    situationEn:
+      "the user defends an opinion, concedes points and rebuts arguments",
+    openerEn:
+      "Many people would say remote work has damaged company culture. What's your take on that?",
+    prep: [
+      { en: "That's arguably true, but only to some extent.", es: "Eso es posiblemente cierto, pero solo hasta cierto punto." },
+      { en: "I take your point, however the data suggest otherwise.", es: "Entiendo tu argumento, sin embargo los datos apuntan a lo contrario." },
+      { en: "It may well be the case in large firms.", es: "Bien puede ser el caso en empresas grandes." },
+    ],
+    tipEs:
+      "En un debate en inglés se concede antes de rebatir («I take your point, but…»). Ir de frente sin conceder suena agresivo y resta credibilidad, aunque tengas razón.",
+  },
 ];
 
 export function scenarioById(id: string | null): Scenario | null {

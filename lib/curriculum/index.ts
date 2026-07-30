@@ -32,6 +32,18 @@ export function localTitle(
 
 export const LEVEL_ORDER: Cefr[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
 
+/**
+ * Niveles que EXISTEN en el currículo, en orden. Todo lo que dependa del techo
+ * (landing, test de nivel, prompt del coach) sale de aquí: así añadir C2 es
+ * escribir el contenido y nada más.
+ */
+export const LEVELS_WITH_CONTENT: Cefr[] = LEVEL_ORDER.filter((lvl) =>
+  curriculum.some((u) => u.level === lvl),
+);
+
+/** Nivel más alto con contenido (hoy C1). */
+export const TOP_LEVEL: Cefr = LEVELS_WITH_CONTENT[LEVELS_WITH_CONTENT.length - 1];
+
 export function levelRank(level: Cefr): number {
   return LEVEL_ORDER.indexOf(level);
 }
