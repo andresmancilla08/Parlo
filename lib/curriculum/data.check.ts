@@ -8,9 +8,12 @@ import { a1 } from "./levels/a1.ts";
 import { a2 } from "./levels/a2.ts";
 import { b1 } from "./levels/b1.ts";
 import { b2 } from "./levels/b2.ts";
+import { withExtra } from "./extra/index.ts";
+import { a2Extra } from "./extra/a2.ts";
+import { b1Extra } from "./extra/b1.ts";
 import { optionsSpeakable } from "./speech.ts";
 
-const curriculum = [...a1, ...a2, ...b1, ...b2];
+const curriculum = [...a1, ...withExtra(a2, a2Extra), ...withExtra(b1, b1Extra), ...b2];
 const SPANISH_CHARS = /[áéíóúñüÁÉÍÓÚÑ¿¡]/;
 let mute = 0;
 
@@ -24,6 +27,11 @@ function normalize(s: string): string {
     .trim();
 }
 
+const allIds = new Set(curriculum.flatMap((u) => u.lessons.map((l) => l.id)));
+for (const id of [...Object.keys(a2Extra), ...Object.keys(b1Extra)]) {
+  assert.ok(allIds.has(id), `ejercicios extra para una lección inexistente: ${id}`);
+}
+
 const lessonIds = new Set<string>();
 let exercises = 0;
 
@@ -32,7 +40,13 @@ for (const unit of curriculum) {
     assert.ok(!lessonIds.has(lesson.id), `id de lección duplicado: ${lesson.id}`);
     lessonIds.add(lesson.id);
     assert.ok(lesson.vocab.length > 0, `${lesson.id}: sin vocabulario (no alimenta el SRS)`);
-    assert.ok(lesson.exercises.length > 0, `${lesson.id}: sin ejercicios`);
+    assert.ok(lesson.exercises.length >= 5, `${lesson.id}: menos de 5 ejercicios`);
+    const prompts = lesson.exercises.map((e) => e.prompt);
+    assert.equal(
+      new Set(prompts).size,
+      prompts.length,
+      `${lesson.id}: hay enunciados repetidos (¿un extra que ya existía?)`,
+    );
 
     for (const [i, ex] of lesson.exercises.entries()) {
       const at = `${lesson.id}#${i} (${ex.kind})`;

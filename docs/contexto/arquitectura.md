@@ -18,7 +18,7 @@ PWA web que enseña inglés a hispanohablantes con currículo por niveles + tuto
 - `app/` — rutas (App Router), `layout.tsx`, `globals.css`, `manifest.ts`, `sw.ts`, `register-pwa.tsx`.
 - `components/ui/` — componentes visuales reutilizables.
 - `components/lesson/` — `lesson-teach.tsx` (fase «Aprende») y `lesson-runner.tsx` (práctica).
-- `lib/curriculum/` — `levels/*` (ejercicios) y `teach/*` (teoría por lección, mapa `lessonId → TeachStep[]`).
+- `lib/curriculum/` — `levels/*` (ejercicios base), `extra/*` (ejercicios añadidos, mapa `lessonId → Exercise[]`) y `teach/*` (teoría, mapa `lessonId → TeachStep[]`). `data.ts` los compone con `withExtra()`.
 - `lib/` — `firebase.ts` (init cliente), `utils.ts` (`cn`), `sfx.ts` (sonidos WebAudio), `dictation.ts` (voz→texto), `tts.ts` (texto→voz, normal y lenta).
 - `docs/` — `roadmap-mvp.md` y `docs/contexto/`.
 

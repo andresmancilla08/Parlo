@@ -56,6 +56,7 @@ Leyenda de prioridad: **P0** rompe o bloquea · **P1** siguiente entrega · **P2
 - Checks nuevos: `lib/curriculum/teach.check.ts` (54 lecciones · 216 pasos · 216 ejemplos) y `lib/placement.check.ts` reescrito.
 
 **Currículo completo A1→B2 y destrezas cerradas (2026-07-30)**
+- **A2 y B1 ampliados a 8 ejercicios por lección** (+108): viven en `lib/curriculum/extra/{a2,b1}.ts` como mapa `lessonId → Exercise[]` y se mezclan con `withExtra()` en `data.ts`; los originales no se tocan. Total: **468 ejercicios** (A1 90 · A2 144 · B1 144 · B2 90). `data.check.ts` ahora exige ≥5 por lección y **enunciados sin repetir**.
 - **B2 completo**: 6 unidades nuevas (relativos, hipotético avanzado, pasiva avanzada, conectores y matiz, patrones verbales, sonar natural) → **24 unidades / 72 lecciones / 360 ejercicios**, todas con teoría (288 pasos).
 - **Test de nivel hasta B2**: 4 bloques adaptativos de 5 ítems (20 en total).
 - **M8 · Pronunciación** (`/app/pronunciacion`): se lee la frase en voz alta, el reconocedor del navegador transcribe y `lib/pronunciation.ts` compara por subsecuencia común: marca qué palabras se entendieron, da % y XP. Las frases salen de la teoría de las lecciones ya hechas. Check propio con 15 asserts.
@@ -110,7 +111,7 @@ Harness de capturas (dev): `shot.mjs` (Chrome headless por CDP) entra con usuari
 ### P2 — Expansión
 9. ~~M6b · fuente de letras con licencia~~ ⛔ **descartado**: el módulo de canciones se retiró el 2026-07-26 y no se reabre sin licencia.
 10. **M9 v3**: EPUB (necesita epub.js o un lector de zip propio) y vocabulario del documento entero al SRS de una vez. DOCX, traducción en voz y búsqueda ✅ hechos.
-11. ~~Contenido B2~~ ✅ hecho (2026-07-30). Queda **ampliar a 7-8 ejercicios por lección** en A2/B1 (hoy 5) y, más adelante, C1.
+11. ~~Contenido B2~~ ✅ · ~~ampliar A2/B1 a 8 ejercicios por lección~~ ✅ (2026-07-30, +108 ejercicios). Queda **C1** y, si se quiere simetría, subir A1 y B2 de 5 a 8.
 12. **Arte propio** de las 3 insignias nuevas y poses extra de la mascota (las genera Andrés).
 13. ~~M8 · Pronunciación~~ ✅ v1 (2026-07-30). **v2**: comparar fonema a fonema o puntuar entonación exigiría un modelo de audio (coste) — aparcado.
 14. Liga/ranking entre amigos (opt-in) y retos compartidos.

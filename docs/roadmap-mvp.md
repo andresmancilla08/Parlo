@@ -33,7 +33,8 @@ Encima de todo: objetivo diario, retos, racha, niveles y logros.
 
 ## Currículo
 
-**24 unidades · 72 lecciones · 360 ejercicios**, de A1 a B2, cada lección con su teoría.
+**24 unidades · 72 lecciones · 468 ejercicios**, de A1 a B2, cada lección con su teoría.
+(A2 y B1 llevan 8 ejercicios por lección; A1 y B2, 5.)
 
 - **A1** saludos, números y hora, día a día, familia, lugares, tiempo y calendario.
 - **A2** rutinas, pasado, futuro, comparar, viajar, presente perfecto.

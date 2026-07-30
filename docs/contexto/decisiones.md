@@ -139,3 +139,10 @@
 - **EPUB queda fuera:** es un zip con XHTML; haría falta epub.js (pesado) o un lector de zip propio. No compensa hasta que alguien lo pida.
 - **`.doc` (binario, pre-2007) no está soportado** y no se va a soportar.
 - **Estado:** vigente.
+
+## Ejercicios extra en un mapa aparte, no dentro de `levels/*`
+- **Qué:** ampliar A2 y B1 de 5 a 8 ejercicios por lección se hizo en `lib/curriculum/extra/{a2,b1}.ts` (`lessonId → Exercise[]`), y `data.ts` los concatena con `withExtra()`.
+- **Por qué:** mismo motivo que la teoría — `a2.ts` y `b1.ts` pasan de 1.100 líneas y editarlas por dentro para meter tres ejercicios en cada una de las 18 lecciones es pedir romper contenido que ya funciona. Además el diff queda legible: todo lo nuevo en un archivo.
+- **Orden:** los extra van al FINAL de cada lección, así quien ya la había hecho reconoce el principio.
+- **Red de seguridad:** `data.check.ts` valida el currículo YA compuesto (lo mismo que ve la app), comprueba que ningún extra apunte a una lección inexistente y que no haya **enunciados repetidos** dentro de una lección.
+- **Estado:** vigente. A1 y B2 siguen con 5 ejercicios por lección.
