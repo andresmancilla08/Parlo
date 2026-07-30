@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import {
   IconBook,
+  IconCards,
   IconLanguage,
   IconPlayerPlayFilled,
   IconPlayerStopFilled,
@@ -17,6 +18,7 @@ import {
 import { parseFile } from "@/lib/reader/parse";
 import { deleteDoc, getDoc, listDocs, saveDoc, type StoredDoc } from "@/lib/reader/store";
 import { buildIndex, cleanWord, search, toSentences, toWords } from "@/lib/reader/segment";
+import { vocabCandidates } from "@/lib/reader/vocab";
 import { detectLang, targetLang } from "@/lib/reader/detect";
 import { RATE_SLOW, speak } from "@/lib/tts";
 import { useProgress } from "@/lib/progress";
@@ -105,7 +107,7 @@ function Library() {
         </Card>
         <input
           type="file"
-          accept=".txt,.md,.markdown,.csv,.log,.docx,application/pdf,text/plain"
+          accept=".txt,.md,.markdown,.csv,.log,.docx,.epub,application/pdf,text/plain"
           className="hidden"
           disabled={busy}
           onChange={(e) => {
@@ -193,7 +195,9 @@ function Reader({ id }: { id: string }) {
   const { t } = useTranslation();
   const router = useRouter();
   const noteListen = useProgress((s) => s.noteListen);
+  const addCard = useProgress((s) => s.addCard);
 
+  const [vocabAdded, setVocabAdded] = useState<number | null>(null);
   const [doc, setDoc] = useState<StoredDoc | null | undefined>(undefined);
   const [current, setCurrent] = useState(0);
   const [reading, setReading] = useState(false);
@@ -327,6 +331,33 @@ function Reader({ id }: { id: string }) {
           {t("leer.results", { n: hits.length })}
         </p>
       )}
+
+      {/* Vocabulario del documento entero al repaso: lo que más se repite en lo
+          que TÚ lees es justo lo que te conviene aprender. */}
+      <button
+        type="button"
+        onClick={() => {
+          const known = new Set(Object.keys(useProgress.getState().cards).map((k) => k.toLowerCase()));
+          const picked = vocabCandidates(doc.text, known, 20);
+          picked.forEach((c) => addCard(c.word));
+          setVocabAdded(picked.length);
+        }}
+        className="mt-3 flex w-full items-center gap-3 rounded-2xl border border-border bg-card p-3.5 text-left transition-colors hover:border-accent active:scale-[0.99]"
+      >
+        <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent-ink">
+          <IconCards className="size-5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-display text-sm font-extrabold">
+            {vocabAdded === null
+              ? t("leer.vocab_cta")
+              : vocabAdded > 0
+                ? t("leer.vocab_added", { n: vocabAdded })
+                : t("leer.vocab_none")}
+          </span>
+          <span className="block text-xs font-bold text-muted">{t("leer.vocab_hint")}</span>
+        </span>
+      </button>
 
       <div className="mt-4 space-y-1">
         {visible.map((s) => (

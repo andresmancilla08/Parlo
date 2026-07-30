@@ -19,7 +19,7 @@ export type PlacementItem = {
 };
 
 /** Niveles por los que pasa el test, en orden. */
-export const PLACEMENT_LEVELS: Cefr[] = ["A1", "A2", "B1", "B2"];
+export const PLACEMENT_LEVELS: Cefr[] = ["A1", "A2", "B1", "B2", "C1"];
 
 /** Ítems por nivel (un bloque). */
 export const BLOCK = 5;
@@ -230,6 +230,57 @@ export const PLACEMENT_ITEMS: PlacementItem[] = [
     explain:
       "«Insist ON», y tras preposición el verbo va en -ing: insist on paying. Nunca «insist to pay».",
     full: "She insisted on paying for dinner.",
+  },
+
+  // ---------------- C1 ----------------
+  {
+    id: "p-c1-1",
+    level: "C1",
+    prompt: "«Never before ___ such a mess.»",
+    options: ["had I seen", "I had seen", "I saw", "did I saw"],
+    answer: "had I seen",
+    explain:
+      "Con un negativo al principio, el auxiliar se adelanta al sujeto: never before HAD I seen.",
+    full: "Never before had I seen such a mess.",
+  },
+  {
+    id: "p-c1-2",
+    level: "C1",
+    prompt: "«No sooner had we left ___ it started to rain.»",
+    options: ["than", "when", "that", "then"],
+    answer: "than",
+    explain: "«No sooner… THAN». Con «hardly» y «scarcely» sí se usa «when».",
+    full: "No sooner had we left than it started to rain.",
+  },
+  {
+    id: "p-c1-3",
+    level: "C1",
+    prompt: "«You ___ paid: it was already covered.»",
+    options: ["needn't have", "mustn't have", "shouldn't", "couldn't have"],
+    answer: "needn't have",
+    explain:
+      "«Needn't have + participio» = lo hiciste y no hacía falta. «Didn't need to» sería que ni lo hiciste.",
+    full: "You needn't have paid: it was already covered.",
+  },
+  {
+    id: "p-c1-4",
+    level: "C1",
+    prompt: "«___ the report, she went home.»",
+    options: ["Having finished", "Have finished", "After finish", "Finished"],
+    answer: "Having finished",
+    explain:
+      "Cláusula de participio: «having + participio» comprime «after she had finished».",
+    full: "Having finished the report, she went home.",
+  },
+  {
+    id: "p-c1-5",
+    level: "C1",
+    prompt: "«She's very ___ about criticism.» (le afecta)",
+    options: ["sensitive", "sensible", "sensitivity", "sensate"],
+    answer: "sensitive",
+    explain:
+      "Falso amigo: «sensitive» = sensible (emocional); «sensible» significa sensato.",
+    full: "She's very sensitive about criticism.",
   },
 ];
 

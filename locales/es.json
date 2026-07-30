@@ -154,7 +154,8 @@
     "unit_skipped": "Superada en el test",
     "feature_learn": "Aprender y practicar",
     "feature_theory_chip": "Primero la teoría",
-    "level_b2": "Precisión y matiz"
+    "level_b2": "Precisión y matiz",
+    "level_c1": "Dominio y matiz"
   },
   "retos": {
     "kicker": "Tu avance",
@@ -292,7 +293,7 @@
     "title": "Lee en inglés",
     "subtitle": "Sube un texto o un PDF y léelo con voz, traducción y significado de cada palabra.",
     "upload": "Subir un documento",
-    "upload_hint": "TXT, MD, PDF o DOCX · se queda en tu dispositivo",
+    "upload_hint": "TXT, MD, PDF, DOCX o EPUB · se queda en tu dispositivo",
     "reading": "Leyendo el archivo…",
     "library": "Tu biblioteca",
     "empty": "Todavía no has subido nada.",
@@ -300,7 +301,7 @@
     "remove": "Quitar el documento",
     "privacy": "Los documentos se guardan solo en este dispositivo. Al pedir traducción se envían frases sueltas a la IA.",
     "err_empty": "Ese archivo está vacío.",
-    "err_type": "Formato no admitido. Usa TXT, MD, PDF o DOCX.",
+    "err_type": "Formato no admitido. Usa TXT, MD, PDF, DOCX o EPUB.",
     "err_scanned": "Ese PDF es una imagen escaneada y no tiene texto que leer.",
     "err_read": "No se pudo leer el archivo.",
     "not_found": "Ese documento ya no está.",
@@ -317,7 +318,11 @@
     "saved": "Añadida al repaso",
     "home_cta": "Leer un documento",
     "show_en": "Ver en inglés",
-    "only_es": "Solo español"
+    "only_es": "Solo español",
+    "vocab_cta": "Añadir vocabulario al repaso",
+    "vocab_hint": "Las palabras más repetidas del documento que aún no tienes",
+    "vocab_added": "{{n}} palabras añadidas al repaso",
+    "vocab_none": "No quedan palabras nuevas que añadir"
   },
   "perfil": {
     "level": "Nivel {{level}}",
@@ -434,5 +439,41 @@
     "unsupported_body": "Este navegador no permite reconocer la voz. Prueba en Chrome, Edge o Safari; mientras tanto, entrena el oído.",
     "home_cta": "Practicar pronunciación",
     "home_sub": "Lee en voz alta y comprueba si se te entiende"
+  },
+  "liga": {
+    "kicker": "Liga con amigos",
+    "title": "Compite con quien tú elijas",
+    "subtitle": "Una liga privada de hasta 20 personas. Gana quien más XP haga esta semana.",
+    "privacy_title": "Qué se comparte",
+    "privacy_1": "Solo tu alias y tu XP de la semana.",
+    "privacy_2": "Nunca tu correo, tus lecciones ni cuándo estudias.",
+    "privacy_3": "Puedes salir cuando quieras: tu marcador se borra.",
+    "alias_label": "Tu alias en la liga",
+    "alias_ph": "Cómo te verán los demás",
+    "alias_short": "Al menos 2 caracteres.",
+    "alias_long": "Máximo 16 caracteres.",
+    "alias_chars": "Solo letras, números, espacios y . _ - (nada de correos ni teléfonos).",
+    "create_title": "Crear una liga",
+    "create_body": "Tú la creas y compartes el código.",
+    "name_ph": "Nombre de la liga",
+    "create_cta": "Crear liga",
+    "join_title": "Entrar con código",
+    "join_body": "Pide el código de 6 letras a quien te invita.",
+    "join_cta": "Entrar",
+    "err_not_found": "No encontramos esa liga. Revisa el código.",
+    "err_full": "Esa liga está llena (máximo 20).",
+    "err_offline": "Sin conexión. Inténtalo de nuevo.",
+    "members": "{{n}} de {{max}} personas",
+    "this_week": "esta semana",
+    "invite": "Código para invitar",
+    "copied": "Código copiado",
+    "ranking": "Clasificación",
+    "you": "(tú)",
+    "alone": "Todavía estás tú solo. Pasa el código a alguien y que empiece la competición.",
+    "leave": "Salir de la liga",
+    "leave_confirm": "¿Seguro? Se borrará tu marcador de esta liga.",
+    "footer": "La clasificación se reinicia cada lunes. Solo cuenta la XP que ganes en la semana.",
+    "home_cta": "Liga con amigos",
+    "home_sub": "Compite en XP semanal"
   }
 }

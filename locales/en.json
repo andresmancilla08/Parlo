@@ -154,7 +154,8 @@
     "unit_skipped": "Passed in the test",
     "feature_learn": "Learn and practise",
     "feature_theory_chip": "Theory first",
-    "level_b2": "Precision and nuance"
+    "level_b2": "Precision and nuance",
+    "level_c1": "Mastery and nuance"
   },
   "retos": {
     "kicker": "Your progress",
@@ -292,7 +293,7 @@
     "title": "Read in English",
     "subtitle": "Upload a text or PDF and read it with audio, translation and word meanings.",
     "upload": "Upload a document",
-    "upload_hint": "TXT, MD, PDF or DOCX · stays on your device",
+    "upload_hint": "TXT, MD, PDF, DOCX or EPUB · stays on your device",
     "reading": "Reading the file…",
     "library": "Your library",
     "empty": "You haven't uploaded anything yet.",
@@ -300,7 +301,7 @@
     "remove": "Remove document",
     "privacy": "Documents are stored on this device only. Individual sentences are sent to the AI when you ask for a translation.",
     "err_empty": "That file is empty.",
-    "err_type": "Format not supported. Use TXT, MD, PDF or DOCX.",
+    "err_type": "Format not supported. Use TXT, MD, PDF, DOCX or EPUB.",
     "err_scanned": "That PDF is a scanned image with no readable text.",
     "err_read": "Couldn't read the file.",
     "not_found": "That document is gone.",
@@ -317,7 +318,11 @@
     "saved": "Added to review",
     "home_cta": "Read a document",
     "show_en": "Show English",
-    "only_es": "Spanish only"
+    "only_es": "Spanish only",
+    "vocab_cta": "Add vocabulary to review",
+    "vocab_hint": "The most repeated words in the document that you do not have yet",
+    "vocab_added": "{{n}} words added to your review",
+    "vocab_none": "No new words left to add"
   },
   "perfil": {
     "level": "Level {{level}}",
@@ -434,5 +439,41 @@
     "unsupported_body": "This browser does not support speech recognition. Try Chrome, Edge or Safari; meanwhile, train your ear.",
     "home_cta": "Practise pronunciation",
     "home_sub": "Read out loud and check if you are understood"
+  },
+  "liga": {
+    "kicker": "Friends league",
+    "title": "Compete with whoever you choose",
+    "subtitle": "A private league of up to 20 people. Whoever earns the most XP this week wins.",
+    "privacy_title": "What gets shared",
+    "privacy_1": "Only your alias and your XP for the week.",
+    "privacy_2": "Never your email, your lessons or when you study.",
+    "privacy_3": "You can leave whenever you want: your score is deleted.",
+    "alias_label": "Your league alias",
+    "alias_ph": "How others will see you",
+    "alias_short": "At least 2 characters.",
+    "alias_long": "16 characters max.",
+    "alias_chars": "Only letters, numbers, spaces and . _ - (no emails or phone numbers).",
+    "create_title": "Create a league",
+    "create_body": "You create it and share the code.",
+    "name_ph": "League name",
+    "create_cta": "Create league",
+    "join_title": "Join with a code",
+    "join_body": "Ask whoever invited you for the 6-letter code.",
+    "join_cta": "Join",
+    "err_not_found": "We could not find that league. Check the code.",
+    "err_full": "That league is full (20 max).",
+    "err_offline": "No connection. Try again.",
+    "members": "{{n}} of {{max}} people",
+    "this_week": "this week",
+    "invite": "Invite code",
+    "copied": "Code copied",
+    "ranking": "Standings",
+    "you": "(you)",
+    "alone": "It is just you so far. Share the code and let the competition begin.",
+    "leave": "Leave the league",
+    "leave_confirm": "Are you sure? Your score in this league will be deleted.",
+    "footer": "Standings reset every Monday. Only the XP you earn during the week counts.",
+    "home_cta": "Friends league",
+    "home_sub": "Compete on weekly XP"
   }
 }

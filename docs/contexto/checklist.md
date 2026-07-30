@@ -22,7 +22,8 @@ Leyenda de prioridad: **P0** rompe o bloquea · **P1** siguiente entrega · **P2
 | M6b | Canciones con letra | ⛔ **RETIRADO 2026-07-26**: sin licencia no se pueden servir letras de catálogo actual a los usuarios, y el repertorio libre (Jamendo/dominio público) no convence. Queda entero en el historial de git |
 | M7 | Test de nivel inicial (colocación CEFR) | ✅ **v2 adaptativo** | `app/app/test`, `lib/placement.ts` |
 | M8 | **Pronunciación (leer en voz alta y puntuar)** | ✅ v1 | `app/app/pronunciacion`, `lib/pronunciation.ts` |
-| M9 | **Lector de documentos propios con voz** | ✅ v2 (DOCX + traducción en voz) | `app/app/leer`, `lib/reader/*`, `app/api/translate` |
+| M10 | **Liga entre amigos** (opt-in, alias + XP semanal) | ✅ v1 | `app/app/liga`, `lib/league*.ts`, `firestore.rules` |
+| M9 | **Lector de documentos propios con voz** | ✅ v3 (PDF · DOCX · **EPUB** + traducción en voz + vocabulario al SRS) | `app/app/leer`, `lib/reader/*`, `app/api/translate` |
 
 ---
 
@@ -54,6 +55,11 @@ Leyenda de prioridad: **P0** rompe o bloquea · **P1** siguiente entrega · **P2
 - **Voz**: botón tortuga (lento) en teoría, feedback, escucha y lector; **dictado por voz** en Practicar; la respuesta del coach **se lee sola la primera vez**.
 - **Animaciones/progreso**: la barra mide lo respondido (no el índice), combo de aciertos seguidos, XP con contador ascendente, confeti al terminar y `MotionConfig reducedMotion="user"` global.
 - Checks nuevos: `lib/curriculum/teach.check.ts` (54 lecciones · 216 pasos · 216 ejemplos) y `lib/placement.check.ts` reescrito.
+
+**Currículo A1→C1 y liga (2026-07-30, v0.7.0)**
+- **C1 completo**: 6 unidades nuevas (inversión y énfasis · matices modales · frases compactas y nominalización · lenguaje idiomático · registro académico · precisión léxica) con teoría → **30 unidades / 90 lecciones / 558 ejercicios / 360 pasos de teoría**. Test de nivel con 5.º bloque C1 (25 ítems).
+- **M10 · Liga entre amigos** (`/app/liga`): privada, opt-in, hasta 20 personas, se entra por código de 6 caracteres. Se comparte SÓLO alias + XP de la semana; las reglas de Firestore garantizan que cada quien toca únicamente su entrada de `members` y su documento de `scores`. Ranking semanal que se reinicia el lunes; salir borra tu marcador. Probado contra Firestore real.
+- **M9 v3**: **EPUB** (zip + spine del OPF con `fflate`, en diferido) y **volcado del vocabulario del documento al SRS** (las 20 palabras más repetidas que no sean funcionales, nombres propios ni conocidas). Ambos probados de punta a punta subiendo un EPUB real por CDP.
 
 **Currículo completo A1→B2 y destrezas cerradas (2026-07-30)**
 - **A2 y B1 ampliados a 8 ejercicios por lección** (+108): viven en `lib/curriculum/extra/{a2,b1}.ts` como mapa `lessonId → Exercise[]` y se mezclan con `withExtra()` en `data.ts`; los originales no se tocan. Total: **468 ejercicios** (A1 90 · A2 144 · B1 144 · B2 90). `data.check.ts` ahora exige ≥5 por lección y **enunciados sin repetir**.
@@ -110,11 +116,11 @@ Harness de capturas (dev): `shot.mjs` (Chrome headless por CDP) entra con usuari
 
 ### P2 — Expansión
 9. ~~M6b · fuente de letras con licencia~~ ⛔ **descartado**: el módulo de canciones se retiró el 2026-07-26 y no se reabre sin licencia.
-10. **M9 v3**: EPUB (necesita epub.js o un lector de zip propio) y vocabulario del documento entero al SRS de una vez. DOCX, traducción en voz y búsqueda ✅ hechos.
-11. ~~Contenido B2~~ ✅ · ~~ampliar A2/B1 a 8 ejercicios por lección~~ ✅ (2026-07-30, +108 ejercicios). Queda **C1** y, si se quiere simetría, subir A1 y B2 de 5 a 8.
+10. ~~M9 v3: EPUB y vocabulario del documento al SRS~~ ✅ (2026-07-30). Pendiente: TTS de servidor cacheado para el lector.
+11. ~~Contenido B2~~ ✅ · ~~A2/B1 a 8 ejercicios~~ ✅ · ~~C1 completo~~ ✅ (2026-07-30). Queda **C2** y, si se quiere simetría, subir A1/B2/C1 de 5 a 8 ejercicios por lección.
 12. **Arte propio** de las 3 insignias nuevas y poses extra de la mascota (las genera Andrés).
 13. ~~M8 · Pronunciación~~ ✅ v1 (2026-07-30). **v2**: comparar fonema a fonema o puntuar entonación exigiría un modelo de audio (coste) — aparcado.
-14. Liga/ranking entre amigos (opt-in) y retos compartidos.
+14. ~~Liga/ranking entre amigos (opt-in)~~ ✅ v1 (2026-07-30). Pendiente si se quiere: **retos compartidos** dentro de la liga y aviso cuando alguien te adelanta.
 
 ### P3 — Aparcado
 15. Recuperación de PIN (el flujo estándar de Firebase pide 6+ caracteres y rompe `pin+"00"`; haría falta página propia y dominio).

@@ -8,12 +8,13 @@ import { a1 } from "./levels/a1.ts";
 import { a2 } from "./levels/a2.ts";
 import { b1 } from "./levels/b1.ts";
 import { b2 } from "./levels/b2.ts";
+import { c1 } from "./levels/c1.ts";
 import { withExtra } from "./extra/index.ts";
 import { a2Extra } from "./extra/a2.ts";
 import { b1Extra } from "./extra/b1.ts";
 import { optionsSpeakable } from "./speech.ts";
 
-const curriculum = [...a1, ...withExtra(a2, a2Extra), ...withExtra(b1, b1Extra), ...b2];
+const curriculum = [...a1, ...withExtra(a2, a2Extra), ...withExtra(b1, b1Extra), ...b2, ...c1];
 const SPANISH_CHARS = /[áéíóúñüÁÉÍÓÚÑ¿¡]/;
 let mute = 0;
 

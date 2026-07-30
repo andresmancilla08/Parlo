@@ -19,7 +19,7 @@ PWA web que enseña inglés a hispanohablantes con currículo por niveles + tuto
 - `components/ui/` — componentes visuales reutilizables.
 - `components/lesson/` — `lesson-teach.tsx` (fase «Aprende») y `lesson-runner.tsx` (práctica).
 - `lib/curriculum/` — `levels/*` (ejercicios base), `extra/*` (ejercicios añadidos, mapa `lessonId → Exercise[]`) y `teach/*` (teoría, mapa `lessonId → TeachStep[]`). `data.ts` los compone con `withExtra()`.
-- `lib/` — `firebase.ts` (init cliente), `utils.ts` (`cn`), `sfx.ts` (sonidos WebAudio), `dictation.ts` (voz→texto), `tts.ts` (texto→voz, normal y lenta).
+- `lib/` — `firebase.ts` (init cliente), `utils.ts` (`cn`), `sfx.ts` (sonidos WebAudio), `dictation.ts` (voz→texto), `tts.ts` (texto→voz, normal y lenta), `pronunciation.ts` (puntuar lectura en voz alta), `league*.ts` (liga: `league-core` es la parte pura y `league` la de Firestore).
 - `docs/` — `roadmap-mvp.md` y `docs/contexto/`.
 
 ## Flujo de datos
@@ -28,6 +28,8 @@ PWA web que enseña inglés a hispanohablantes con currículo por niveles + tuto
   ejercicios al terminarla (o si `progress.taught` ya la contiene). `?mode=teoria|practica` fuerza una u otra.
 - **IA (tutor/corrección):** cliente → Route Handler `/api/...` → Gemini vía AI SDK (streaming) → respuesta. La clave de IA vive solo en el servidor.
 - **PWA:** `manifest.ts` sirve `/manifest.webmanifest`; `sw.ts` precachea y da offline parcial (solo en producción).
+
+- **Liga:** el ÚNICO dato compartido. `leagues/{id}` + `leagues/{id}/scores/{uid}` + `leagueCodes/{code}`; sólo viajan alias y XP semanal, y las reglas impiden tocar la entrada de otro.
 
 ## Lo que NO existe (descartado)
 - **Nada nativo** (sin Expo/React Native): Parlo es SIEMPRE web PWA.

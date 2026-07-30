@@ -86,3 +86,12 @@
 - **Síntoma:** `TS7016: Could not find a declaration file for module 'mammoth/mammoth.browser'`.
 - **Causa real:** el paquete tipa el build de Node (que importa `fs`); el de navegador va sin tipos.
 - **Solución:** `types/mammoth-browser.d.ts` declara sólo `extractRawText`. No cambiar el import a `"mammoth"` a secas: eso mete Node en el bundle del cliente.
+
+## `setState` en efectos: el lint lo prohíbe, también en cargas asíncronas
+- **Síntoma:** `react-hooks/set-state-in-effect` al llamar desde un efecto a una función que hace `setState`, aunque sea `async`.
+- **Causa real:** la regla mira la llamada, no si el `setState` ocurre tras un `await`.
+- **Solución:** poner los `setState` dentro de callbacks de promesa (`fetchX().then((data) => setX(data))`), como ya hacía el lector. Y derivar el estado de carga (`league === undefined`) en vez de un `setLoading(true/false)`.
+
+## Las reglas de la liga se prueban con la app, no con asserts
+- **Cómo:** `lib/league.check.ts` cubre alias, códigos, XP semanal y ranking (lógica pura). Lo que las reglas permiten o no se comprueba usando la app con el usuario ficticio: crear liga, ver el marcador y salir.
+- **Ojo:** tras tocar `firestore.rules` hay que `firebase deploy --only firestore:rules` o la app seguirá contra las reglas viejas.

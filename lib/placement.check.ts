@@ -29,7 +29,8 @@ for (const lvl of PLACEMENT_LEVELS) {
 }
 assert.equal(nextLevel("A1"), "A2");
 assert.equal(nextLevel("B1"), "B2");
-assert.equal(nextLevel("B2"), null, "B2 es el último nivel con contenido");
+assert.equal(nextLevel("B2"), "C1");
+assert.equal(nextLevel("C1"), null, "C1 es el último nivel con contenido");
 
 /** Respuestas de los niveles indicados; `ok` decide si se acierta. */
 function answersFor(levels: string[], ok: (id: string) => boolean) {
@@ -57,9 +58,9 @@ assert.equal(
   "B1",
 );
 
-// Todo bien → B2 (es el nivel más alto con contenido hoy).
-const full = placementResult(answersFor(["A1", "A2", "B1", "B2"], () => true));
-assert.equal(full.level, "B2");
+// Todo bien → C1 (es el nivel más alto con contenido hoy).
+const full = placementResult(answersFor(["A1", "A2", "B1", "B2", "C1"], () => true));
+assert.equal(full.level, "C1");
 assert.equal(full.correct, PLACEMENT_ITEMS.length);
 assert.equal(full.missed.length, 0);
 

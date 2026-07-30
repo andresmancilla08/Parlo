@@ -4,10 +4,11 @@ import { a1Teach } from "./a1";
 import { a2Teach } from "./a2";
 import { b1Teach } from "./b1";
 import { b2Teach } from "./b2";
+import { c1Teach } from "./c1";
 
 export type { TeachExample, TeachStep } from "./types";
 
-const TEACH: TeachMap = { ...a1Teach, ...a2Teach, ...b1Teach, ...b2Teach };
+const TEACH: TeachMap = { ...a1Teach, ...a2Teach, ...b1Teach, ...b2Teach, ...c1Teach };
 
 /**
  * Teoría de una lección. Nunca devuelve vacío: si una lección todavía no tiene

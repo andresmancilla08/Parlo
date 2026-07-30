@@ -3,6 +3,7 @@ import { a1 } from "./levels/a1";
 import { a2 } from "./levels/a2";
 import { b1 } from "./levels/b1";
 import { b2 } from "./levels/b2";
+import { c1 } from "./levels/c1";
 import { withExtra } from "./extra";
 import { a2Extra } from "./extra/a2";
 import { b1Extra } from "./extra/b1";
@@ -15,4 +16,5 @@ export const curriculum: Unit[] = [
   ...withExtra(a2, a2Extra),
   ...withExtra(b1, b1Extra),
   ...b2,
+  ...c1,
 ];

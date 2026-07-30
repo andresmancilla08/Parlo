@@ -146,3 +146,23 @@
 - **Orden:** los extra van al FINAL de cada lección, así quien ya la había hecho reconoce el principio.
 - **Red de seguridad:** `data.check.ts` valida el currículo YA compuesto (lo mismo que ve la app), comprueba que ningún extra apunte a una lección inexistente y que no haya **enunciados repetidos** dentro de una lección.
 - **Estado:** vigente. A1 y B2 siguen con 5 ejercicios por lección.
+
+## Liga entre amigos: alias, XP semanal y nada más
+- **Qué:** liga privada opt-in de hasta 20 personas a la que se entra por un código de 6 caracteres. Modelo: `leagues/{id}` (con `members` como mapa uid → {alias, joinedAt}), `leagues/{id}/scores/{uid}` (alias, semana, XP) y `leagueCodes/{code}` → leagueId.
+- **Qué se comparte y qué no:** un alias que elige el usuario y su XP de la semana. Nunca el correo, ni las lecciones, ni cuándo estudia. La pantalla lo dice ANTES de pedir nada.
+- **Por qué el mapa `members` y no una subcolección:** con un mapa, la regla `members.diff(...).affectedKeys().hasOnly([uid])` deja que cada quien se añada o se quite **solo a sí mismo** en una sola operación, sin poder meter ni echar a nadie.
+- **Por qué un código y no invitaciones:** invitar por correo obligaría a compartir correos, justo lo que se quiere evitar. El código no es adivinable en la práctica (29⁶ con alfabeto sin vocales ni caracteres ambiguos) y `leagueCodes` sólo permite `get`, nunca `list`.
+- **El alias se valida** (`league-core.ts`) para que nadie meta un correo o un teléfono sin darse cuenta.
+- **Estado:** vigente. Cubierto por `lib/league.check.ts` y probado contra Firestore real.
+
+## EPUB con fflate y el spine, no por nombre de fichero
+- **Qué:** `lib/reader/epub.ts` descomprime el EPUB con `fflate` (30 KB, import dinámico), lee `META-INF/container.xml` → OPF → manifest + spine, y extrae el texto con `DOMParser` en ese orden.
+- **Por qué el spine:** coger los XHTML por orden alfabético desordena los capítulos (chapter10 antes que chapter2). El spine ES el índice de lectura del libro.
+- **Descartado:** epub.js (pesa y trae visor propio, que aquí sobra) y leer el zip a mano.
+- **Estado:** vigente. Probado subiendo un EPUB real por CDP.
+
+## Vocabulario del documento al SRS por frecuencia
+- **Qué:** un botón vuelca al repaso las 20 palabras más repetidas del documento que no sean funcionales, nombres propios ni conocidas ya.
+- **Cómo distingue un nombre propio:** si TODAS sus apariciones llevan mayúscula y al menos una está a mitad de frase. Así «Sarah» cae y «Climate» (que solo aparece abriendo frase) se queda.
+- **Por qué frecuencia y no IA:** lo que se repite en lo que TÚ lees es exactamente lo que te conviene aprender, y no cuesta ni una llamada.
+- **Estado:** vigente. Cubierto por `lib/reader/vocab.check.ts`.

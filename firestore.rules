@@ -1,6 +1,8 @@
 rules_version = '2';
 
-// Parlo — cada persona sólo toca SU documento. No hay datos compartidos.
+// Parlo — cada persona sólo toca SU documento. Lo único compartido es la liga
+// entre amigos (opt-in), y ahí sólo viajan un alias elegido por el usuario y su
+// XP de la semana: ni correo, ni progreso detallado, ni actividad.
 service cloud.firestore {
   match /databases/{database}/documents {
     // Usuario de servicio del cron de recordatorios (`/api/reminders`). La
@@ -8,6 +10,10 @@ service cloud.firestore {
     // cron entra con este usuario de Firebase Auth en vez del Admin SDK.
     function isCron() {
       return request.auth != null && request.auth.uid == 'UgqGDgO64fSuLcw8r6bAQJG3L8q2';
+    }
+
+    function signedIn() {
+      return request.auth != null;
     }
 
     match /users/{uid} {
@@ -22,6 +28,61 @@ service cloud.firestore {
 
       match /{document=**} {
         allow read, write: if request.auth != null && request.auth.uid == uid;
+      }
+    }
+
+    /* ---------------- liga entre amigos (opt-in) ---------------- */
+
+    // Índice código → liga. Sólo `get` (nunca `list`): con el código se entra,
+    // pero nadie puede enumerar las ligas que existen.
+    match /leagueCodes/{code} {
+      allow get: if signedIn();
+      allow create: if signedIn() && request.resource.data.keys().hasOnly(['leagueId']);
+      allow update, delete: if false;
+    }
+
+    match /leagues/{leagueId} {
+      function isMember() {
+        return signedIn() && request.auth.uid in resource.data.members;
+      }
+      // De `members` sólo puedes tocar TU entrada: ni metes a otros ni echas a nadie.
+      function onlyOwnMembership() {
+        return request.resource.data.members.diff(resource.data.members)
+          .affectedKeys().hasOnly([request.auth.uid]);
+      }
+
+      // La liga la ven sus miembros; para entrar se usa el código, no la lectura.
+      allow get: if isMember();
+      allow list: if false;
+
+      allow create: if signedIn()
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.members.keys().hasOnly([request.auth.uid])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() <= 30;
+
+      // Entrar o salir. Nada más cambia (ni nombre, ni dueño, ni código), y hay tope.
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members'])
+        && onlyOwnMembership()
+        && request.resource.data.members.keys().size() <= 20;
+
+      allow delete: if signedIn() && resource.data.ownerUid == request.auth.uid;
+
+      // Marcador: cada quien escribe SÓLO el suyo; lo leen los miembros.
+      match /scores/{uid} {
+        function league() {
+          return get(/databases/$(database)/documents/leagues/$(leagueId)).data;
+        }
+        allow read: if signedIn() && request.auth.uid in league().members;
+        allow delete: if signedIn() && request.auth.uid == uid;
+        allow create, update: if signedIn()
+          && request.auth.uid == uid
+          && request.auth.uid in league().members
+          && request.resource.data.xp is int
+          && request.resource.data.xp >= 0
+          && request.resource.data.alias is string
+          && request.resource.data.alias.size() <= 16;
       }
     }
   }

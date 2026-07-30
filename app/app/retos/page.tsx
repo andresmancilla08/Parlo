@@ -15,6 +15,7 @@ import {
   IconRefresh,
   IconShieldCheck,
   IconSparkles,
+  IconTrophy,
   type Icon,
 } from "@tabler/icons-react";
 import {
@@ -153,6 +154,22 @@ export default function RetosPage() {
         </div>
         <Bar fraction={level.fraction} className="mt-3" />
       </Card>
+
+      {/* La liga vive aquí: es competición, como los retos. */}
+      <Link href="/app/liga" className="mt-4 block active:scale-[0.99]">
+        <Card className="flex items-center gap-3.5 p-4">
+          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-gem/15 text-gem">
+            <IconTrophy className="size-5" stroke={2.2} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-display text-base font-extrabold">
+              {t("liga.home_cta")}
+            </span>
+            <span className="block text-xs font-bold text-muted">{t("liga.home_sub")}</span>
+          </span>
+          <IconArrowRight className="size-5 shrink-0 text-muted" />
+        </Card>
+      </Link>
 
       {hydrated && done === 0 && (
         <Link href="/app" className="mt-8 block active:scale-[0.99]">

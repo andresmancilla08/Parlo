@@ -26,6 +26,12 @@ export async function parseFile(file: File): Promise<ParseResult> {
     return text.trim() ? { text, title } : { error: "empty" };
   }
 
+  if (file.name.toLowerCase().endsWith(".epub")) {
+    const { epubToText } = await import("./epub");
+    const book = await epubToText(file);
+    return book.text.trim() ? { text: book.text, title: book.title || title } : { error: "empty" };
+  }
+
   return { error: "type" };
 }
 

@@ -31,3 +31,10 @@
 - **Briefing:** las frases y el consejo que se enseñan antes de un escenario de conversación (`Scenario.prep` y `tipEs`).
 - **LCS (pronunciación):** subsecuencia común más larga; así se alinea lo que dijiste con la frase de referencia sin que una palabra de más lo descuadre todo.
 - **B2 en Parlo:** no es «más gramática», es precisión y naturalidad — relativos, matiz, collocations y registro.
+
+## Añadidos 2026-07-30 (liga y C1)
+- **Liga:** competición privada opt-in entre amigos. Se comparte alias + XP semanal; nada más.
+- **Alias:** el nombre público dentro de una liga. Validado para que no sea un correo ni un teléfono.
+- **Código de liga:** 6 caracteres sin vocales ni ambigüedades (`BCDFGHJKLMNPQRSTVWXYZ23456789`); es la única forma de entrar.
+- **Nominalización (C1):** convertir el verbo en sustantivo (implement → implementation) para elevar el registro.
+- **Inversión (C1):** adelantar el auxiliar al sujeto tras un negativo al principio («Never had I seen…»).

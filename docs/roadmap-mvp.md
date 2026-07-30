@@ -29,20 +29,23 @@ Tres decisiones lo definen:
 | Hablar | Pronunciación (`/app/pronunciacion`) y conversación con corrección (`/app/practica`) |
 | Leer | Lector de documentos propios con voz y traducción (`/app/leer`) |
 
-Encima de todo: objetivo diario, retos, racha, niveles y logros.
+Encima de todo: objetivo diario, retos, racha, niveles, logros y una **liga privada con amigos**
+(opt-in: sólo se comparte un alias y la XP de la semana).
 
 ## Currículo
 
-**24 unidades · 72 lecciones · 468 ejercicios**, de A1 a B2, cada lección con su teoría.
-(A2 y B1 llevan 8 ejercicios por lección; A1 y B2, 5.)
+**30 unidades · 90 lecciones · 558 ejercicios**, de A1 a C1, cada lección con su teoría.
+(A2 y B1 llevan 8 ejercicios por lección; A1, B2 y C1, 5.)
 
 - **A1** saludos, números y hora, día a día, familia, lugares, tiempo y calendario.
 - **A2** rutinas, pasado, futuro, comparar, viajar, presente perfecto.
 - **B1** condicionales, historias, modales, opiniones, trabajo, estilo indirecto y pasiva.
 - **B2** relativos, hipotético avanzado, pasiva avanzada, conectores y matiz, patrones
   verbales, sonar natural.
+- **C1** inversión y énfasis, matices modales, frases compactas y nominalización, lenguaje
+  idiomático, registro académico, precisión léxica.
 
-El test de nivel coloca por bloques adaptativos de 5 preguntas (A1 → B2) y explica cada fallo.
+El test de nivel coloca por bloques adaptativos de 5 preguntas (A1 → C1) y explica cada fallo.
 
 ## Lo que Parlo NO es
 
