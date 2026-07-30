@@ -97,7 +97,7 @@ Harness de capturas (dev): `shot.mjs` (Chrome headless por CDP) entra con usuari
 5. ~~M5 · Entrenador de conversación con corrección~~ ✅ escenarios + puerta de corrección con ejemplos en español.
 6. ~~M9 v1 · Lector de documentos con voz~~ ✅ hecho, y además **bidireccional** (§7).
 7. ~~**Verificación de correo**~~ ✅ (§7c) `sendEmailVerification` al registrarse + aviso reenviable en la app.
-8. ~~**Recordatorio diario** de la racha~~ ✅ (§7d) Web Push + cron horario de GitHub Actions. **Falta configurar** la service account y los secretos (§7d, «Configuración pendiente»).
+8. ~~**Recordatorio diario** de la racha~~ ✅ (§7d) Web Push + cron horario de GitHub Actions, **configurado y probado de punta a punta** (2026-07-29).
 
 ### P2 — Expansión
 9. **M6b · fuente de letras con licencia** (§6): integrar **Musixmatch API** (plan gratis = ~30% de la letra + atribución) para no depender de que el usuario pegue la letra. Necesita que Andrés cree su key gratuita. Letras completas de catálogo actual = licencia de pago.
@@ -216,7 +216,7 @@ Riesgos: calidad de voz desigual por dispositivo (mitigación: selector de voz +
 **Configuración: hecha, salvo un paso**
 - ✅ Variables en Vercel (producción): `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `CRON_SECRET`, `CRON_FIREBASE_EMAIL`, `CRON_FIREBASE_PASSWORD`. Los valores están en `.env.local` (gitignored).
 - ✅ Reglas de Firestore desplegadas con el uid del usuario de servicio.
-- ⏳ Secreto `CRON_SECRET` en el repositorio de GitHub (Settings → Secrets → Actions) para que el workflow pueda llamar al endpoint.
+- ✅ Secreto `CRON_SECRET` en el repositorio de GitHub (mismo valor que en Vercel; se puso con `gh secret set CRON_SECRET` leyendo de stdin). Probado con `gh workflow run reminder.yml`: run `30514376448` en verde y el endpoint devolvió `{"candidates":0,…}`. El cron horario queda operativo.
 - Nota: la service account `parlo-reminders@parlo-ecdb0` que se creó al explorar la vía del Admin SDK **ya no se usa** (se puede borrar junto con su binding `roles/datastore.user`).
 
 ## 8. Decisiones de IA y voz (verificado 2026-07-26)
