@@ -1,7 +1,7 @@
 # Parlo — Mapa maestro (estado · pendientes · plan)
 
 Fuente de verdad del proyecto. Actualizado **2026-07-29**.
-Producción: <https://parlo-lilac.vercel.app> (auto-deploy en cada push a `main`).
+Producción: <https://parlo-lilac.vercel.app>. Auto-deploy en push a `main`, pero **la credencial de git local (`mancilla08`) no tiene permiso de push** en `andresmancilla08/Parlo`: mientras tanto se despliega con `vercel --prod` (v0.5.0 desplegada así el 2026-07-29).
 
 Leyenda de prioridad: **P0** rompe o bloquea · **P1** siguiente entrega · **P2** deseable · **P3** aparcado.
 
