@@ -133,8 +133,10 @@ export function LessonRunner({
       </div>
 
       {/* qué estás practicando (mismo kicker editorial que la home) */}
-      <div className="mt-3 flex items-center justify-between gap-3 pl-12">
-        <p className="font-display text-[0.7rem] font-extrabold uppercase tracking-[0.14em] text-muted">
+      <div className="mt-3 flex items-center justify-between gap-2">
+        {/* `min-w-0` + `line-clamp-1`: con el combo al lado, un título largo
+            empujaba la fila y desbordaba la página en móvil. */}
+        <p className="min-w-0 flex-1 pl-12 font-display text-[0.7rem] font-extrabold uppercase leading-4 tracking-[0.14em] text-muted line-clamp-1">
           {title}
         </p>
         <AnimatePresence>
