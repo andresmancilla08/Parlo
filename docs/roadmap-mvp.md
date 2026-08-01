@@ -34,7 +34,7 @@ Encima de todo: objetivo diario, retos, racha, niveles, logros y una **liga priv
 
 ## Currículo
 
-**30 unidades · 90 lecciones · 558 ejercicios**, de A1 a C1, cada lección con su teoría.
+**30 unidades · 90 lecciones · 720 ejercicios** (8 por lección en todos los niveles), de A1 a C1, cada lección con su teoría.
 (A2 y B1 llevan 8 ejercicios por lección; A1, B2 y C1, 5.)
 
 - **A1** saludos, números y hora, día a día, familia, lugares, tiempo y calendario.

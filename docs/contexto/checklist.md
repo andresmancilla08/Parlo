@@ -1,6 +1,6 @@
 # Parlo — Mapa maestro (estado · pendientes · plan)
 
-Fuente de verdad del proyecto. Actualizado **2026-07-29**.
+Fuente de verdad del proyecto. Actualizado **2026-08-01**.
 Producción: <https://parlo-lilac.vercel.app>. Auto-deploy en push a `main`, pero **la credencial de git local (`mancilla08`) no tiene permiso de push** en `andresmancilla08/Parlo`: mientras tanto se despliega con `vercel --prod` (v0.5.0 desplegada así el 2026-07-29).
 
 Leyenda de prioridad: **P0** rompe o bloquea · **P1** siguiente entrega · **P2** deseable · **P3** aparcado.
@@ -56,10 +56,14 @@ Leyenda de prioridad: **P0** rompe o bloquea · **P1** siguiente entrega · **P2
 - **Animaciones/progreso**: la barra mide lo respondido (no el índice), combo de aciertos seguidos, XP con contador ascendente, confeti al terminar y `MotionConfig reducedMotion="user"` global.
 - Checks nuevos: `lib/curriculum/teach.check.ts` (54 lecciones · 216 pasos · 216 ejemplos) y `lib/placement.check.ts` reescrito.
 
+**Simetría del currículo y armazón fijo (2026-08-01)**
+- **Las 90 lecciones tienen ya 8 ejercicios: 720 en total** (antes A1, B2 y C1 iban con 5). Los nuevos viven en `lib/curriculum/extra/{a1,b2,c1}.ts` con el mismo patrón que A2/B1; `levels/*` no se toca. Cada nivel ataca su propio hueco: A1 ensancha la rampa (saludos que faltaban, plurales irregulares, `its` vs `it's`), B2 hace elegir entre dos formas correctas pero de distinto significado (`stop to do`/`stop doing`, `despite`/`although`, mixtos), y C1 va a registro y colocación (inversión, `whom`, hedging, falsos amigos).
+- **La app ya no scrollea en bloque**: el armazón de `/app` es `h-dvh overflow-hidden` y el que scrollea es el `<main>` (ver `decisiones.md`). Antes scrolleaba el documento y el rebote del móvil/trackpad movía barras incluidas. El aviso de verificación pasó dentro del scroller para no quedarse clavado.
+
 **Currículo A1→C1 y liga (2026-07-30, v0.7.0)**
 - **El techo de nivel ya no está escrito a mano**: `LEVELS_WITH_CONTENT` y `TOP_LEVEL` se derivan del currículo. Los usan la landing (antes prometía C2 sin tenerlo), el prompt del coach cuando ya no quedan lecciones y el test de nivel. Añadir C2 será escribir el contenido y nada más.
 - **Escucha y conversación con nivel alto**: 2 pistas nuevas (B2 «una reunión que se tuerce», C1 «pódcast sobre el sueño») y 2 escenarios nuevos del coach (B2 negociar un contrato, C1 debate con periodista), con su briefing.
-- **C1 completo**: 6 unidades nuevas (inversión y énfasis · matices modales · frases compactas y nominalización · lenguaje idiomático · registro académico · precisión léxica) con teoría → **30 unidades / 90 lecciones / 558 ejercicios / 360 pasos de teoría**. Test de nivel con 5.º bloque C1 (25 ítems).
+- **C1 completo**: 6 unidades nuevas (inversión y énfasis · matices modales · frases compactas y nominalización · lenguaje idiomático · registro académico · precisión léxica) con teoría → **30 unidades / 90 lecciones / 558 ejercicios / 360 pasos de teoría** (los ejercicios subieron a 720 el 2026-08-01). Test de nivel con 5.º bloque C1 (25 ítems).
 - **M10 · Liga entre amigos** (`/app/liga`): privada, opt-in, hasta 20 personas, se entra por código de 6 caracteres. Se comparte SÓLO alias + XP de la semana; las reglas de Firestore garantizan que cada quien toca únicamente su entrada de `members` y su documento de `scores`. Ranking semanal que se reinicia el lunes; salir borra tu marcador. Probado contra Firestore real.
 - **M9 v3**: **EPUB** (zip + spine del OPF con `fflate`, en diferido) y **volcado del vocabulario del documento al SRS** (las 20 palabras más repetidas que no sean funcionales, nombres propios ni conocidas). Ambos probados de punta a punta subiendo un EPUB real por CDP.
 
@@ -119,7 +123,7 @@ Harness de capturas (dev): `shot.mjs` (Chrome headless por CDP) entra con usuari
 ### P2 — Expansión
 9. ~~M6b · fuente de letras con licencia~~ ⛔ **descartado**: el módulo de canciones se retiró el 2026-07-26 y no se reabre sin licencia.
 10. ~~M9 v3: EPUB y vocabulario del documento al SRS~~ ✅ (2026-07-30). Pendiente: TTS de servidor cacheado para el lector.
-11. ~~Contenido B2~~ ✅ · ~~A2/B1 a 8 ejercicios~~ ✅ · ~~C1 completo~~ ✅ (2026-07-30). Queda **C2** y, si se quiere simetría, subir A1/B2/C1 de 5 a 8 ejercicios por lección.
+11. ~~Contenido B2~~ ✅ · ~~A2/B1 a 8 ejercicios~~ ✅ · ~~C1 completo~~ ✅ (2026-07-30). ~~subir A1/B2/C1 a 8 ejercicios~~ ✅ (2026-08-01, **720**). Queda **C2**.
 12. **Arte propio** de las 3 insignias nuevas y poses extra de la mascota (las genera Andrés).
 13. ~~M8 · Pronunciación~~ ✅ v1 (2026-07-30). **v2**: comparar fonema a fonema o puntuar entonación exigiría un modelo de audio (coste) — aparcado.
 14. ~~Liga/ranking entre amigos (opt-in)~~ ✅ v1 (2026-07-30). Pendiente si se quiere: **retos compartidos** dentro de la liga y aviso cuando alguien te adelanta.

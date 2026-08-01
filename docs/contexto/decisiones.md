@@ -145,7 +145,7 @@
 - **Por qué:** mismo motivo que la teoría — `a2.ts` y `b1.ts` pasan de 1.100 líneas y editarlas por dentro para meter tres ejercicios en cada una de las 18 lecciones es pedir romper contenido que ya funciona. Además el diff queda legible: todo lo nuevo en un archivo.
 - **Orden:** los extra van al FINAL de cada lección, así quien ya la había hecho reconoce el principio.
 - **Red de seguridad:** `data.check.ts` valida el currículo YA compuesto (lo mismo que ve la app), comprueba que ningún extra apunte a una lección inexistente y que no haya **enunciados repetidos** dentro de una lección.
-- **Estado:** vigente. A1 y B2 siguen con 5 ejercicios por lección.
+- **Estado:** vigente y **completo**: desde el 2026-08-01 hay `extra/{a1,a2,b1,b2,c1}.ts` y las 90 lecciones tienen 8 ejercicios (**720**). El foco de cada nivel es distinto: A1 ensancha la rampa (el saludo que faltaba, el plural, la preposición hermana), B2 obliga a elegir entre dos formas gramaticales pero de significado distinto, y C1 va a registro y colocación.
 
 ## Liga entre amigos: alias, XP semanal y nada más
 - **Qué:** liga privada opt-in de hasta 20 personas a la que se entra por un código de 6 caracteres. Modelo: `leagues/{id}` (con `members` como mapa uid → {alias, joinedAt}), `leagues/{id}/scores/{uid}` (alias, semana, XP) y `leagueCodes/{code}` → leagueId.
@@ -166,3 +166,10 @@
 - **Cómo distingue un nombre propio:** si TODAS sus apariciones llevan mayúscula y al menos una está a mitad de frase. Así «Sarah» cae y «Climate» (que solo aparece abriendo frase) se queda.
 - **Por qué frecuencia y no IA:** lo que se repite en lo que TÚ lees es exactamente lo que te conviene aprender, y no cuesta ni una llamada.
 - **Estado:** vigente. Cubierto por `lib/reader/vocab.check.ts`.
+
+## El armazón de `/app` es fijo; lo que scrollea es el contenido
+- **Qué:** `app/app/layout.tsx` es un `flex h-dvh overflow-hidden`; el que scrollea es el `<main>` (`overflow-y-auto overscroll-contain`). El lateral pasó de `sticky h-dvh` a `h-full` y la barra superior perdió el `sticky top-0`.
+- **Por qué:** antes scrolleaba el documento entero. Las barras *parecían* quietas (sticky/fixed), pero el rebote del móvil y el del trackpad en macOS arrastran el documento con todo lo que cuelga de él: la app se movía en bloque. Con el armazón fijo no hay nada que rebotar, y `overscroll-contain` impide que el scroll del contenido se propague al documento al llegar al final.
+- **Coste asumido:** Next ya no puede restaurar la posición al navegar (el scroller no es el documento), así que el layout hace `scrollTo(0, 0)` sobre el `<main>` cuando cambia `pathname`. Y en iOS la barra del navegador deja de esconderse al bajar, que es justo lo que se busca: nada se mueve.
+- **Efecto lateral corregido:** el aviso de «verifica tu correo» quedó DENTRO del scroller; fuera se convertía en cromo permanente y se comía media pantalla en móvil.
+- **Estado:** vigente. Verificado por CDP en 320/390/768/1440: `scrollHeight == clientHeight` del documento en las 9 rutas, barras inmóviles tras scrollear el contenido a tope, y reset al navegar.

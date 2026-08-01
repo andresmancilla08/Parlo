@@ -95,3 +95,9 @@
 ## Las reglas de la liga se prueban con la app, no con asserts
 - **Cómo:** `lib/league.check.ts` cubre alias, códigos, XP semanal y ranking (lógica pura). Lo que las reglas permiten o no se comprueba usando la app con el usuario ficticio: crear liga, ver el marcador y salir.
 - **Ojo:** tras tocar `firestore.rules` hay que `firebase deploy --only firestore:rules` o la app seguirá contra las reglas viejas.
+
+## En `/app` el que scrollea es `<main>`, no el documento
+- **Síntoma:** `window.scrollTo(...)`, `window.scrollY` o medir `documentElement.scrollHeight` no hacen nada útil dentro de la app logueada; y al navegar, la pantalla nueva aparecería a media altura si nadie la sube.
+- **Causa real:** el armazón es `h-dvh overflow-hidden` a propósito (ver `decisiones.md`), así que el documento nunca scrollea.
+- **Solución:** usar `document.querySelector('main')` como scroller (o pasar un ref). El reset al cambiar de ruta ya lo hace `app/app/layout.tsx`; si algún día hay más scrollers, que cada uno se resetee.
+- **Al medir con el harness:** comparar `main.scrollHeight - main.clientHeight`, no el del documento, o parecerá que no hay contenido.
