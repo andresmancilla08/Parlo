@@ -78,7 +78,7 @@ export function VerifyBanner() {
       initial={{ opacity: 0, y: -8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={spring}
-      className="px-4 pt-4 sm:px-5"
+      className="shrink-0 px-4 pt-4 sm:px-5"
     >
       {/* Ámbar (warning), no mint: el verde de éxito diría «todo en orden». */}
       <div className="flex items-start gap-3 rounded-2xl border border-warning/40 bg-warning/12 p-3 sm:p-4">

@@ -32,17 +32,26 @@ export function AppBar() {
   const streak = useProgress((s) => s.streak);
   const gems = useProgress((s) => s.gems);
   return (
-    <header className="sticky top-0 z-30 flex items-center justify-between gap-2 border-b border-border bg-bg/80 px-4 py-3 pt-[calc(0.75rem+env(safe-area-inset-top))] backdrop-blur-md sm:gap-3 sm:px-5">
+    // Sin `sticky`: la barra vive fuera del área que scrollea, así que ya está
+    // quieta por construcción (antes fingía estarlo colgando del documento).
+    // Arriba del todo se funde con la página; al bajar aparece el fondo, el
+    // desenfoque y el borde, en proporción al scroll (`--bar`, del layout).
+    <header className="relative z-30 flex shrink-0 items-center justify-between gap-2 px-4 py-3 pt-[calc(0.75rem+env(safe-area-inset-top))] sm:gap-3 sm:px-5">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 border-b border-border bg-bg/80 shadow-sm shadow-black/[0.03] backdrop-blur-md"
+        style={{ opacity: "var(--bar, 0)" }}
+      />
       {/* min-w-0 + overflow: en 320px el wordmark forzaba el ancho de toda la app */}
       <Link
         href="/app"
-        className="min-w-0 overflow-hidden md:hidden"
+        className="relative min-w-0 overflow-hidden md:hidden"
         aria-label={t("a11y.home")}
       >
         <Logo height={24} />
       </Link>
       <div className="hidden md:block" />
-      <div className="flex shrink-0 items-center gap-2">
+      <div className="relative flex shrink-0 items-center gap-2">
         <StatPill icon={IconFlame} value={String(hydrated ? streak : 0)} className="text-primary" />
         <StatPill icon={IconSparkles} value={String(hydrated ? gems : 0)} className="text-gem" />
       </div>

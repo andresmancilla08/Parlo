@@ -35,7 +35,9 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "sticky top-0 hidden h-dvh shrink-0 flex-col overflow-visible border-r border-border bg-surface/60 pb-8 pt-6 transition-[width] duration-150 md:flex",
+        // h-full (no sticky): el armazón ya está fijo a la pantalla.
+        // overflow-visible o el popover del menú de cuenta se recorta.
+        "hidden h-full shrink-0 flex-col overflow-visible border-r border-border bg-surface/60 pb-8 pt-6 transition-[width] duration-150 md:flex",
         collapsed ? "w-[4.5rem] px-2" : "w-60 px-4",
       )}
     >
