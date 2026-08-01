@@ -23,6 +23,7 @@ Leyenda de prioridad: **P0** rompe o bloquea · **P1** siguiente entrega · **P2
 | M7 | Test de nivel inicial (colocación CEFR) | ✅ **v2 adaptativo** | `app/app/test`, `lib/placement.ts` |
 | M8 | **Pronunciación (leer en voz alta y puntuar)** | ✅ v1 | `app/app/pronunciacion`, `lib/pronunciation.ts` |
 | M10 | **Liga entre amigos** (opt-in, alias + XP semanal) | ✅ v1 | `app/app/liga`, `lib/league*.ts`, `firestore.rules` |
+| M11 | **Guía de consulta** (irregulares, -ed, conjugador, phrasals, falsos amigos) | ✅ v1 | `app/app/guia`, `lib/guide/*`, `components/guide/*` |
 | M9 | **Lector de documentos propios con voz** | ✅ v3 (PDF · DOCX · **EPUB** + traducción en voz + vocabulario al SRS) | `app/app/leer`, `lib/reader/*`, `app/api/translate` |
 
 ---
@@ -55,6 +56,12 @@ Leyenda de prioridad: **P0** rompe o bloquea · **P1** siguiente entrega · **P2
 - **Voz**: botón tortuga (lento) en teoría, feedback, escucha y lector; **dictado por voz** en Practicar; la respuesta del coach **se lee sola la primera vez**.
 - **Animaciones/progreso**: la barra mide lo respondido (no el índice), combo de aciertos seguidos, XP con contador ascendente, confeti al terminar y `MotionConfig reducedMotion="user"` global.
 - Checks nuevos: `lib/curriculum/teach.check.ts` (54 lecciones · 216 pasos · 216 ejemplos) y `lib/placement.check.ts` reescrito.
+
+**C2 y guía de consulta (2026-08-01, v0.8.0)**
+- **C2 completo**: 6 unidades (economía y precisión · foco de la información · registro extremo · lenguaje figurado · implicatura · variedades) con teoría y extras → **36 unidades / 108 lecciones / 864 ejercicios / 432 pasos**. Test de nivel con 6.º bloque (30 ítems), pista de escucha C2 y escenario C2 del coach. La landing interpola `TOP_LEVEL` en vez de escribir el techo a mano.
+- **M11 · Guía** (`/app/guia`, sexta pestaña): 106 irregulares por patrón, reglas del -ed con sus tres sonidos, **conjugador de 15 tiempos para cualquier verbo**, 85 phrasal verbs (con separable/no separable) y 50 falsos amigos. Todo con voz y con «al repaso».
+- **Arreglo de fondo**: `addCard` guardaba la clave pero no el significado, así que una palabra añadida desde el lector **nunca llegaba a preguntarse**. Ahora el par vive en `progress.saved` (sincronizado) y `/app/repaso` mezcla currículo + guardadas.
+- **Pendiente conocido**: el volcado masivo de vocabulario del lector (las 20 palabras del documento) sigue añadiendo cartas SIN traducción, así que esas siguen sin poder preguntarse. Hace falta traducirlas al añadirlas.
 
 **Simetría del currículo y armazón fijo (2026-08-01)**
 - **Las 90 lecciones tienen ya 8 ejercicios: 720 en total** (antes A1, B2 y C1 iban con 5). Los nuevos viven en `lib/curriculum/extra/{a1,b2,c1}.ts` con el mismo patrón que A2/B1; `levels/*` no se toca. Cada nivel ataca su propio hueco: A1 ensancha la rampa (saludos que faltaban, plurales irregulares, `its` vs `it's`), B2 hace elegir entre dos formas correctas pero de distinto significado (`stop to do`/`stop doing`, `despite`/`although`, mixtos), y C1 va a registro y colocación (inversión, `whom`, hedging, falsos amigos).

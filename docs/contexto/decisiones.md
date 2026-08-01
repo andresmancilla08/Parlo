@@ -173,3 +173,10 @@
 - **Coste asumido:** Next ya no puede restaurar la posición al navegar (el scroller no es el documento), así que el layout hace `scrollTo(0, 0)` sobre el `<main>` cuando cambia `pathname`. Y en iOS la barra del navegador deja de esconderse al bajar, que es justo lo que se busca: nada se mueve.
 - **Efecto lateral corregido:** el aviso de «verifica tu correo» quedó DENTRO del scroller; fuera se convertía en cromo permanente y se comía media pantalla en móvil.
 - **Estado:** vigente. Verificado por CDP en 320/390/768/1440: `scrollHeight == clientHeight` del documento en las 9 rutas, barras inmóviles tras scrollear el contenido a tope, y reset al navegar.
+
+## La guía es consulta, no curso: datos bilingües y motor puro
+- **Qué:** `/app/guia` con cinco temas (irregulares, regulares y el -ed, conjugador, phrasal verbs, falsos amigos). El contenido vive como datos bilingües en `lib/guide/`, igual que el currículo, y no en `locales/`: un verbo irregular no se traduce, se muestra.
+- **Por qué un motor y no tablas:** guardar la conjugación de cada verbo sería imposible de mantener y estaría siempre incompleta. Con cinco formas (base, 3.ª persona, -ing, pasado, participio) salen los 15 tiempos, porque el inglés conjuga con auxiliares. Así funciona con CUALQUIER verbo que se escriba, esté o no en la tabla.
+- **Por qué el motor no importa la tabla:** los `.check.ts` corren con `node --experimental-strip-types` y están excluidos de tsc, así que importan con extensión `.ts`. Para que eso funcione, el módulo probado no puede tener imports locales en runtime. `conjugate.ts` recibe el irregular como argumento y `lib/guide/index.ts` es quien cablea las dos piezas.
+- **El límite conocido:** doblar la consonante final depende del ACENTO, que no está en la ortografía. Los monosílabos se resuelven con la regla; los polisílabos, con una lista explícita (`STRESSED_DOUBLERS`). Si aparece un verbo que dobla y no está, se añade ahí.
+- **Estado:** vigente. Cubierto por `lib/guide/conjugate.check.ts` (reglas de ortografía, «to be» sin auxiliar, y validación de las tres tablas).
