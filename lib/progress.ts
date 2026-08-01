@@ -47,6 +47,8 @@ export type ProgressSnapshot = {
   completed: string[];
   stars: Record<string, number>;
   cards: Record<string, SrsCard>;
+  /** Significado de las palabras guardadas fuera del currículo (en → es). */
+  saved: Record<string, string>;
   tutorMessages: number;
   listens: number;
   days: Record<string, DayStats>;
@@ -132,6 +134,10 @@ type ProgressState = {
   completed: string[]; // ids de lecciones
   stars: Record<string, number>; // 1..3 por lección
   cards: Record<string, SrsCard>; // SRS, clave = vocab.en
+  // Traducción de las palabras que NO vienen del currículo (lector, guía). Sin
+  // esto, `addCard` guardaba una carta que el repaso no sabía convertir en
+  // ejercicio, porque busca el significado en el vocabulario de las lecciones.
+  saved: Record<string, string>; // en → es
   tutorMessages: number; // mensajes enviados al tutor (logro «primera conversación»)
   listens: number; // veces que se ha escuchado la pronunciación (logro «oído fino»)
   days: Record<string, DayStats>; // estadísticas por día (objetivo, retos, racha)
@@ -153,7 +159,7 @@ type ProgressState = {
   noteListen: () => void;
   completeListening: (correct: number, total: number) => void;
   completeSpeaking: (correct: number, total: number) => void;
-  addCard: (key: string) => void;
+  addCard: (key: string, es?: string) => void;
   setGoal: (xp: number) => void;
   setStartLevel: (level: Cefr) => void;
   claimChallenge: (challenge: Challenge) => void;
@@ -170,6 +176,7 @@ const initial = {
   completed: [] as string[],
   stars: {} as Record<string, number>,
   cards: {} as Record<string, SrsCard>,
+  saved: {} as Record<string, string>,
   tutorMessages: 0,
   listens: 0,
   days: {} as Record<string, DayStats>,
@@ -198,6 +205,7 @@ export const useProgress = create<ProgressState>()(
           completed: s.completed,
           stars: s.stars,
           cards: s.cards,
+          saved: s.saved,
           tutorMessages: s.tutorMessages,
           listens: s.listens,
           days: s.days,
@@ -321,9 +329,17 @@ export const useProgress = create<ProgressState>()(
           };
         }),
 
-      /** Guarda una palabra suelta (del lector) en el repaso espaciado. */
-      addCard: (key) =>
-        set((s) => (s.cards[key] ? {} : { cards: { ...s.cards, [key]: newCard(key, Date.now()) } })),
+      /**
+       * Guarda una palabra suelta (del lector o de la guía) en el repaso.
+       * `es` es su significado: sin él la carta existe pero el repaso no puede
+       * construir el ejercicio, porque el significado sólo estaba en el currículo.
+       */
+      addCard: (key, es) =>
+        set((s) => {
+          const saved = es ? { ...s.saved, [key]: es } : s.saved;
+          if (s.cards[key]) return { saved };
+          return { cards: { ...s.cards, [key]: newCard(key, Date.now()) }, saved };
+        }),
 
       setGoal: (xp) => set({ goalXp: xp }),
 

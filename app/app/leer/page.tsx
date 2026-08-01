@@ -564,7 +564,8 @@ function WordCard({
             className="mt-4"
             disabled={saved}
             onClick={() => {
-              addCard(word);
+              // Con su significado: la carta sin traducción no se puede preguntar.
+              addCard(word, info.meaning);
               setSaved(true);
             }}
           >

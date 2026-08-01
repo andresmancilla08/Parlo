@@ -1,0 +1,137 @@
+import type { Irregular } from "./types";
+
+// Los irregulares que de verdad salen. Ordenados por patrón y no alfabéticamente
+// en la cabeza de nadie: por eso cada uno lleva su `group`, que es el gancho
+// para memorizarlos en bloques en vez de en una lista de 100.
+export const IRREGULARS: Irregular[] = [
+  /* ---------------- AAA: las tres formas iguales ---------------- */
+  { base: "cut", past: "cut", participle: "cut", es: "cortar", group: "AAA" },
+  { base: "put", past: "put", participle: "put", es: "poner", group: "AAA" },
+  { base: "let", past: "let", participle: "let", es: "dejar / permitir", group: "AAA" },
+  { base: "set", past: "set", participle: "set", es: "fijar / colocar", group: "AAA" },
+  { base: "hit", past: "hit", participle: "hit", es: "golpear", group: "AAA" },
+  { base: "hurt", past: "hurt", participle: "hurt", es: "doler / herir", group: "AAA" },
+  { base: "cost", past: "cost", participle: "cost", es: "costar", group: "AAA" },
+  { base: "shut", past: "shut", participle: "shut", es: "cerrar", group: "AAA" },
+  { base: "quit", past: "quit", participle: "quit", es: "dejar (un trabajo)", group: "AAA" },
+  { base: "spread", past: "spread", participle: "spread", es: "extender", group: "AAA" },
+  { base: "read", past: "read", participle: "read", es: "leer (suena «red» en pasado)", group: "AAA" },
+
+  /* ---------------- AAB: base y pasado iguales ---------------- */
+  { base: "beat", past: "beat", participle: "beaten", es: "vencer / batir", group: "AAB" },
+  /* ---------------- ABB: pasado y participio iguales ---------------- */
+  { base: "buy", past: "bought", participle: "bought", es: "comprar", group: "ABB" },
+  { base: "bring", past: "brought", participle: "brought", es: "traer", group: "ABB" },
+  { base: "think", past: "thought", participle: "thought", es: "pensar", group: "ABB" },
+  { base: "fight", past: "fought", participle: "fought", es: "pelear", group: "ABB" },
+  { base: "catch", past: "caught", participle: "caught", es: "coger / atrapar", group: "ABB" },
+  { base: "teach", past: "taught", participle: "taught", es: "enseñar", group: "ABB" },
+  { base: "seek", past: "sought", participle: "sought", es: "buscar (formal)", group: "ABB" },
+  { base: "feel", past: "felt", participle: "felt", es: "sentir", group: "ABB" },
+  { base: "keep", past: "kept", participle: "kept", es: "guardar / mantener", group: "ABB" },
+  { base: "sleep", past: "slept", participle: "slept", es: "dormir", group: "ABB" },
+  { base: "sweep", past: "swept", participle: "swept", es: "barrer", group: "ABB" },
+  { base: "weep", past: "wept", participle: "wept", es: "llorar (literario)", group: "ABB" },
+  { base: "leave", past: "left", participle: "left", es: "dejar / irse", group: "ABB" },
+  { base: "mean", past: "meant", participle: "meant", es: "significar / querer decir", group: "ABB" },
+  { base: "meet", past: "met", participle: "met", es: "conocer / quedar", group: "ABB" },
+  { base: "lead", past: "led", participle: "led", es: "liderar / conducir a", group: "ABB" },
+  { base: "feed", past: "fed", participle: "fed", es: "alimentar", group: "ABB" },
+  { base: "bleed", past: "bled", participle: "bled", es: "sangrar", group: "ABB" },
+  { base: "hold", past: "held", participle: "held", es: "sostener / celebrar", group: "ABB" },
+  { base: "sell", past: "sold", participle: "sold", es: "vender", group: "ABB" },
+  { base: "tell", past: "told", participle: "told", es: "decir (a alguien)", group: "ABB" },
+  { base: "build", past: "built", participle: "built", es: "construir", group: "ABB" },
+  { base: "send", past: "sent", participle: "sent", es: "enviar", group: "ABB" },
+  { base: "spend", past: "spent", participle: "spent", es: "gastar / pasar (tiempo)", group: "ABB" },
+  { base: "lend", past: "lent", participle: "lent", es: "prestar", group: "ABB" },
+  { base: "bend", past: "bent", participle: "bent", es: "doblar", group: "ABB" },
+  { base: "find", past: "found", participle: "found", es: "encontrar", group: "ABB" },
+  { base: "have", past: "had", participle: "had", es: "tener / haber", group: "ABB" },
+  { base: "hear", past: "heard", participle: "heard", es: "oír", group: "ABB" },
+  { base: "make", past: "made", participle: "made", es: "hacer (crear)", group: "ABB" },
+  { base: "pay", past: "paid", participle: "paid", es: "pagar", group: "ABB" },
+  { base: "say", past: "said", participle: "said", es: "decir", group: "ABB" },
+  { base: "lay", past: "laid", participle: "laid", es: "colocar / poner (tumbado)", group: "ABB" },
+  { base: "sit", past: "sat", participle: "sat", es: "sentarse", group: "ABB" },
+  { base: "stand", past: "stood", participle: "stood", es: "estar de pie", group: "ABB" },
+  { base: "understand", past: "understood", participle: "understood", es: "entender", group: "ABB" },
+  { base: "win", past: "won", participle: "won", es: "ganar", group: "ABB" },
+  { base: "shine", past: "shone", participle: "shone", es: "brillar", group: "ABB" },
+  { base: "lose", past: "lost", participle: "lost", es: "perder", group: "ABB" },
+  { base: "shoot", past: "shot", participle: "shot", es: "disparar", group: "ABB" },
+  { base: "get", past: "got", participle: "got", es: "conseguir / ponerse", group: "ABB" },
+  { base: "sting", past: "stung", participle: "stung", es: "picar (un insecto)", group: "ABB" },
+  { base: "dig", past: "dug", participle: "dug", es: "cavar", group: "ABB" },
+  { base: "hang", past: "hung", participle: "hung", es: "colgar", group: "ABB" },
+  { base: "strike", past: "struck", participle: "struck", es: "golpear / declararse en huelga", group: "ABB" },
+  { base: "stick", past: "stuck", participle: "stuck", es: "pegar / atascarse", group: "ABB" },
+  { base: "burn", past: "burnt", participle: "burnt", es: "quemar (también burned)", group: "ABB" },
+  { base: "learn", past: "learnt", participle: "learnt", es: "aprender (también learned)", group: "ABB" },
+  { base: "dream", past: "dreamt", participle: "dreamt", es: "soñar (también dreamed)", group: "ABB" },
+  { base: "spell", past: "spelt", participle: "spelt", es: "deletrear (también spelled)", group: "ABB" },
+
+  /* ---------------- ABA: base y participio iguales ---------------- */
+  { base: "come", past: "came", participle: "come", es: "venir", group: "ABA" },
+  { base: "become", past: "became", participle: "become", es: "convertirse en", group: "ABA" },
+  { base: "run", past: "ran", participle: "run", es: "correr / dirigir", group: "ABA" },
+  { base: "overcome", past: "overcame", participle: "overcome", es: "superar", group: "ABA" },
+
+  /* ---------------- ABC: las tres distintas ---------------- */
+  { base: "be", past: "was / were", participle: "been", es: "ser / estar", group: "ABC" },
+  { base: "go", past: "went", participle: "gone", es: "ir", group: "ABC" },
+  { base: "do", past: "did", participle: "done", es: "hacer", group: "ABC" },
+  { base: "see", past: "saw", participle: "seen", es: "ver", group: "ABC" },
+  { base: "eat", past: "ate", participle: "eaten", es: "comer", group: "ABC" },
+  { base: "give", past: "gave", participle: "given", es: "dar", group: "ABC" },
+  { base: "take", past: "took", participle: "taken", es: "tomar / coger", group: "ABC" },
+  { base: "write", past: "wrote", participle: "written", es: "escribir", group: "ABC" },
+  { base: "drive", past: "drove", participle: "driven", es: "conducir", group: "ABC" },
+  { base: "ride", past: "rode", participle: "ridden", es: "montar", group: "ABC" },
+  { base: "rise", past: "rose", participle: "risen", es: "subir (por sí solo)", group: "ABC" },
+  { base: "speak", past: "spoke", participle: "spoken", es: "hablar", group: "ABC" },
+  { base: "break", past: "broke", participle: "broken", es: "romper", group: "ABC" },
+  { base: "choose", past: "chose", participle: "chosen", es: "elegir", group: "ABC" },
+  { base: "freeze", past: "froze", participle: "frozen", es: "congelar", group: "ABC" },
+  { base: "steal", past: "stole", participle: "stolen", es: "robar", group: "ABC" },
+  { base: "wake", past: "woke", participle: "woken", es: "despertarse", group: "ABC" },
+  { base: "drink", past: "drank", participle: "drunk", es: "beber", group: "ABC" },
+  { base: "sing", past: "sang", participle: "sung", es: "cantar", group: "ABC" },
+  { base: "swim", past: "swam", participle: "swum", es: "nadar", group: "ABC" },
+  { base: "ring", past: "rang", participle: "rung", es: "sonar / llamar", group: "ABC" },
+  { base: "begin", past: "began", participle: "begun", es: "empezar", group: "ABC" },
+  { base: "know", past: "knew", participle: "known", es: "saber / conocer", group: "ABC" },
+  { base: "grow", past: "grew", participle: "grown", es: "crecer / cultivar", group: "ABC" },
+  { base: "throw", past: "threw", participle: "thrown", es: "lanzar", group: "ABC" },
+  { base: "blow", past: "blew", participle: "blown", es: "soplar", group: "ABC" },
+  { base: "fly", past: "flew", participle: "flown", es: "volar", group: "ABC" },
+  { base: "draw", past: "drew", participle: "drawn", es: "dibujar", group: "ABC" },
+  { base: "show", past: "showed", participle: "shown", es: "mostrar", group: "ABC" },
+  { base: "fall", past: "fell", participle: "fallen", es: "caer", group: "ABC" },
+  { base: "forget", past: "forgot", participle: "forgotten", es: "olvidar", group: "ABC" },
+  { base: "forgive", past: "forgave", participle: "forgiven", es: "perdonar", group: "ABC" },
+  { base: "hide", past: "hid", participle: "hidden", es: "esconder", group: "ABC" },
+  { base: "bite", past: "bit", participle: "bitten", es: "morder", group: "ABC" },
+  { base: "wear", past: "wore", participle: "worn", es: "llevar puesto", group: "ABC" },
+  { base: "tear", past: "tore", participle: "torn", es: "rasgar", group: "ABC" },
+  { base: "swear", past: "swore", participle: "sworn", es: "jurar", group: "ABC" },
+  { base: "shake", past: "shook", participle: "shaken", es: "agitar / temblar", group: "ABC" },
+  { base: "mistake", past: "mistook", participle: "mistaken", es: "confundir", group: "ABC" },
+  { base: "lie", past: "lay", participle: "lain", es: "tumbarse (mentir es regular)", group: "ABC" },
+];
+
+/** Búsqueda del pasado y el participio de un verbo, si es irregular. */
+const BY_BASE = new Map(IRREGULARS.map((v) => [v.base, v]));
+
+export function irregularOf(base: string): Irregular | undefined {
+  return BY_BASE.get(base.trim().toLowerCase());
+}
+
+/** Etiquetas de los patrones, para agrupar la tabla. */
+export const GROUPS: { id: Irregular["group"]; es: string; en: string; hint: string }[] = [
+  { id: "AAA", es: "Las tres iguales", en: "All three the same", hint: "cut · cut · cut" },
+  { id: "ABB", es: "Pasado y participio iguales", en: "Past and participle match", hint: "buy · bought · bought" },
+  { id: "ABA", es: "Base y participio iguales", en: "Base and participle match", hint: "come · came · come" },
+  { id: "AAB", es: "Base y pasado iguales", en: "Base and past match", hint: "beat · beat · beaten" },
+  { id: "ABC", es: "Las tres distintas", en: "All three different", hint: "go · went · gone" },
+];

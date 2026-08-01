@@ -22,6 +22,7 @@ export default function RepasoPage() {
   const { t, i18n } = useTranslation();
   const router = useRouter();
   const cards = useProgress((s) => s.cards);
+  const saved = useProgress((s) => s.saved);
   const completed = useProgress((s) => s.completed);
   const startLevel = useProgress((s) => s.startLevel);
   const reviewCards = useProgress((s) => s.reviewCards);
@@ -33,7 +34,12 @@ export default function RepasoPage() {
   // puro (react-hooks/purity) y además la sesión no debe cambiar a mitad.
   const [session] = useState(() => {
     const now = Date.now();
-    const pool = learnedVocab(new Set(completed));
+    // El vocabulario del currículo MÁS lo guardado a mano (lector y guía): sin
+    // esto, una palabra añadida fuera de una lección nunca llegaba a preguntarse.
+    const pool = [
+      ...learnedVocab(new Set(completed)),
+      ...Object.entries(saved).map(([en, es]) => ({ en, es })),
+    ];
     const exercises: Exercise[] = buildReviewExercises(dueCardKeys(cards, now), pool);
     const soonest = Object.values(cards).reduce<number | null>(
       (min, c) => (min === null || c.due < min ? c.due : min),
