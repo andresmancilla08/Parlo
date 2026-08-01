@@ -151,6 +151,23 @@ export const SCENARIOS: Scenario[] = [
     tipEs:
       "En un debate en inglés se concede antes de rebatir («I take your point, but…»). Ir de frente sin conceder suena agresivo y resta credibilidad, aunque tengas razón.",
   },
+  {
+    id: "board",
+    level: "C2",
+    roleEn:
+      "a sceptical board member questioning the user's proposal, using understatement and irony",
+    situationEn:
+      "the user defends a proposal under polite but pointed pressure, reads what is implied and answers without losing the room",
+    openerEn:
+      "Well, that's certainly an ambitious plan. I'm not entirely sure the numbers hold up, but do go on.",
+    prep: [
+      { en: "I hear what you're saying, but the risk is smaller than it looks.", es: "Entiendo lo que dices, pero el riesgo es menor de lo que parece." },
+      { en: "That's one way of looking at it.", es: "Es una forma de verlo." },
+      { en: "It may well be worth parking that until we have the data.", es: "Bien puede merecer la pena aparcarlo hasta tener los datos." },
+    ],
+    tipEs:
+      "Aquí no te van a decir que no: te lo van a insinuar. «Ambitious» suele ser «poco realista» y «I'm not entirely sure» es un no. Responde al mensaje de debajo, no al literal, y devuelve la pelota con la misma suavidad.",
+  },
 ];
 
 export function scenarioById(id: string | null): Scenario | null {

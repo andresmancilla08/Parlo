@@ -1,7 +1,7 @@
 "use client";
 
 import Image, { type StaticImageData } from "next/image";
-import { LEVELS_WITH_CONTENT } from "@/lib/curriculum";
+import { LEVELS_WITH_CONTENT, TOP_LEVEL } from "@/lib/curriculum";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { useTranslation } from "react-i18next";
 import {
@@ -286,7 +286,7 @@ function Method() {
                 {t(`landing.features.${f.key}.title`)}
               </h3>
               <p className="mt-2 text-sm leading-relaxed text-muted">
-                {t(`landing.features.${f.key}.body`)}
+                {t(`landing.features.${f.key}.body`, { top: TOP_LEVEL })}
               </p>
             </Card>
           </motion.div>

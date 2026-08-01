@@ -59,7 +59,7 @@
     "features": {
       "levels": {
         "title": "Aprende por niveles",
-        "body": "Desde A1 hasta C1 con un camino claro, sin perderte ni saltarte pasos."
+        "body": "Desde A1 hasta {{top}} con un camino claro, sin perderte ni saltarte pasos."
       },
       "converse": {
         "title": "Conversa desde el primer día",
@@ -262,7 +262,9 @@
     "scenario_negotiation": "Negociar un contrato",
     "goal_negotiation": "Precio, plazos y condiciones",
     "scenario_debate": "Debate con una periodista",
-    "goal_debate": "Defender tu opinión y rebatir"
+    "goal_debate": "Defender tu opinión y rebatir",
+    "scenario_board": "Consejo de administración",
+    "goal_board": "Defender una propuesta entre líneas"
   },
   "escucha": {
     "kicker": "Escucha activa",

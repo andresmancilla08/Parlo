@@ -96,6 +96,22 @@ export const TRACKS: ListeningTrack[] = [
       "On balance, the advice is simple: protect the hours before bed.",
     ],
   },
+  {
+    id: "column",
+    level: "C2",
+    titleEs: "Una columna con retranca",
+    titleEn: "A column with an edge",
+    lines: [
+      "Gone are the days when an office was simply a place to work.",
+      "It is worth noting that nobody asked for a ping-pong table.",
+      "Management, with all due respect, seems economical with the truth.",
+      "We were told the restructuring would be, and I quote, challenging.",
+      "Not that I know of, said the director, when asked about the layoffs.",
+      "Such was the confusion that three teams built the same feature.",
+      "Well, that went well, as somebody muttered on the way out.",
+      "Little did we know the memo had been written months earlier.",
+    ],
+  },
 ];
 
 export type Difficulty = {

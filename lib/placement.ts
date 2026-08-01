@@ -19,7 +19,7 @@ export type PlacementItem = {
 };
 
 /** Niveles por los que pasa el test, en orden. */
-export const PLACEMENT_LEVELS: Cefr[] = ["A1", "A2", "B1", "B2", "C1"];
+export const PLACEMENT_LEVELS: Cefr[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
 
 /** Ítems por nivel (un bloque). */
 export const BLOCK = 5;
@@ -281,6 +281,63 @@ export const PLACEMENT_ITEMS: PlacementItem[] = [
     explain:
       "Falso amigo: «sensitive» = sensible (emocional); «sensible» significa sensato.",
     full: "She's very sensitive about criticism.",
+  },
+
+  // ---------------- C2 ----------------
+  // C2 no pregunta reglas, pregunta criterio: registro, foco e implicatura.
+  {
+    id: "p-c2-1",
+    level: "C2",
+    prompt: "«Are you coming?» — «I'd love ___.»",
+    options: ["to", "it", "so", "to come it"],
+    answer: "to",
+    explain:
+      "Elipsis: se calla el verbo y se queda el «to». Decir «I'd love» a secas suena incompleto.",
+    full: "I'd love to.",
+  },
+  {
+    id: "p-c2-2",
+    level: "C2",
+    prompt: "«___ the days when a degree guaranteed a job.»",
+    options: ["Gone are", "Gone is", "Are gone", "Went are"],
+    answer: "Gone are",
+    explain:
+      "Participio adelantado: el verbo va antes del sujeto y concuerda con «the days» → gone ARE.",
+    full: "Gone are the days when a degree guaranteed a job.",
+  },
+  {
+    id: "p-c2-3",
+    level: "C2",
+    prompt: "Tu jefe dice «that's not ideal» sobre tu informe. Quiere decir que:",
+    options: [
+      "hay un problema serio",
+      "está casi perfecto",
+      "le da igual",
+      "lo quiere para mañana",
+    ],
+    answer: "hay un problema serio",
+    explain:
+      "Understatement: baja el volumen, no la gravedad. «Not ideal» suele significar «esto está mal».",
+    full: "That's not ideal.",
+  },
+  {
+    id: "p-c2-4",
+    level: "C2",
+    prompt: "«It is worth ___ that the data come from two sources.»",
+    options: ["noting", "to note", "note", "noted"],
+    answer: "noting",
+    explain: "«Worth» funciona como preposición: todo lo que va detrás va en -ing.",
+    full: "It is worth noting that the data come from two sources.",
+  },
+  {
+    id: "p-c2-5",
+    level: "C2",
+    prompt: "En un contrato, «the tenant shall pay» expresa:",
+    options: ["una obligación", "un futuro neutro", "una sugerencia", "un permiso"],
+    answer: "una obligación",
+    explain:
+      "En registro legal «shall» impone obligación; fuera de un contrato suena arcaico y se usa «must» o «will».",
+    full: "The tenant shall pay the rent on the first of each month.",
   },
 ];
 

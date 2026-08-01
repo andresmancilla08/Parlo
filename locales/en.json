@@ -59,7 +59,7 @@
     "features": {
       "levels": {
         "title": "Learn by levels",
-        "body": "From A1 to C1 with a clear path, without getting lost or skipping steps."
+        "body": "From A1 to {{top}} with a clear path, without getting lost or skipping steps."
       },
       "converse": {
         "title": "Talk from day one",
@@ -262,7 +262,9 @@
     "scenario_negotiation": "Negotiating a contract",
     "goal_negotiation": "Price, deadlines and terms",
     "scenario_debate": "Debate with a journalist",
-    "goal_debate": "Defend your view and push back"
+    "goal_debate": "Defend your view and push back",
+    "scenario_board": "Board meeting",
+    "goal_board": "Defend a proposal, reading between the lines"
   },
   "escucha": {
     "kicker": "Active listening",

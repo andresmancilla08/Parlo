@@ -41,7 +41,7 @@ export const LEVELS_WITH_CONTENT: Cefr[] = LEVEL_ORDER.filter((lvl) =>
   curriculum.some((u) => u.level === lvl),
 );
 
-/** Nivel más alto con contenido (hoy C1). */
+/** Nivel más alto con contenido (hoy C2). */
 export const TOP_LEVEL: Cefr = LEVELS_WITH_CONTENT[LEVELS_WITH_CONTENT.length - 1];
 
 export function levelRank(level: Cefr): number {

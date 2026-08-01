@@ -9,12 +9,14 @@ import { a2 } from "./levels/a2.ts";
 import { b1 } from "./levels/b1.ts";
 import { b2 } from "./levels/b2.ts";
 import { c1 } from "./levels/c1.ts";
+import { c2 } from "./levels/c2.ts";
 import { withExtra } from "./extra/index.ts";
 import { a1Extra } from "./extra/a1.ts";
 import { a2Extra } from "./extra/a2.ts";
 import { b2Extra } from "./extra/b2.ts";
 import { b1Extra } from "./extra/b1.ts";
 import { c1Extra } from "./extra/c1.ts";
+import { c2Extra } from "./extra/c2.ts";
 import { optionsSpeakable } from "./speech.ts";
 
 const curriculum = [
@@ -23,6 +25,7 @@ const curriculum = [
   ...withExtra(b1, b1Extra),
   ...withExtra(b2, b2Extra),
   ...withExtra(c1, c1Extra),
+  ...withExtra(c2, c2Extra),
 ];
 const SPANISH_CHARS = /[áéíóúñüÁÉÍÓÚÑ¿¡]/;
 let mute = 0;
@@ -38,7 +41,7 @@ function normalize(s: string): string {
 }
 
 const allIds = new Set(curriculum.flatMap((u) => u.lessons.map((l) => l.id)));
-for (const id of [...Object.keys(a1Extra), ...Object.keys(a2Extra), ...Object.keys(b1Extra), ...Object.keys(b2Extra), ...Object.keys(c1Extra)]) {
+for (const id of [...Object.keys(a1Extra), ...Object.keys(a2Extra), ...Object.keys(b1Extra), ...Object.keys(b2Extra), ...Object.keys(c1Extra), ...Object.keys(c2Extra)]) {
   assert.ok(allIds.has(id), `ejercicios extra para una lección inexistente: ${id}`);
 }
 
