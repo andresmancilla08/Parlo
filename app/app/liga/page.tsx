@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
@@ -8,6 +8,7 @@ import {
   IconCheck,
   IconCopy,
   IconCrown,
+  IconFlame,
   IconLogout2,
   IconShieldLock,
   IconTrophy,
@@ -16,13 +17,16 @@ import {
 } from "@tabler/icons-react";
 import { useAuth } from "@/lib/auth";
 import { useProgress } from "@/lib/progress";
-import { weekDays } from "@/lib/gamification";
+import { weekDays, weekKey } from "@/lib/gamification";
 import {
   createLeague,
   fetchLeague,
   fetchScores,
   isValidCode,
   joinLeague,
+  leagueChallenge,
+  leagueProgress,
+  overtakenBy,
   leaveLeague,
   MAX_MEMBERS,
   normalizeCode,
@@ -279,6 +283,14 @@ function Standings({
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const [confirmLeave, setConfirmLeave] = useState(false);
+  const markSeen = useLeague((s) => s.markSeen);
+  const claimLeague = useProgress((s) => s.claimLeague);
+  const claims = useProgress((s) => s.claims);
+
+  // Foto CONGELADA al entrar: si se leyera del store en cada render, marcarla
+  // como vista borraría el aviso justo al enseñarlo.
+  const [seenOnEnter] = useState(() => useLeague.getState().lastSeen);
+  const [week] = useState(() => weekKey(new Date()));
 
   // Quien aún no ha estudiado esta semana no tiene marcador: se muestra a 0
   // para que la liga no parezca vacía y se vea a todo el mundo.
@@ -289,6 +301,24 @@ function Standings({
       .filter(([uid]) => !listed.has(uid))
       .map(([uid, m]) => ({ uid, alias: m.alias, xp: uid === myUid ? myXp : 0 })),
   ].sort((a, b) => b.xp - a.xp || a.alias.localeCompare(b.alias));
+
+  // `all` se rehace en cada render, así que la dependencia real es su CONTENIDO.
+  const allKey = all.map((s) => `${s.uid}:${s.xp}`).join("|");
+  const overtaken = useMemo(
+    () => overtakenBy(seenOnEnter, all, myUid),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [seenOnEnter, myUid, allKey],
+  );
+
+  const challenge = leagueChallenge(league.id, week, Object.keys(league.members).length);
+  const progress = leagueProgress(challenge, all);
+  const claimed = Boolean(claims[challenge.key]);
+
+  // La foto se actualiza para la PRÓXIMA visita, no para esta.
+  useEffect(() => {
+    if (all.length) markSeen(all);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allKey, markSeen]);
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 pb-10 pt-5 sm:px-5">
@@ -343,6 +373,70 @@ function Standings({
           </motion.p>
         )}
       </AnimatePresence>
+
+      {/* Te han adelantado: es el aviso que pidió existir la liga, y se calcula
+          contra una foto local, sin publicar cuándo mira cada uno. */}
+      {overtaken.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={spring}
+          className="mt-5 flex items-start gap-3 rounded-2xl border border-warning/40 bg-warning/12 p-3.5"
+        >
+          <IconFlame className="mt-0.5 size-5 shrink-0 text-primary" stroke={2.2} />
+          <div className="min-w-0">
+            <p className="font-display text-sm font-extrabold">{t("liga.overtaken_title")}</p>
+            <p className="mt-0.5 text-sm text-muted">
+              {t("liga.overtaken_body", {
+                who: overtaken.slice(0, 3).join(", "),
+                count: overtaken.length,
+              })}
+            </p>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Reto compartido: el mismo para toda la liga, sin escribir nada nuevo
+          en Firestore (el progreso sale de los marcadores que ya se publican). */}
+      <div className="mt-5 rounded-2xl border border-border bg-card p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="font-display text-xs font-extrabold uppercase tracking-[0.13em] text-accent-ink">
+              {t("liga.challenge_kicker")}
+            </p>
+            <p className="mt-1 font-display text-base font-extrabold">
+              {t(`liga.challenge_${challenge.id}`, { n: challenge.target })}
+            </p>
+          </div>
+          <span className="shrink-0 rounded-pill bg-gem/20 px-2.5 py-1 font-display text-xs font-extrabold text-gem">
+            +{challenge.reward}
+          </span>
+        </div>
+
+        <div className="mt-3 h-2 overflow-hidden rounded-pill bg-border">
+          <div
+            className="h-full rounded-pill bg-gradient-brand transition-[width] duration-300"
+            style={{ width: `${Math.min(100, (progress.value / progress.target) * 100)}%` }}
+          />
+        </div>
+        <p className="mt-1.5 text-xs font-bold text-muted">
+          {progress.value} / {progress.target}
+        </p>
+
+        {progress.done && (
+          <Button
+            className="mt-3"
+            fullWidth
+            disabled={claimed}
+            onClick={() => {
+              claimLeague(challenge.key, challenge.reward);
+              playReward();
+            }}
+          >
+            {claimed ? t("liga.challenge_claimed") : t("liga.challenge_claim")}
+          </Button>
+        )}
+      </div>
 
       {/* ranking */}
       <p className="mt-7 mb-2 font-display text-xs font-extrabold uppercase tracking-[0.14em] text-muted">

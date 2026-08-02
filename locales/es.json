@@ -481,7 +481,16 @@
     "leave_confirm": "¿Seguro? Se borrará tu marcador de esta liga.",
     "footer": "La clasificación se reinicia cada lunes. Solo cuenta la XP que ganes en la semana.",
     "home_cta": "Liga con amigos",
-    "home_sub": "Compite en XP semanal"
+    "home_sub": "Compite en XP semanal",
+    "overtaken_title": "Te han adelantado",
+    "overtaken_body_one": "{{who}} está ahora por delante de ti. Aún queda semana.",
+    "overtaken_body_other": "{{who}} están ahora por delante de ti. Aún queda semana.",
+    "challenge_kicker": "Reto de la liga",
+    "challenge_team_xp": "Entre todos, {{n}} XP esta semana",
+    "challenge_everyone": "Que los {{n}} lleguéis a 100 XP esta semana",
+    "challenge_leader": "Que alguien de la liga llegue a {{n}} XP",
+    "challenge_claim": "Cobrar recompensa",
+    "challenge_claimed": "Recompensa cobrada"
   },
   "guia": {
     "kicker": "Guía",

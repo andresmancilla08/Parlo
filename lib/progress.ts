@@ -163,6 +163,12 @@ type ProgressState = {
   setGoal: (xp: number) => void;
   setStartLevel: (level: Cefr) => void;
   claimChallenge: (challenge: Challenge) => void;
+  /**
+   * Cobra el reto COMPARTIDO de la liga. Va aparte de `claimChallenge` porque
+   * ese comprueba el objetivo contra MIS días, y aquí el progreso es colectivo:
+   * sale de los marcadores de la liga, que ya vienen de Firestore.
+   */
+  claimLeague: (key: string, reward: number) => void;
   buyShield: () => void;
   reset: () => void;
   setHydrated: () => void;
@@ -368,6 +374,13 @@ export const useProgress = create<ProgressState>()(
             claims: { ...s.claims, [challenge.key]: Date.now() },
           };
         }),
+
+      claimLeague: (key, reward) =>
+        set((s) =>
+          s.claims[key]
+            ? {}
+            : { gems: s.gems + reward, claims: { ...s.claims, [key]: Date.now() } },
+        ),
 
       buyShield: () =>
         set((s) =>

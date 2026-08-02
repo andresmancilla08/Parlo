@@ -64,3 +64,94 @@ export function weeklyXp(days: Record<string, { xp: number }>, week: string[]): 
 export function rank(scores: LeagueScore[]): LeagueScore[] {
   return [...scores].sort((a, b) => b.xp - a.xp || a.alias.localeCompare(b.alias));
 }
+
+/* ---------------- reto compartido ---------------- */
+
+/**
+ * Reto de la liga: uno por semana, el MISMO para todos y sin escribir nada
+ * nuevo en Firestore. Se deriva de la semana y del id de la liga, y su
+ * progreso se calcula con los marcadores que ya se publican. Así no hace falta
+ * tocar las reglas ni confiar en que alguien no manipule un contador común.
+ */
+export type LeagueChallenge = {
+  /** Clave de cobro, única por liga y semana (se cobra en el progreso local). */
+  key: string;
+  id: "team_xp" | "everyone" | "leader";
+  /** Objetivo, ya escalado al tamaño de la liga cuando toca. */
+  target: number;
+  reward: number;
+};
+
+/** Gemas del reto de liga: entre el reto diario (5) y el semanal (25). */
+export const LEAGUE_REWARD = 20;
+
+const LEAGUE_IDS = ["team_xp", "everyone", "leader"] as const;
+
+/** XP que tiene que hacer cada miembro para contar en el reto «everyone». */
+export const EVERYONE_XP = 100;
+
+/** Índice determinista a partir de una cadena (sin Math.random, como en retos). */
+function rotate(key: string, mod: number): number {
+  let n = 0;
+  for (const ch of key) n = (n * 31 + ch.charCodeAt(0)) % 100000;
+  return n % mod;
+}
+
+/**
+ * El reto de esta semana para esta liga. `members` escala el objetivo: una
+ * liga de tres no puede tener la misma meta que una de veinte.
+ */
+export function leagueChallenge(
+  leagueId: string,
+  week: string,
+  members: number,
+): LeagueChallenge {
+  const id = LEAGUE_IDS[rotate(`${leagueId}:${week}`, LEAGUE_IDS.length)];
+  const people = Math.max(1, members);
+  const target =
+    id === "team_xp" ? 250 * people : id === "everyone" ? people : 500;
+  return { key: `league:${week}:${leagueId}:${id}`, id, target, reward: LEAGUE_REWARD };
+}
+
+/** Progreso del reto compartido, calculado con los marcadores de la semana. */
+export function leagueProgress(
+  challenge: LeagueChallenge,
+  scores: LeagueScore[],
+): { value: number; target: number; done: boolean } {
+  const value =
+    challenge.id === "team_xp"
+      ? scores.reduce((sum, s) => sum + s.xp, 0)
+      : challenge.id === "everyone"
+        ? scores.filter((s) => s.xp >= EVERYONE_XP).length
+        : scores.reduce((max, s) => Math.max(max, s.xp), 0);
+  return { value, target: challenge.target, done: value >= challenge.target };
+}
+
+/* ---------------- adelantamientos ---------------- */
+
+/**
+ * Quién estaba por debajo de mí la última vez que miré y ahora está por
+ * encima. Se compara contra una foto GUARDADA EN EL DISPOSITIVO: no hace falta
+ * publicar nada nuevo ni saber cuándo entra cada uno.
+ */
+export function overtakenBy(
+  previous: LeagueScore[],
+  current: LeagueScore[],
+  uid: string,
+): string[] {
+  const before = rank(previous).findIndex((s) => s.uid === uid);
+  const now = rank(current);
+  const nowIndex = now.findIndex((s) => s.uid === uid);
+  // Si antes no estaba en la foto (o ya no estoy), no hay adelantamiento que contar.
+  if (before < 0 || nowIndex < 0) return [];
+
+  const wasBelow = new Set(
+    rank(previous)
+      .slice(before + 1)
+      .map((s) => s.uid),
+  );
+  return now
+    .slice(0, nowIndex)
+    .filter((s) => wasBelow.has(s.uid))
+    .map((s) => s.alias);
+}

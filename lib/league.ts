@@ -17,7 +17,6 @@ import { db, firebaseReady } from "@/lib/firebase";
 import { weekKey } from "@/lib/gamification";
 import {
   makeCode,
-  MAX_MEMBERS,
   normalizeCode,
   rank,
   type League,
@@ -46,8 +45,15 @@ type LeagueState = {
   /** Liga en la que estoy (null = no participo: la liga es opt-in). */
   leagueId: string | null;
   alias: string;
+  /**
+   * Foto del marcador la última vez que lo miré, para poder avisar de quién me
+   * ha adelantado. Vive en el dispositivo a propósito: publicar «cuándo miró
+   * cada uno» sería compartir más de lo que la liga promete compartir.
+   */
+  lastSeen: LeagueScore[];
   join: (leagueId: string, alias: string) => void;
   leaveLocal: () => void;
+  markSeen: (scores: LeagueScore[]) => void;
 };
 
 export const useLeague = create<LeagueState>()(
@@ -55,8 +61,10 @@ export const useLeague = create<LeagueState>()(
     (set) => ({
       leagueId: null,
       alias: "",
-      join: (leagueId, alias) => set({ leagueId, alias }),
-      leaveLocal: () => set({ leagueId: null, alias: "" }),
+      lastSeen: [],
+      join: (leagueId, alias) => set({ leagueId, alias, lastSeen: [] }),
+      leaveLocal: () => set({ leagueId: null, alias: "", lastSeen: [] }),
+      markSeen: (scores) => set({ lastSeen: scores }),
     }),
     { name: "parlo-league", storage: createJSONStorage(() => localStorage) },
   ),
@@ -69,6 +77,28 @@ export type JoinError = "not_found" | "full" | "offline";
 function requireDb() {
   if (!firebaseReady) throw new Error("offline");
   return db();
+}
+
+/**
+ * La liga en la que estoy, guardada en MI documento (`users/{uid}.league`).
+ * Sin esto, la pertenencia sólo vivía en localStorage: al entrar desde otro
+ * dispositivo (o tras limpiar el navegador) veías la pantalla de «crear liga»
+ * mientras seguías ocupando una plaza en Firestore.
+ * No comparte nada nuevo: ese documento sólo lo lee su dueño.
+ */
+async function rememberLeague(uid: string, league: { id: string; alias: string } | null) {
+  await setDoc(doc(requireDb(), "users", uid), { league }, { merge: true }).catch(() => {
+    // Que falle recordar la liga no puede tumbar el alta: se reintentará.
+  });
+}
+
+/** Recupera la liga guardada en el documento del usuario (otro dispositivo). */
+export async function fetchMyLeague(
+  uid: string,
+): Promise<{ id: string; alias: string } | null> {
+  const snap = await getDoc(doc(requireDb(), "users", uid));
+  const saved = snap.exists() ? (snap.data().league as { id: string; alias: string } | null) : null;
+  return saved?.id ? saved : null;
 }
 
 /** Crea la liga y reserva su código. El creador entra como primer miembro. */
@@ -96,11 +126,21 @@ export async function createLeague(
     members,
   });
   await setDoc(doc(database, "leagueCodes", code), { leagueId: ref.id });
+  await rememberLeague(uid, { id: ref.id, alias });
 
   return { id: ref.id, name, code, ownerUid: uid, members };
 }
 
-/** Entra por código. Devuelve la liga o el motivo por el que no se pudo. */
+/**
+ * Entra por código. Devuelve la liga o el motivo por el que no se pudo.
+ *
+ * OJO con el orden: las reglas sólo dejan LEER la liga a quien ya es miembro
+ * (`allow get: if isMember()`), así que aquí NO se puede mirar antes de entrar.
+ * Se escribe primero la propia entrada de `members` —la regla de update ya
+ * valida que sólo se toque la tuya y que no se pase del tope— y se lee después,
+ * cuando el permiso ya existe. Leer primero es lo que hacía que entrar por
+ * código fallara siempre en silencio.
+ */
 export async function joinLeague(
   code: string,
   uid: string,
@@ -113,20 +153,30 @@ export async function joinLeague(
 
   const leagueId = codeSnap.data().leagueId as string;
   const ref = doc(database, "leagues", leagueId);
+
+  try {
+    await updateDoc(ref, { [`members.${uid}`]: { alias, joinedAt: Date.now() } });
+  } catch (err) {
+    // La liga ya no existe (código huérfano) o la regla ha rechazado la
+    // entrada, y lo único que puede rechazarla en un alta bien formada es el
+    // tope de miembros.
+    const codeName = (err as { code?: string })?.code ?? "";
+    if (codeName === "not-found") return "not_found";
+    if (codeName === "permission-denied") return "full";
+    return "offline";
+  }
+
   const snap = await getDoc(ref);
   if (!snap.exists()) return "not_found";
-
   const data = snap.data();
-  const members = (data.members ?? {}) as Record<string, LeagueMember>;
-  if (!(uid in members) && Object.keys(members).length >= MAX_MEMBERS) return "full";
+  await rememberLeague(uid, { id: leagueId, alias });
 
-  await updateDoc(ref, { [`members.${uid}`]: { alias, joinedAt: Date.now() } });
   return {
     id: leagueId,
     name: data.name,
     code: clean,
     ownerUid: data.ownerUid,
-    members: { ...members, [uid]: { alias, joinedAt: Date.now() } },
+    members: (data.members ?? {}) as Record<string, LeagueMember>,
   };
 }
 
@@ -178,4 +228,5 @@ export async function leaveLeague(leagueId: string, uid: string): Promise<void> 
   await updateDoc(doc(database, "leagues", leagueId), {
     [`members.${uid}`]: deleteField(),
   });
+  await rememberLeague(uid, null);
 }

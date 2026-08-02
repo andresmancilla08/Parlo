@@ -481,7 +481,16 @@
     "leave_confirm": "Are you sure? Your score in this league will be deleted.",
     "footer": "Standings reset every Monday. Only the XP you earn during the week counts.",
     "home_cta": "Friends league",
-    "home_sub": "Compete on weekly XP"
+    "home_sub": "Compete on weekly XP",
+    "overtaken_title": "You've been overtaken",
+    "overtaken_body_one": "{{who}} is now ahead of you. There's still time this week.",
+    "overtaken_body_other": "{{who}} are now ahead of you. There's still time this week.",
+    "challenge_kicker": "League challenge",
+    "challenge_team_xp": "{{n}} XP between all of you this week",
+    "challenge_everyone": "All {{n}} of you reach 100 XP this week",
+    "challenge_leader": "Someone in the league reaches {{n}} XP",
+    "challenge_claim": "Claim reward",
+    "challenge_claimed": "Reward claimed"
   },
   "guia": {
     "kicker": "Guide",
