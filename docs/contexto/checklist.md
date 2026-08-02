@@ -1,7 +1,7 @@
 # Parlo — Mapa maestro (estado · pendientes · plan)
 
-Fuente de verdad del proyecto. Actualizado **2026-08-01**.
-Producción: <https://parlo-lilac.vercel.app>. Auto-deploy en push a `main`, pero **la credencial de git local (`mancilla08`) no tiene permiso de push** en `andresmancilla08/Parlo`: mientras tanto se despliega con `vercel --prod` (v0.5.0 desplegada así el 2026-07-29).
+Fuente de verdad del proyecto. Actualizado **2026-08-02** (v0.9.0 en producción).
+Producción: <https://parlo-lilac.vercel.app>. **Auto-deploy en push a `main`** (el problema de credencial de git se resolvió el 2026-07-29 con `gh auth login` como `andresmancilla08`).
 
 Leyenda de prioridad: **P0** rompe o bloquea · **P1** siguiente entrega · **P2** deseable · **P3** aparcado.
 
@@ -96,19 +96,21 @@ Leyenda de prioridad: **P0** rompe o bloquea · **P1** siguiente entrega · **P2
 
 ---
 
-## 3. Auditoría visual (2026-07-26) — hallazgos abiertos
+## 3. Auditoría visual (2026-07-26) — CERRADA
+
+Todos los hallazgos están corregidos; la tabla se queda como registro de qué se arregló y por qué.
 
 Hecha mirando capturas reales de la app logueada (móvil 390 y desktop 1440, claro y oscuro).
 
 | id | Sev | Pantalla | Problema | Arreglo |
 |----|-----|----------|----------|---------|
-| V1 | 🔴 | /app desktop | Contenido en `max-w-2xl`: **un tercio derecho vacío**; desktop = móvil estirado | Layout de 2 columnas ≥`xl` (ruta + panel lateral con objetivo/retos/repaso) |
-| V2 | 🔴 | /app ruta | 18 filas planas, 15 seguidas «Bloqueada» | Agrupar por nivel A1/A2/B1, colapsar lo no alcanzado, foco en la unidad actual |
-| V3 | 🔴 | /app/leccion | AppBar + BottomNav visibles: no hay **modo foco**, dos salidas compitiendo | Ocultar navegación durante lección y repaso |
-| V4 | 🟠 | /app/leccion | Media pantalla muerta bajo las opciones; el CTA aparece de golpe | Reequilibrar: CTA siempre presente (deshabilitado) y contenido centrado |
-| V5 | 🟠 | /app/retos | Panel apretado, titular en 2 líneas; diario y semanal indistinguibles; cobrar sin celebración | Jerarquía por periodo + microcelebración al cobrar |
-| V6 | 🟠 | /app/tutor | Botón enviar deshabilitado en rojo apagado (parece error); hueco enorme entre starters e input | Estado deshabilitado neutro; repartir el alto |
-| V7 | 🟠 | /app/perfil | «Logros» muestra el nº de lecciones (etiqueta engañosa) | Contar insignias ganadas o corregir la etiqueta |
+| V1 | ✅ | /app desktop | Contenido en `max-w-2xl`: **un tercio derecho vacío**; desktop = móvil estirado | Layout de 2 columnas ≥`xl` (ruta + panel lateral con objetivo/retos/repaso) |
+| V2 | ✅ | /app ruta | 18 filas planas, 15 seguidas «Bloqueada» | Agrupar por nivel A1/A2/B1, colapsar lo no alcanzado, foco en la unidad actual |
+| V3 | ✅ | /app/leccion | AppBar + BottomNav visibles: no hay **modo foco**, dos salidas compitiendo | Ocultar navegación durante lección y repaso |
+| V4 | ✅ | /app/leccion | Media pantalla muerta bajo las opciones; el CTA aparece de golpe | Reequilibrar: CTA siempre presente (deshabilitado) y contenido centrado |
+| V5 | ✅ | /app/retos | Panel apretado, titular en 2 líneas; diario y semanal indistinguibles; cobrar sin celebración | Jerarquía por periodo + microcelebración al cobrar |
+| V6 | ✅ | /app/tutor | Botón enviar deshabilitado en rojo apagado (parece error); hueco enorme entre starters e input | Estado deshabilitado neutro; repartir el alto |
+| V7 | ✅ | /app/perfil | «Logros» muestra el nº de lecciones (etiqueta engañosa) | Contar insignias ganadas o corregir la etiqueta |
 | V8 | ✅ | global | Desborde horizontal real a 320px (medido, no a ojo) | `truncate` (whitespace-nowrap) en títulos subía el ancho MÍNIMO y estiraba la página → `line-clamp`; `<select>` con `w-0 flex-1`; nav de 5 pestañas y AppBar que encogen; densidad escalonada en 320 |
 | V9 | ✅ | /app/repaso · /app/retos | Sin estado vacío útil | Repaso: mascota + «vuelve en N h» + CTA a la lección real; Retos: aviso «hoy no has practicado» con CTA |
 
@@ -134,11 +136,16 @@ Harness de capturas (dev): `shot.mjs` (Chrome headless por CDP) entra con usuari
 
 ### P2 — Expansión
 9. ~~M6b · fuente de letras con licencia~~ ⛔ **descartado**: el módulo de canciones se retiró el 2026-07-26 y no se reabre sin licencia.
-10. ~~M9 v3: EPUB y vocabulario del documento al SRS~~ ✅ (2026-07-30). Pendiente: TTS de servidor cacheado para el lector.
-11. ~~Contenido B2~~ ✅ · ~~A2/B1 a 8 ejercicios~~ ✅ · ~~C1 completo~~ ✅ (2026-07-30). ~~subir A1/B2/C1 a 8 ejercicios~~ ✅ (2026-08-01, **720**). Queda **C2**.
+10. ~~M9 v3: EPUB y vocabulario del documento al SRS~~ ✅ (2026-07-30) · ~~TTS de servidor cacheado~~ ✅ (2026-08-02, voz neural con caché de CDN). **Queda**: el volcado masivo de vocabulario del documento añade cartas SIN traducción y por eso nunca se preguntan.
+11. ~~Contenido B2 · A2/B1 a 8 ejercicios · C1~~ ✅ · ~~A1/B2/C1 a 8~~ ✅ · ~~**C2**~~ ✅ (2026-08-02). Currículo cerrado: **A1→C2, 864 ejercicios**.
 12. **Arte propio** de las 3 insignias nuevas y poses extra de la mascota (las genera Andrés).
 13. ~~M8 · Pronunciación~~ ✅ v1 (2026-07-30). **v2**: comparar fonema a fonema o puntuar entonación exigiría un modelo de audio (coste) — aparcado.
-14. ~~Liga/ranking entre amigos (opt-in)~~ ✅ v1 (2026-07-30). Pendiente si se quiere: **retos compartidos** dentro de la liga y aviso cuando alguien te adelanta.
+14. ~~Liga/ranking entre amigos~~ ✅ v1 (2026-07-30) · ~~retos compartidos y aviso de adelantamiento~~ ✅ (2026-08-02, M10 cerrado).
+
+### P2 — lo que sigue abierto (2026-08-02)
+18. **Volcado masivo de vocabulario del lector**: añade 20 cartas sin traducción, así que el repaso no puede preguntarlas. Hace falta traducirlas al añadirlas (una llamada a `/api/translate`).
+19. **«Al repaso» sólo está en los irregulares** de la guía; phrasal verbs y falsos amigos aún no lo tienen.
+20. **Probar en un móvil real** los sonidos (`lib/sfx.ts`) y el dictado con micrófono: headless no da ni audio ni micro.
 
 ### P3 — Aparcado
 15. Recuperación de PIN (el flujo estándar de Firebase pide 6+ caracteres y rompe `pin+"00"`; haría falta página propia y dominio).
