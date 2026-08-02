@@ -31,6 +31,7 @@ import { Card } from "@/components/ui/card";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { LangToggle } from "@/components/ui/lang-toggle";
 import { VoicePicker } from "@/components/ui/voice-picker";
+import { speak, useServerVoice } from "@/lib/tts";
 import { ReminderSetting } from "@/components/app/reminder-setting";
 import { playCorrect, useSfx } from "@/lib/sfx";
 import { spring } from "@/lib/motion";
@@ -175,6 +176,8 @@ export default function PerfilPage() {
         <p className="mb-2 text-sm font-semibold text-muted">{t("reminder.section")}</p>
         <ReminderSetting />
       </div>
+
+      <NeuralVoiceSetting />
 
       <div className="mt-8">
         <p className="mb-2 text-sm font-semibold text-muted">
@@ -325,5 +328,58 @@ function BadgeTile({
       ) : null}
       <p className="hyphens-auto text-[0.7rem] font-bold leading-tight sm:text-xs">{title}</p>
     </Card>
+  );
+}
+
+/**
+ * Voz neural del servidor. Se puede apagar: hay quien prefiere la voz de su
+ * sistema (o estar sin datos), y el respaldo es justo esa.
+ */
+function NeuralVoiceSetting() {
+  const { t } = useTranslation();
+  const hydrated = useHydrated();
+  const on = useServerVoice((s) => s.on);
+  const toggle = useServerVoice((s) => s.toggle);
+  const active = hydrated ? on : true;
+
+  return (
+    <div className="mt-8">
+      <p className="mb-2 text-sm font-semibold text-muted">{t("perfil.neural_title")}</p>
+      <Card className="flex items-center gap-3 p-4">
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent-ink">
+          <IconSparkles className="size-5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block font-display text-sm font-extrabold">
+            {t(active ? "perfil.neural_on" : "perfil.neural_off")}
+          </span>
+          <span className="block text-xs font-bold text-muted">{t("perfil.neural_hint")}</span>
+        </span>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={active}
+          aria-label={t("perfil.neural_title")}
+          onClick={() => {
+            toggle();
+            // Se oye el cambio: la frase suena con la voz que acabas de elegir.
+            if (!active) speak("This is the neural voice.", "en");
+          }}
+          className={cn(
+            "relative h-7 w-12 shrink-0 rounded-pill transition-colors",
+            active ? "bg-primary" : "bg-border",
+          )}
+        >
+          <motion.span
+            layout
+            transition={spring}
+            className={cn(
+              "absolute top-1 size-5 rounded-full bg-white shadow",
+              active ? "left-6" : "left-1",
+            )}
+          />
+        </button>
+      </Card>
+    </div>
   );
 }

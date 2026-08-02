@@ -354,7 +354,11 @@
     "sound_title": "Sonidos",
     "sound_hint": "Un pitido al acertar y otro al fallar.",
     "sound_on": "Activados",
-    "sound_off": "Silencio"
+    "sound_off": "Silencio",
+    "neural_title": "Voz neural",
+    "neural_on": "Voz neural activada",
+    "neural_off": "Voz del dispositivo",
+    "neural_hint": "Suena igual de bien en cualquier móvil. Si no hay red, se usa la del dispositivo."
   },
   "leccion": {
     "check": "Comprobar",

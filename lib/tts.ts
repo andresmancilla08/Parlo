@@ -99,9 +99,23 @@ export const RATE_SLOW = 0.55;
  * Lee `text`. Usa la voz elegida en el perfil; si no hay, la mejor puntuada.
  * `rate` baja a `RATE_SLOW` cuando se pulsa la tortuga.
  */
-export function speak(text: string, lang: "en" | "es" = "en", rate = RATE_NORMAL) {
+export function speak(
+  text: string,
+  lang: "en" | "es" = "en",
+  rate = RATE_NORMAL,
+  /** `true` fuerza la voz del dispositivo (lo usa el propio respaldo). */
+  device = false,
+) {
+  if (!text.trim()) return;
+
+  if (!device && serverAvailable(text)) {
+    stopSpeaking();
+    playServer(text, rate).catch(() => speak(text, lang, rate, true));
+    return;
+  }
+
   const s = synth();
-  if (!s || !text.trim()) return;
+  if (!s) return;
   refresh(); // en Chrome la lista llega tarde la primera vez
   s.cancel();
 
@@ -117,6 +131,118 @@ export function speak(text: string, lang: "en" | "es" = "en", rate = RATE_NORMAL
   u.pitch = 1;
   u.volume = 1;
   s.speak(u);
+}
+
+/* ---------------- voz neural del servidor ---------------- */
+
+/**
+ * Voz neural (`/api/tts`) en vez de la del dispositivo. Se usa en el LECTOR,
+ * que es donde más se nota: en un móvil barato la voz del sistema suena
+ * metálica y ahí se leen textos largos.
+ *
+ * Cada frase es siempre la misma URL, así que la CDN la cachea y la segunda
+ * vez ni llega al servidor. Si algo falla (sin red, cuota agotada, 503 porque
+ * no hay clave) se cae con red a Web Speech: nunca deja al usuario sin voz.
+ */
+export const useServerVoice = create<{ on: boolean; toggle: () => void }>()(
+  persist((set) => ({ on: true, toggle: () => set((s) => ({ on: !s.on })) }), {
+    name: "parlo-voice-server",
+    storage: createJSONStorage(() => localStorage),
+  }),
+);
+
+/** Frases más largas que esto las rechaza el endpoint: van por Web Speech. */
+const SERVER_MAX_CHARS = 400;
+
+let current: HTMLAudioElement | null = null;
+
+/**
+ * Cortafuegos: la cuota gratuita del modelo tiene un tope POR MINUTO, así que
+ * en una ráfaga de clics algunas peticiones fallan. Tras un fallo se deja de
+ * intentar un rato y se habla con la voz del dispositivo: es peor esperar a
+ * una petición que ya sabemos que va a fallar que sonar algo peor.
+ */
+const COOLDOWN_MS = 5 * 60_000;
+let serverDownUntil = 0;
+
+function serverAvailable(text: string): boolean {
+  return (
+    useServerVoice.getState().on &&
+    text.length <= SERVER_MAX_CHARS &&
+    Date.now() >= serverDownUntil
+  );
+}
+
+export function ttsUrl(text: string): string {
+  return `/api/tts?t=${encodeURIComponent(text)}`;
+}
+
+/** Corta lo que esté sonando, venga de donde venga. */
+export function stopSpeaking() {
+  synth()?.cancel();
+  if (current) {
+    current.pause();
+    current = null;
+  }
+}
+
+/**
+ * Reproduce con la voz del servidor. Resuelve al terminar y RECHAZA si no se
+ * puede (para que quien llama pueda tirar de Web Speech).
+ */
+function playServer(text: string, rate: number): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const audio = new Audio(ttsUrl(text));
+    // El servidor devuelve la frase a velocidad normal; la tortuga se consigue
+    // bajando la reproducción, que además no cambia la URL cacheada.
+    audio.playbackRate = rate / RATE_NORMAL;
+    audio.preservesPitch = true;
+    current = audio;
+    audio.addEventListener("ended", () => {
+      if (current === audio) current = null;
+      resolve();
+    });
+    audio.addEventListener("error", () => {
+      serverDownUntil = Date.now() + COOLDOWN_MS;
+      reject(new Error("tts"));
+    });
+    audio.play().catch((err) => {
+      serverDownUntil = Date.now() + COOLDOWN_MS;
+      reject(err);
+    });
+  });
+}
+
+/**
+ * Lee y espera a que termine, para poder encadenar frases (lectura continua).
+ * Intenta la voz neural y, si no puede, la del dispositivo.
+ */
+export async function speakAndWait(
+  text: string,
+  lang: "en" | "es" = "en",
+  rate = RATE_NORMAL,
+): Promise<void> {
+  if (!text.trim()) return;
+  if (serverAvailable(text)) {
+    stopSpeaking();
+    try {
+      await playServer(text, rate);
+      return;
+    } catch {
+      // Sigue con la voz del dispositivo.
+    }
+  }
+  await new Promise<void>((resolve) => {
+    speak(text, lang, rate, true);
+    const s = synth();
+    if (!s) return resolve();
+    const check = setInterval(() => {
+      if (!s.speaking && !s.pending) {
+        clearInterval(check);
+        resolve();
+      }
+    }, 200);
+  });
 }
 
 /** ¿Sólo hay voces malas instaladas? Sirve para avisar en la UI. */

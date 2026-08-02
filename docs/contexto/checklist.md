@@ -24,7 +24,7 @@ Leyenda de prioridad: **P0** rompe o bloquea · **P1** siguiente entrega · **P2
 | M8 | **Pronunciación (leer en voz alta y puntuar)** | ✅ v1 | `app/app/pronunciacion`, `lib/pronunciation.ts` |
 | M10 | **Liga entre amigos** (opt-in, alias + XP semanal) | ✅ v1 | `app/app/liga`, `lib/league*.ts`, `firestore.rules` |
 | M11 | **Guía de consulta** (irregulares, -ed, conjugador, phrasals, falsos amigos) | ✅ v1 | `app/app/guia`, `lib/guide/*`, `components/guide/*` |
-| M9 | **Lector de documentos propios con voz** | ✅ v3 (PDF · DOCX · **EPUB** + traducción en voz + vocabulario al SRS) | `app/app/leer`, `lib/reader/*`, `app/api/translate` |
+| M9 | **Lector de documentos propios con voz** | ✅ v4 (voz neural cacheada) (PDF · DOCX · **EPUB** + traducción en voz + vocabulario al SRS) | `app/app/leer`, `lib/reader/*`, `app/api/translate` |
 
 ---
 
@@ -56,6 +56,11 @@ Leyenda de prioridad: **P0** rompe o bloquea · **P1** siguiente entrega · **P2
 - **Voz**: botón tortuga (lento) en teoría, feedback, escucha y lector; **dictado por voz** en Practicar; la respuesta del coach **se lee sola la primera vez**.
 - **Animaciones/progreso**: la barra mide lo respondido (no el índice), combo de aciertos seguidos, XP con contador ascendente, confeti al terminar y `MotionConfig reducedMotion="user"` global.
 - Checks nuevos: `lib/curriculum/teach.check.ts` (54 lecciones · 216 pasos · 216 ejemplos) y `lib/placement.check.ts` reescrito.
+
+**M9 y M10 cerrados (2026-08-02, v0.9.0)**
+- **M9 · voz neural cacheada** (`/api/tts`): Gemini TTS devuelto como WAV. Es un **GET** a propósito, así la misma frase es siempre la misma URL y la cachea la CDN de Vercel: la segunda vez no llega al servidor. Sin bucket, sin base de datos y sin coste de almacenamiento. Con esto, **el «audio neural del currículo» deja de estar bloqueado**: se genera solo, la primera vez que alguien escucha cada frase. Interruptor en el perfil y respaldo automático a la voz del dispositivo; un fallo activa un cortafuegos de 5 minutos porque el tope de la cuota gratuita es POR MINUTO.
+- **M10 · liga**: reto compartido semanal (mismo para todos, derivado de liga+semana, con el objetivo escalado al número de miembros) y aviso de quién te ha adelantado (contra una foto local, sin publicar cuándo mira cada uno).
+- **Dos fallos de fondo que sólo aparecen probando con dos cuentas**: entrar por código NUNCA había funcionado (las reglas no dejan leer la liga a quien aún no es miembro y `joinLeague` la leía antes de entrar), y la pertenencia vivía sólo en localStorage (desde otro dispositivo veías «crear liga» ocupando plaza). Ahora se guarda en `users/{uid}.league`.
 
 **C2 y guía de consulta (2026-08-01, v0.8.0)**
 - **C2 completo**: 6 unidades (economía y precisión · foco de la información · registro extremo · lenguaje figurado · implicatura · variedades) con teoría y extras → **36 unidades / 108 lecciones / 864 ejercicios / 432 pasos**. Test de nivel con 6.º bloque (30 ítems), pista de escucha C2 y escenario C2 del coach. La landing interpola `TOP_LEVEL` en vez de escribir el techo a mano.

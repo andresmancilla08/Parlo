@@ -20,7 +20,7 @@ import { deleteDoc, getDoc, listDocs, saveDoc, type StoredDoc } from "@/lib/read
 import { buildIndex, cleanWord, search, toSentences, toWords } from "@/lib/reader/segment";
 import { vocabCandidates } from "@/lib/reader/vocab";
 import { detectLang, targetLang } from "@/lib/reader/detect";
-import { RATE_SLOW, speak } from "@/lib/tts";
+import { RATE_SLOW, speak, speakAndWait, stopSpeaking } from "@/lib/tts";
 import { useProgress } from "@/lib/progress";
 import { IconTurtle } from "@/components/ui/icon-turtle";
 import { SpeakControls } from "@/components/ui/speak-controls";
@@ -417,7 +417,7 @@ function Reader({ id }: { id: string }) {
           onClick={() => {
             if (reading) {
               stop.current = true;
-              window.speechSynthesis?.cancel();
+              stopSpeaking();
               setReading(false);
             } else {
               readAll(current);
@@ -449,21 +449,6 @@ function Reader({ id }: { id: string }) {
       )}
     </div>
   );
-}
-
-/** Habla y espera a que termine, para poder encadenar frases. */
-function speakAndWait(text: string, lang: "en" | "es"): Promise<void> {
-  return new Promise((resolve) => {
-    speak(text, lang);
-    const synth = typeof window !== "undefined" ? window.speechSynthesis : null;
-    if (!synth) return resolve();
-    const check = setInterval(() => {
-      if (!synth.speaking && !synth.pending) {
-        clearInterval(check);
-        resolve();
-      }
-    }, 200);
-  });
 }
 
 /* ---------------- significado de una palabra ---------------- */

@@ -101,3 +101,13 @@
 - **Causa real:** el armazón es `h-dvh overflow-hidden` a propósito (ver `decisiones.md`), así que el documento nunca scrollea.
 - **Solución:** usar `document.querySelector('main')` como scroller (o pasar un ref). El reset al cambiar de ruta ya lo hace `app/app/layout.tsx`; si algún día hay más scrollers, que cada uno se resetee.
 - **Al medir con el harness:** comparar `main.scrollHeight - main.clientHeight`, no el del documento, o parecerá que no hay contenido.
+
+## El Chrome del harness sobrevive al `proc.kill()`
+- **Síntoma:** una prueba mide algo imposible (por ejemplo «0 peticiones» cuando el código sí las hace) o el usuario aparece ya logueado en un perfil recién creado.
+- **Causa real:** si un Chrome de una ejecución anterior sigue escuchando en el puerto de depuración, el nuevo `spawn` no puede abrirlo y el script se conecta al VIEJO, con su `localStorage`, su sesión y sus preferencias.
+- **Solución:** `launch()` hace `pkill -f "remote-debugging-port=<puerto>"` antes de arrancar. Si una medida sale rara, comprobar primero que no hay dos Chrome vivos.
+
+## La liga no se puede probar con una sola cuenta
+- **Síntoma:** todo parece funcionar, pero entrar por código falla en producción.
+- **Causa real:** las reglas distinguen miembro de no miembro. Con una sola cuenta (la que crea la liga) nunca se ejecuta el camino del que entra.
+- **Solución:** `cdp-multi.mjs` abre dos contextos de navegador aislados (cada uno con su `localStorage` y su sesión de Firebase) y los conduce por CDP con `sessionId`. Es la única forma de ver el adelantamiento y el alta por código.

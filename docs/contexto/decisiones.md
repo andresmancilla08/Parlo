@@ -180,3 +180,17 @@
 - **Por qué el motor no importa la tabla:** los `.check.ts` corren con `node --experimental-strip-types` y están excluidos de tsc, así que importan con extensión `.ts`. Para que eso funcione, el módulo probado no puede tener imports locales en runtime. `conjugate.ts` recibe el irregular como argumento y `lib/guide/index.ts` es quien cablea las dos piezas.
 - **El límite conocido:** doblar la consonante final depende del ACENTO, que no está en la ortografía. Los monosílabos se resuelven con la regla; los polisílabos, con una lista explícita (`STRESSED_DOUBLERS`). Si aparece un verbo que dobla y no está, se añade ahí.
 - **Estado:** vigente. Cubierto por `lib/guide/conjugate.check.ts` (reglas de ortografía, «to be» sin auxiliar, y validación de las tres tablas).
+
+## Voz neural cacheada en la CDN, no pregenerada
+- **Qué:** `GET /api/tts?t=…` llama a Gemini TTS, envuelve el PCM en una cabecera WAV y responde con `cache-control: immutable` a un año. La misma frase es siempre la misma URL, así que la CDN de Vercel la cachea y la segunda vez no llega al servidor.
+- **Por qué así y no pregenerando el currículo:** pregenerar exigía decidir cuenta, autenticar (y la org de GCP prohíbe claves de service account) y guardar ~30k caracteres de audio en algún sitio. Generar bajo demanda con la clave de Gemini que YA existe y dejar que la CDN haga de almacén consigue lo mismo sin infraestructura nueva, y sólo se genera lo que alguien escucha de verdad.
+- **Por qué GET y no POST:** un POST no lo cachea la CDN. El texto va en la URL, con tope de 400 caracteres (más que eso no es una frase).
+- **El respaldo no es opcional:** la cuota gratuita tiene tope POR MINUTO, así que en una ráfaga de clics algunas peticiones fallan. Ante cualquier fallo se habla con la voz del dispositivo y se deja de intentar 5 minutos (cortafuegos en `lib/tts.ts`): esperar a una petición que sabemos que va a fallar es peor que sonar algo peor.
+- **Estado:** vigente. Interruptor en el perfil (por defecto encendida). Verificado con el harness: 200 `audio/wav` con la cabecera de caché, y cero peticiones con el interruptor apagado.
+
+## Entrar en la liga: escribir primero, leer después
+- **Qué:** `joinLeague` ya no lee la liga antes de entrar; escribe su entrada de `members` y lee después.
+- **Por qué:** la regla es `allow get: if isMember()`, así que quien todavía no es miembro NO puede leer el documento. Leer primero hacía que entrar por código fallara siempre, en silencio. La regla de `update` ya valida que sólo toques tu entrada y que no se pase del tope, así que escribir a ciegas es seguro.
+- **Cómo se distinguen los errores:** por el código de Firestore — `not-found` (liga borrada, código huérfano) y `permission-denied` (el único rechazo posible en un alta bien formada es el tope de miembros).
+- **Lección:** esto no se ve con una sola cuenta. El harness de capturas ahora sabe abrir **dos contextos de navegador aislados** (`cdp-multi.mjs`) precisamente para esto.
+- **Estado:** vigente. Probado con dos cuentas reales: B entra por código, adelanta a A y A ve el aviso.

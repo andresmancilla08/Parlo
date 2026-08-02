@@ -354,7 +354,11 @@
     "sound_title": "Sounds",
     "sound_hint": "A chime when you get it right, another when you miss.",
     "sound_on": "On",
-    "sound_off": "Muted"
+    "sound_off": "Muted",
+    "neural_title": "Neural voice",
+    "neural_on": "Neural voice on",
+    "neural_off": "Device voice",
+    "neural_hint": "Sounds the same on any phone. With no connection, the device voice takes over."
   },
   "leccion": {
     "check": "Check",
