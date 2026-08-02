@@ -7,6 +7,7 @@ import { searchFalseFriends } from "@/lib/guide";
 import { SpeakControls } from "@/components/ui/speak-controls";
 import { Card } from "@/components/ui/card";
 import { SearchBox, ResultCount } from "@/components/guide/search-box";
+import { AddToReview } from "@/components/guide/add-to-review";
 
 /**
  * Falsos amigos: el error que no suena a error, porque la palabra existe y la
@@ -35,6 +36,9 @@ export function FalseFriendsView() {
                 </p>
               </div>
               <SpeakControls text={f.example} size="sm" variant="outline" />
+              {/* Lo que hay que recordar no es la palabra, es lo que significa
+                  de verdad: por eso la carta guarda `means`, no `looksLike`. */}
+              <AddToReview en={f.en} es={f.means} />
             </div>
 
             <p className="mt-3 text-sm leading-relaxed">

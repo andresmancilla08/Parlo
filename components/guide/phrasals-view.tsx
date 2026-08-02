@@ -7,6 +7,7 @@ import { PARTICLES, PHRASAL_VERBS, searchPhrasals, type Phrasal } from "@/lib/gu
 import { SpeakControls } from "@/components/ui/speak-controls";
 import { Card } from "@/components/ui/card";
 import { SearchBox, ResultCount } from "@/components/guide/search-box";
+import { AddToReview } from "@/components/guide/add-to-review";
 import { cn } from "@/lib/utils";
 
 /**
@@ -81,6 +82,7 @@ function Row({ phrasal }: { phrasal: Phrasal }) {
           <p className="mt-0.5 text-xs text-muted">{phrasal.es}</p>
         </div>
         <SpeakControls text={phrasal.example} size="sm" variant="outline" />
+        <AddToReview en={`${phrasal.verb} ${phrasal.particle}`} es={phrasal.es} />
       </div>
 
       <p className="mt-2 text-sm font-semibold leading-relaxed">{phrasal.example}</p>

@@ -2,12 +2,11 @@
 
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { IconCards, IconCheck } from "@tabler/icons-react";
 import { GROUPS, searchIrregulars, type Irregular } from "@/lib/guide";
-import { useProgress } from "@/lib/progress";
 import { SpeakControls } from "@/components/ui/speak-controls";
 import { Card } from "@/components/ui/card";
 import { SearchBox, ResultCount } from "@/components/guide/search-box";
+import { AddToReview } from "@/components/guide/add-to-review";
 import { cn } from "@/lib/utils";
 
 /**
@@ -68,10 +67,6 @@ export function IrregularsView() {
 }
 
 function Row({ verb }: { verb: Irregular }) {
-  const { t } = useTranslation();
-  const addCard = useProgress((s) => s.addCard);
-  const inReview = useProgress((s) => Boolean(s.cards[verb.base]));
-
   return (
     <div className="flex items-center gap-3 p-3.5">
       <div className="min-w-0 flex-1">
@@ -87,19 +82,7 @@ function Row({ verb }: { verb: Irregular }) {
         size="sm"
         variant="outline"
       />
-      <button
-        type="button"
-        onClick={() => addCard(verb.base, verb.es)}
-        disabled={inReview}
-        aria-label={t(inReview ? "guia.added" : "guia.add_review")}
-        title={t(inReview ? "guia.added" : "guia.add_review")}
-        className={cn(
-          "grid size-8 shrink-0 place-items-center rounded-full transition-transform active:scale-95",
-          inReview ? "bg-success-soft text-success-ink" : "bg-primary-soft text-primary",
-        )}
-      >
-        {inReview ? <IconCheck className="size-4" /> : <IconCards className="size-4" />}
-      </button>
+      <AddToReview en={verb.base} es={verb.es} />
     </div>
   );
 }

@@ -143,8 +143,8 @@ Harness de capturas (dev): `shot.mjs` (Chrome headless por CDP) entra con usuari
 14. ~~Liga/ranking entre amigos~~ ✅ v1 (2026-07-30) · ~~retos compartidos y aviso de adelantamiento~~ ✅ (2026-08-02, M10 cerrado).
 
 ### P2 — lo que sigue abierto (2026-08-02)
-18. **Volcado masivo de vocabulario del lector**: añade 20 cartas sin traducción, así que el repaso no puede preguntarlas. Hace falta traducirlas al añadirlas (una llamada a `/api/translate`).
-19. **«Al repaso» sólo está en los irregulares** de la guía; phrasal verbs y falsos amigos aún no lo tienen.
+18. ~~Volcado masivo de vocabulario del lector sin traducción~~ ✅ (2026-08-02): se traducen las 20 palabras en UNA llamada a `/api/translate` **antes** de guardarlas; si la traducción falla no se añade nada (mejor no añadir que añadir mudo).
+19. ~~«Al repaso» sólo en los irregulares~~ ✅ (2026-08-02): componente `AddToReview` compartido, también en phrasal verbs y falsos amigos. En los falsos amigos la carta guarda lo que la palabra SIGNIFICA, no a lo que se parece.
 20. **Probar en un móvil real** los sonidos (`lib/sfx.ts`) y el dictado con micrófono: headless no da ni audio ni micro.
 
 ### P3 — Aparcado

@@ -329,7 +329,8 @@
     "vocab_cta": "Añadir vocabulario al repaso",
     "vocab_hint": "Las palabras más repetidas del documento que aún no tienes",
     "vocab_added": "{{n}} palabras añadidas al repaso",
-    "vocab_none": "No quedan palabras nuevas que añadir"
+    "vocab_none": "No quedan palabras nuevas que añadir",
+    "vocab_failed": "No se pudieron traducir: inténtalo otra vez"
   },
   "perfil": {
     "level": "Nivel {{level}}",

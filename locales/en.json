@@ -329,7 +329,8 @@
     "vocab_cta": "Add vocabulary to review",
     "vocab_hint": "The most repeated words in the document that you do not have yet",
     "vocab_added": "{{n}} words added to your review",
-    "vocab_none": "No new words left to add"
+    "vocab_none": "No new words left to add",
+    "vocab_failed": "Couldn't translate them: try again"
   },
   "perfil": {
     "level": "Level {{level}}",

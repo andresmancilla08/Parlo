@@ -198,6 +198,8 @@ function Reader({ id }: { id: string }) {
   const addCard = useProgress((s) => s.addCard);
 
   const [vocabAdded, setVocabAdded] = useState<number | null>(null);
+  const [vocabBusy, setVocabBusy] = useState(false);
+  const [vocabFailed, setVocabFailed] = useState(false);
   const [doc, setDoc] = useState<StoredDoc | null | undefined>(undefined);
   const [current, setCurrent] = useState(0);
   const [reading, setReading] = useState(false);
@@ -336,24 +338,60 @@ function Reader({ id }: { id: string }) {
           que TÚ lees es justo lo que te conviene aprender. */}
       <button
         type="button"
-        onClick={() => {
-          const known = new Set(Object.keys(useProgress.getState().cards).map((k) => k.toLowerCase()));
+        disabled={vocabBusy}
+        onClick={async () => {
+          const known = new Set(
+            Object.keys(useProgress.getState().cards).map((k) => k.toLowerCase()),
+          );
           const picked = vocabCandidates(doc.text, known, 20);
-          picked.forEach((c) => addCard(c.word));
-          setVocabAdded(picked.length);
+          if (picked.length === 0) {
+            setVocabAdded(0);
+            return;
+          }
+          // Se traducen ANTES de guardarlas: una carta sin significado se queda
+          // en el repaso sin poder preguntarse nunca. Una sola llamada para las
+          // 20, con las palabras como «líneas».
+          setVocabBusy(true);
+          setVocabFailed(false);
+          try {
+            const res = await fetch("/api/translate", {
+              method: "POST",
+              headers: { "content-type": "application/json" },
+              body: JSON.stringify({ lines: picked.map((c) => c.word), from: lang }),
+            });
+            if (!res.ok) throw new Error("translate");
+            const data = (await res.json()) as { lines: string[] };
+            let added = 0;
+            picked.forEach((c, i) => {
+              const es = data.lines[i]?.trim();
+              if (!es) return; // sin significado no entra: no se podría preguntar
+              addCard(c.word, es);
+              added++;
+            });
+            setVocabAdded(added);
+          } catch {
+            // Sin traducción no se añade nada: mejor no añadir que añadir mudo.
+            setVocabFailed(true);
+          } finally {
+            setVocabBusy(false);
+          }
         }}
-        className="mt-3 flex w-full items-center gap-3 rounded-2xl border border-border bg-card p-3.5 text-left transition-colors hover:border-accent active:scale-[0.99]"
+        className="mt-3 flex w-full items-center gap-3 rounded-2xl border border-border bg-card p-3.5 text-left transition-colors hover:border-accent active:scale-[0.99] disabled:opacity-60"
       >
         <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent-ink">
           <IconCards className="size-5" />
         </span>
         <span className="min-w-0 flex-1">
           <span className="block font-display text-sm font-extrabold">
-            {vocabAdded === null
-              ? t("leer.vocab_cta")
-              : vocabAdded > 0
-                ? t("leer.vocab_added", { n: vocabAdded })
-                : t("leer.vocab_none")}
+            {vocabBusy
+              ? t("common.loading")
+              : vocabFailed
+                ? t("leer.vocab_failed")
+                : vocabAdded === null
+                  ? t("leer.vocab_cta")
+                  : vocabAdded > 0
+                    ? t("leer.vocab_added", { n: vocabAdded })
+                    : t("leer.vocab_none")}
           </span>
           <span className="block text-xs font-bold text-muted">{t("leer.vocab_hint")}</span>
         </span>
