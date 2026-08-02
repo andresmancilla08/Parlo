@@ -40,10 +40,14 @@ export function useLeagueSync(uid: string | null) {
             useLeague.getState().join(saved.id, saved.alias);
             publish();
           }
+          useLeague.getState().markChecked();
         })
         .catch(() => {
-          // Sin red: se reintenta en la próxima sesión.
+          // Sin red: se da por preguntado para no dejar la pantalla colgada.
+          useLeague.getState().markChecked();
         });
+    } else {
+      useLeague.getState().markChecked();
     }
 
     publish(); // al entrar, por si se estudió en otro dispositivo

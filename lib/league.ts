@@ -51,9 +51,17 @@ type LeagueState = {
    * cada uno» sería compartir más de lo que la liga promete compartir.
    */
   lastSeen: LeagueScore[];
+  /**
+   * `false` mientras no se ha preguntado a la nube si este usuario ya está en
+   * una liga. Sin esto, en un dispositivo nuevo se ve un instante la pantalla
+   * de «crear liga» y se puede crear una SEGUNDA liga estando ya en otra.
+   * No se persiste: hay que volver a preguntar en cada sesión.
+   */
+  checked: boolean;
   join: (leagueId: string, alias: string) => void;
   leaveLocal: () => void;
   markSeen: (scores: LeagueScore[]) => void;
+  markChecked: () => void;
 };
 
 export const useLeague = create<LeagueState>()(
@@ -62,11 +70,18 @@ export const useLeague = create<LeagueState>()(
       leagueId: null,
       alias: "",
       lastSeen: [],
-      join: (leagueId, alias) => set({ leagueId, alias, lastSeen: [] }),
-      leaveLocal: () => set({ leagueId: null, alias: "", lastSeen: [] }),
+      checked: false,
+      join: (leagueId, alias) => set({ leagueId, alias, lastSeen: [], checked: true }),
+      leaveLocal: () => set({ leagueId: null, alias: "", lastSeen: [], checked: true }),
       markSeen: (scores) => set({ lastSeen: scores }),
+      markChecked: () => set({ checked: true }),
     }),
-    { name: "parlo-league", storage: createJSONStorage(() => localStorage) },
+    {
+      name: "parlo-league",
+      storage: createJSONStorage(() => localStorage),
+      // `checked` fuera: es de esta sesión, no una preferencia.
+      partialize: (s) => ({ leagueId: s.leagueId, alias: s.alias, lastSeen: s.lastSeen }),
+    },
   ),
 );
 

@@ -55,6 +55,7 @@ export default function LigaPage() {
   const alias = useLeague((s) => s.alias);
   const join = useLeague((s) => s.join);
   const leaveLocal = useLeague((s) => s.leaveLocal);
+  const checked = useLeague((s) => s.checked);
 
   // `undefined` = todavía cargando; `null` = no estoy en ninguna liga.
   const [league, setLeague] = useState<League | null | undefined>(undefined);
@@ -94,8 +95,9 @@ export default function LigaPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [leagueId, uid, alias, leaveLocal]);
 
-  // Sin liga guardada no hay nada que esperar: se pinta el alta directamente.
-  const loading = Boolean(leagueId) && league === undefined;
+  // Se espera también a saber si el usuario ya está en una liga según la nube:
+  // enseñar «crear liga» antes de tiempo invita a crear una segunda.
+  const loading = (Boolean(leagueId) && league === undefined) || !checked;
 
   if (loading) {
     return (
