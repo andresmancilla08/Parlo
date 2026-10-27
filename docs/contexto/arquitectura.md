@@ -34,7 +34,7 @@ PWA web que enseña inglés a hispanohablantes con currículo por niveles + tuto
 - **Liga:** el ÚNICO dato compartido. `leagues/{id}` + `leagues/{id}/scores/{uid}` + `leagueCodes/{code}`; sólo viajan alias y XP semanal, y las reglas impiden tocar la entrada de otro.
 
 ## Lo que NO existe (descartado)
-- **Nada nativo** (sin Expo/React Native): Parlo es SIEMPRE web PWA.
+- **Nada nativo** (sin Expo/React Native): Parlo es SIEMPRE web PWA. `android/` es solo un envoltorio TWA que abre la web de producción en Chrome (ver decisiones).
 - **Sin Anthropic/OpenAI de pago:** se usa Gemini free tier para no tener coste.
 - **Sin i18n de UI (aún):** v1 solo español; strings centralizados para extraer con i18next más adelante.
 - **Sin Postgres:** se eligió Firebase.

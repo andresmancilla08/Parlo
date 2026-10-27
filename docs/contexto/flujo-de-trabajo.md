@@ -42,3 +42,16 @@ Ningún servicio tiene facturación activada y así debe seguir:
 - **Vercel Hobby**: sin método de pago; al pasarse de límites se limita, no se cobra. No subir a Pro.
 - **Firebase Spark**: verificado sin cuenta de facturación (`gcloud beta billing projects describe`). Nada de Cloud Functions ni Identity Platform: exigen Blaze.
 - **Gemini free tier**: si se agota la cuota devuelve error, no cobra. El límite de 15 peticiones/min del tutor existe para no quemarla.
+
+## APK de Android (TWA, instalación manual)
+
+```bash
+cd android
+JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew assembleDebug
+cp app/build/outputs/apk/debug/app-debug.apk ~/Downloads/parlo-$(node -p "require('../package.json').version").apk
+```
+
+- Necesita `android/local.properties` con `sdk.dir=/Users/<usuario>/Library/Android/sdk` (no se versiona).
+- La APK carga producción: no hay que recompilarla al cambiar la web. Solo al cambiar ícono, nombre, URL o versión.
+- Instalar en el teléfono: pasar el `.apk` (WhatsApp/Drive), abrirlo y permitir «Instalar apps desconocidas» para la app desde la que se abre. Requiere Chrome instalado (si no, abre en otro navegador con barra).
+- Probar en emulador sin ventana: `emulator -avd Pixel_9_Pro -no-window -no-audio`, `adb install -r <apk>`, `adb exec-out screencap -p > shot.png`.

@@ -194,3 +194,11 @@
 - **Cómo se distinguen los errores:** por el código de Firestore — `not-found` (liga borrada, código huérfano) y `permission-denied` (el único rechazo posible en un alta bien formada es el tope de miembros).
 - **Lección:** esto no se ve con una sola cuenta. El harness de capturas ahora sabe abrir **dos contextos de navegador aislados** (`cdp-multi.mjs`) precisamente para esto.
 - **Estado:** vigente. Probado con dos cuentas reales: B entra por código, adelanta a A y A ve el aviso.
+
+## APK de Android: envoltorio TWA, no Capacitor
+- **Qué:** `android/` es un proyecto Gradle mínimo con `androidbrowserhelper` (Trusted Web Activity). La APK (`co.parlo.app`) abre `https://parlo-lilac.vercel.app/` en Chrome a pantalla completa. No contiene código web: todo sigue siendo la PWA desplegada, así que se mantiene la regla «siempre web».
+- **Por qué TWA:** en el WebView de Android (lo que usa Capacitor) no existen `speechSynthesis` (la pronunciación de lecciones quedaría muda), `SpeechRecognition` (sin dictado) ni Web Push. En una TWA corre Chrome: voz, dictado, notificaciones, service worker y sesión de Firebase funcionan igual que en la PWA. Además no hace falta `webDir` ni plugins.
+- **Descartado:** Capacitor con `server.url` (pierde las APIs de voz); Bubblewrap CLI (`init` es interactivo y descarga su propio JDK/SDK; el proyecto a mano son 6 archivos).
+- **Pantalla completa:** depende de `public/.well-known/assetlinks.json` con el SHA-256 del certificado que firma la APK. Hoy está el de la debug keystore de la Mac del dueño (`~/.android/debug.keystore`, `49:B2:2F:…:68:9D`). Hasta desplegar ese archivo, la APK abre con barra de URL (modo Custom Tab); funciona igual. Firmar con otra clave = añadir su huella al JSON.
+- **Versión:** `versionName`/`versionCode` salen de `package.json` (`maj*10000+min*100+pat`).
+- **Estado:** vigente. APK debug para instalación manual; para Play haría falta keystore de release.

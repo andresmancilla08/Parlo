@@ -111,3 +111,8 @@
 - **Síntoma:** todo parece funcionar, pero entrar por código falla en producción.
 - **Causa real:** las reglas distinguen miembro de no miembro. Con una sola cuenta (la que crea la liga) nunca se ejecuta el camino del que entra.
 - **Solución:** `cdp-multi.mjs` abre dos contextos de navegador aislados (cada uno con su `localStorage` y su sesión de Firebase) y los conduce por CDP con `sessionId`. Es la única forma de ver el adelantamiento y el alta por código.
+
+## La APK muestra la barra de URL arriba
+- **Síntoma:** la app de Android abre con barra «parlo-lilac.vercel.app» y botón de cerrar.
+- **Causa real:** Chrome no pudo verificar Digital Asset Links: `/.well-known/assetlinks.json` no está desplegado o no contiene la huella SHA-256 del certificado que firmó esa APK.
+- **Solución:** desplegar `public/.well-known/assetlinks.json` con la huella correcta (`keytool -list -v -keystore <ks>`). Chrome cachea la verificación: tras corregir, borrar datos de la app o reinstalar.
