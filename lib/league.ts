@@ -60,6 +60,8 @@ type LeagueState = {
   checked: boolean;
   join: (leagueId: string, alias: string) => void;
   leaveLocal: () => void;
+  /** Cerrar sesión: olvida la liga de esta cuenta y vuelve a «sin preguntar». */
+  resetLocal: () => void;
   markSeen: (scores: LeagueScore[]) => void;
   markChecked: () => void;
 };
@@ -73,6 +75,7 @@ export const useLeague = create<LeagueState>()(
       checked: false,
       join: (leagueId, alias) => set({ leagueId, alias, lastSeen: [], checked: true }),
       leaveLocal: () => set({ leagueId: null, alias: "", lastSeen: [], checked: true }),
+      resetLocal: () => set({ leagueId: null, alias: "", lastSeen: [], checked: false }),
       markSeen: (scores) => set({ lastSeen: scores }),
       markChecked: () => set({ checked: true }),
     }),
