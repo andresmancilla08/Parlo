@@ -21,7 +21,7 @@ PWA web que enseña inglés a hispanohablantes con currículo por niveles + tuto
 - `app/api/tts/` — voz neural (Gemini TTS) devuelta como WAV. GET a propósito: la misma frase es la misma URL y la cachea la CDN.
 - `lib/guide/` — sección de consulta: `irregulars.ts`, `phrasals.ts`, `false-friends.ts`, `regulars.ts` (datos bilingües) y `conjugate.ts` (motor puro de los 15 tiempos). `index.ts` cablea motor + tabla; los `.check.ts` corren con node y por eso `conjugate.ts` NO importa la tabla.
 - `lib/curriculum/` — `levels/*` (ejercicios base), `extra/*` (ejercicios añadidos, mapa `lessonId → Exercise[]`) y `teach/*` (teoría, mapa `lessonId → TeachStep[]`). `data.ts` los compone con `withExtra()`.
-- `lib/` — `firebase.ts` (init cliente), `utils.ts` (`cn`), `sfx.ts` (sonidos WebAudio), `dictation.ts` (voz→texto), `tts.ts` (texto→voz, normal y lenta), `pronunciation.ts` (puntuar lectura en voz alta), `league*.ts` (liga: `league-core` es la parte pura y `league` la de Firestore).
+- `lib/` — `firebase.ts` (init cliente), `utils.ts` (`cn`), `sfx.ts` (sonidos WebAudio), `dictation.ts` (voz→texto), `tts.ts` (texto→voz, normal y lenta), `pronunciation.ts` (puntuar lectura en voz alta), `league*.ts` (liga: `league-core` es la parte pura y `league` la de Firestore), `sync.ts` + `progress-merge.ts` (sync del progreso por transacción; la fusión es pura), `local-data.ts` (qué se borra del dispositivo al cerrar sesión), `chunk-reload.ts` (recarga ante `ChunkLoadError`).
 - `docs/` — `roadmap-mvp.md` y `docs/contexto/`.
 
 ## Flujo de datos
