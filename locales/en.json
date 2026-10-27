@@ -495,7 +495,9 @@
     "challenge_everyone": "All {{n}} of you reach 100 XP this week",
     "challenge_leader": "Someone in the league reaches {{n}} XP",
     "challenge_claim": "Claim reward",
-    "challenge_claimed": "Reward claimed"
+    "challenge_claimed": "Reward claimed",
+    "load_error_title": "We couldn't load your league",
+    "load_error_body": "Check your connection. Your league is still there — no need to create another one."
   },
   "guia": {
     "kicker": "Guide",

@@ -5,6 +5,19 @@
 /** Tope de miembros: es una liga de amigos, no una red social. */
 export const MAX_MEMBERS = 20;
 export const CODE_LENGTH = 6;
+
+/**
+ * Tope de XP semanal que aceptan las reglas (`firestore.rules`, mismo número).
+ * No es anticheat (el cliente decide su XP): evita que alguien rompa el
+ * marcador de sus amigos con un número absurdo. Cálculo, en `lib/progress.ts`:
+ *   - lo que más XP da por minuto es repetir una lección: 8 ejercicios × 10 XP
+ *     = 80 XP, y hacerla entera exige al menos ~1 minuto → ≤ 4.800 XP/hora
+ *     (repaso: 5 XP/carta; escucha: 5/hueco; pronunciación: 2/palabra, todos
+ *     más lentos por XP).
+ *   - 200.000 XP/semana ≈ 42 h a ese ritmo máximo sostenido (6 h diarias sin
+ *     fallar ni una), muy por encima de cualquier semana real.
+ */
+export const MAX_WEEKLY_XP = 200_000;
 /** Sin vocales para que no salgan palabras, y sin 0/O ni 1/I (se confunden). */
 const CODE_ALPHABET = "BCDFGHJKLMNPQRSTVWXYZ23456789";
 

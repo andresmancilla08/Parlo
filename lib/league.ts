@@ -17,6 +17,7 @@ import { db, firebaseReady } from "@/lib/firebase";
 import { weekKey } from "@/lib/gamification";
 import {
   makeCode,
+  MAX_WEEKLY_XP,
   normalizeCode,
   rank,
   type League,
@@ -176,8 +177,12 @@ export async function joinLeague(
     await updateDoc(ref, { [`members.${uid}`]: { alias, joinedAt: Date.now() } });
   } catch (err) {
     // La liga ya no existe (código huérfano) o la regla ha rechazado la
-    // entrada, y lo único que puede rechazarla en un alta bien formada es el
-    // tope de miembros.
+    // entrada. Las reglas también validan la forma de la entrada (alias de
+    // 2-16 caracteres, sólo `alias` y `joinedAt`), pero el alias ya llega
+    // validado por `validateAlias` (los mismos límites), así que en un alta
+    // bien formada lo único que puede rechazarla es el tope de miembros.
+    // Si algún día cambian los límites en un lado, hay que cambiarlos en ambos
+    // o esto dirá «llena» cuando el problema es el alias.
     const codeName = (err as { code?: string })?.code ?? "";
     if (codeName === "not-found") return "not_found";
     if (codeName === "permission-denied") return "full";
@@ -222,7 +227,8 @@ export async function pushScore(
   await setDoc(doc(requireDb(), "leagues", leagueId, "scores", uid), {
     alias,
     week: weekKey(now),
-    xp,
+    // Las reglas rechazan más del tope: mejor recortar que dejar de publicar.
+    xp: Math.min(Math.max(0, Math.floor(xp)), MAX_WEEKLY_XP),
     updatedAt: Date.now(),
   });
 }

@@ -495,7 +495,9 @@
     "challenge_everyone": "Que los {{n}} lleguéis a 100 XP esta semana",
     "challenge_leader": "Que alguien de la liga llegue a {{n}} XP",
     "challenge_claim": "Cobrar recompensa",
-    "challenge_claimed": "Recompensa cobrada"
+    "challenge_claimed": "Recompensa cobrada",
+    "load_error_title": "No pudimos cargar tu liga",
+    "load_error_body": "Revisa tu conexión. Tu liga sigue ahí: no hace falta crear otra."
   },
   "guia": {
     "kicker": "Guía",
