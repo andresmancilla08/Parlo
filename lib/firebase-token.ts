@@ -65,6 +65,21 @@ export const googleKeys: KeySource = async () => {
 /* ---------------- verificación ---------------- */
 
 /**
+ * Emulador de Auth (`pnpm dev:emu`): sus tokens no van firmados. Solo se aceptan fuera de producción, con el
+ * emulador activo y en un proyecto `demo-*` (que no existe en Google): nunca abre las rutas reales.
+ */
+export function emulatorMode(env: Record<string, string | undefined> = process.env): boolean {
+  return env.NODE_ENV !== "production" && !!env.FIREBASE_AUTH_EMULATOR_HOST && !!env.NEXT_PUBLIC_FIREBASE_PROJECT_ID?.startsWith("demo-");
+}
+export function verifyEmulatorToken(token: string, projectId: string): VerifiedToken {
+  const [, p] = token.split(".");
+  if (!p) throw new TokenError("malformed");
+  const claims = b64urlJson(p);
+  if (claims.aud !== projectId || typeof claims.sub !== "string" || !claims.sub) throw new TokenError("emulator");
+  return { uid: claims.sub, exp: Number(claims.exp) || 0 };
+}
+
+/**
  * Devuelve el uid si el token es un ID token válido del proyecto; lanza
  * `TokenError` si no. `nowS` y `keys` se inyectan para poder probarlo.
  */

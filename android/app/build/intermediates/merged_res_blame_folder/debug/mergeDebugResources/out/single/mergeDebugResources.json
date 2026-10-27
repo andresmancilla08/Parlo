@@ -1,0 +1,54 @@
+[
+    {
+        "merged": "co.parlo.app-debug-25:/mipmap-anydpi-v26_ic_launcher.xml.flat",
+        "source": "co.parlo.app-main-27:/mipmap-anydpi-v26/ic_launcher.xml"
+    },
+    {
+        "merged": "co.parlo.app-debug-25:/xml_filepaths.xml.flat",
+        "source": "co.parlo.app-main-27:/xml/filepaths.xml"
+    },
+    {
+        "merged": "co.parlo.app-debug-25:/mipmap-hdpi_ic_launcher_foreground.png.flat",
+        "source": "co.parlo.app-main-27:/mipmap-hdpi/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "co.parlo.app-debug-25:/mipmap-mdpi_ic_launcher_foreground.png.flat",
+        "source": "co.parlo.app-main-27:/mipmap-mdpi/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "co.parlo.app-debug-25:/mipmap-xxhdpi_ic_launcher_foreground.png.flat",
+        "source": "co.parlo.app-main-27:/mipmap-xxhdpi/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "co.parlo.app-debug-25:/drawable_splash.png.flat",
+        "source": "co.parlo.app-main-27:/drawable/splash.png"
+    },
+    {
+        "merged": "co.parlo.app-debug-25:/mipmap-xxxhdpi_ic_launcher_foreground.png.flat",
+        "source": "co.parlo.app-main-27:/mipmap-xxxhdpi/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "co.parlo.app-debug-25:/mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "co.parlo.app-main-27:/mipmap-xxxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "co.parlo.app-debug-25:/mipmap-xxhdpi_ic_launcher.png.flat",
+        "source": "co.parlo.app-main-27:/mipmap-xxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "co.parlo.app-debug-25:/mipmap-hdpi_ic_launcher.png.flat",
+        "source": "co.parlo.app-main-27:/mipmap-hdpi/ic_launcher.png"
+    },
+    {
+        "merged": "co.parlo.app-debug-25:/mipmap-xhdpi_ic_launcher_foreground.png.flat",
+        "source": "co.parlo.app-main-27:/mipmap-xhdpi/ic_launcher_foreground.png"
+    },
+    {
+        "merged": "co.parlo.app-debug-25:/mipmap-xhdpi_ic_launcher.png.flat",
+        "source": "co.parlo.app-main-27:/mipmap-xhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "co.parlo.app-debug-25:/mipmap-mdpi_ic_launcher.png.flat",
+        "source": "co.parlo.app-main-27:/mipmap-mdpi/ic_launcher.png"
+    }
+]

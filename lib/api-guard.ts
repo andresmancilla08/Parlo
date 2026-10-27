@@ -1,5 +1,5 @@
 import { allow } from "@/lib/rate-limit";
-import { TokenError, verifyIdToken } from "@/lib/firebase-token";
+import { emulatorMode, TokenError, verifyEmulatorToken, verifyIdToken } from "@/lib/firebase-token";
 
 // Puerta común de las rutas de IA (/api/coach, /api/translate, /api/tts).
 // Sin ella cualquiera con la URL podía gastar la cuota gratuita de Gemini.
@@ -50,7 +50,7 @@ export async function guard(
 
   let uid: string;
   try {
-    uid = (await verifyIdToken(token, projectId)).uid;
+    uid = emulatorMode() ? verifyEmulatorToken(token, projectId).uid : (await verifyIdToken(token, projectId)).uid;
   } catch (err) {
     if (err instanceof TokenError) {
       return Response.json({ error: "unauthorized" }, { status: 401 });

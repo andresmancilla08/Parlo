@@ -42,3 +42,9 @@ Ningún servicio tiene facturación activada y así debe seguir:
 - **Vercel Hobby**: sin método de pago; al pasarse de límites se limita, no se cobra. No subir a Pro.
 - **Firebase Spark**: verificado sin cuenta de facturación (`gcloud beta billing projects describe`). Nada de Cloud Functions ni Identity Platform: exigen Blaze.
 - **Gemini free tier**: si se agota la cuota devuelve error, no cobra. El límite de 15 peticiones/min del tutor existe para no quemarla.
+
+## Probar con sesión sin tocar producción (2026-10-27)
+- `pnpm dev:emu` (necesita Java 21: `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"`): Next en dev + emuladores de Auth (9099) y Firestore (8080) del proyecto `demo-parlo`. Se crea cualquier cuenta en `/registro` (p. ej. `prueba@parlo.test`, PIN 1234); se borra sola al cerrar.
+- El tutor, la voz y la traducción usan Gemini DE VERDAD (la clave de `.env.local`). Las rutas aceptan los tokens sin firma del emulador solo si `NODE_ENV != production`, hay `FIREBASE_AUTH_EMULATOR_HOST` y el proyecto empieza con `demo-` (`emulatorMode()`, probado en `firebase-token.check.ts`).
+- Capturas: `~/.claude/skills/visual-team/tools/shots.mjs` con un plan que se registra en `/registro` y navega (React: asignar `value` con el setter nativo + evento `input`).
+- Nunca crear cuentas de prueba en el Firebase de producción.

@@ -1,7 +1,7 @@
 // Check runnable. Correr: node --experimental-strip-types lib/firebase-token.check.ts
 // Firma tokens con un par RSA generado aquí mismo: no toca Google ni Firebase.
 import assert from "node:assert";
-import { TokenError, verifyIdToken, type Jwk } from "./firebase-token.ts";
+import { emulatorMode, TokenError, verifyIdToken, type Jwk } from "./firebase-token.ts";
 
 const PROJECT = "parlo-test";
 const NOW = 1_800_000_000;
@@ -82,3 +82,11 @@ await rejects("no.es.jwt", "malformado");
 await rejects("abc", "malformado");
 
 console.log("firebase-token: OK");
+
+// El modo emulador nunca se activa en producción ni con el proyecto real.
+const emu = { NODE_ENV: "development", FIREBASE_AUTH_EMULATOR_HOST: "127.0.0.1:9099", NEXT_PUBLIC_FIREBASE_PROJECT_ID: "demo-parlo" };
+if (!emulatorMode(emu)) throw new Error("emulador: debería activarse en dev con demo-*");
+if (emulatorMode({ ...emu, NODE_ENV: "production" })) throw new Error("emulador: activo en producción");
+if (emulatorMode({ ...emu, NEXT_PUBLIC_FIREBASE_PROJECT_ID: "parlo-real" })) throw new Error("emulador: activo con el proyecto real");
+if (emulatorMode({ ...emu, FIREBASE_AUTH_EMULATOR_HOST: undefined })) throw new Error("emulador: activo sin emulador");
+console.log("emulador: OK");

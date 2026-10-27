@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "dev:emu": "firebase emulators:exec --only auth,firestore --project demo-parlo \"NEXT_PUBLIC_FIREBASE_PROJECT_ID=demo-parlo NEXT_PUBLIC_FIREBASE_EMULATOR=1 next dev\""
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.107",
