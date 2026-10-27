@@ -2,11 +2,13 @@ import { generateObject, generateText, jsonSchema, type ModelMessage } from "ai"
 import { google } from "@ai-sdk/google";
 import { allow } from "@/lib/rate-limit";
 import { SCENARIOS, type CoachTurn } from "@/lib/coach";
+import { COACH_MAX_CHARS, COACH_MAX_MESSAGES } from "@/lib/coach-window";
 
 export const maxDuration = 30;
 
-const MAX_MESSAGES = 40;
-const MAX_CHARS = 10_000;
+// Los mismos números con los que el cliente recorta su ventana (`coachWindow`).
+const MAX_MESSAGES = COACH_MAX_MESSAGES;
+const MAX_CHARS = COACH_MAX_CHARS;
 const RATE = { store: new Map<string, number[]>(), limit: 20, windowMs: 60_000 };
 
 /**

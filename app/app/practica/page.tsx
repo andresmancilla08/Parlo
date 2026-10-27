@@ -27,6 +27,7 @@ import {
   type CoachTurn,
   type Scenario,
 } from "@/lib/coach";
+import { coachWindow } from "@/lib/coach-window";
 import { useProgress } from "@/lib/progress";
 import { firstPendingLesson, TOP_LEVEL, unitOfLesson } from "@/lib/curriculum";
 import { speak } from "@/lib/tts";
@@ -335,7 +336,9 @@ function Conversation({
       const res = await fetch("/api/coach", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ messages: next, scenario: scenarioId, level }),
+        // Sólo una ventana (escenario + últimos turnos): el servidor rechaza
+        // historiales largos y, sin recortar, la charla moría para siempre.
+        body: JSON.stringify({ messages: coachWindow(next), scenario: scenarioId, level }),
       });
       if (!res.ok) throw new Error(String(res.status));
       const data = (await res.json()) as CoachTurn;
