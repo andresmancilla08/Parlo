@@ -56,7 +56,11 @@ async function pdfToText(file: File): Promise<string> {
   ).toString();
 
   const data = new Uint8Array(await file.arrayBuffer());
-  const pdf = await pdfjs.getDocument({ data }).promise;
+  // Seguridad (CVE de ejecución de JS al abrir un PDF malicioso): se exige
+  // pdfjs-dist >= 6.2.108. En la serie 6 ya no existe `isEvalSupported`: el
+  // build no usa `eval` ni `new Function`, así que pasarlo no haría nada. Sólo
+  // se extrae texto: nada de XFA ni scripting.
+  const pdf = await pdfjs.getDocument({ data, enableXfa: false }).promise;
   const parts: string[] = [];
   for (let n = 1; n <= pdf.numPages; n++) {
     const page = await pdf.getPage(n);
