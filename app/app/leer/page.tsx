@@ -21,6 +21,7 @@ import { buildIndex, cleanWord, search, toSentences, toWords } from "@/lib/reade
 import { vocabCandidates } from "@/lib/reader/vocab";
 import { detectLang, targetLang } from "@/lib/reader/detect";
 import { RATE_SLOW, speak, speakAndWait, stopSpeaking } from "@/lib/tts";
+import { apiFetch } from "@/lib/api-client";
 import { useProgress } from "@/lib/progress";
 import { IconTurtle } from "@/components/ui/icon-turtle";
 import { SpeakControls } from "@/components/ui/speak-controls";
@@ -259,7 +260,7 @@ function Reader({ id }: { id: string }) {
     const missing = visible.filter((s) => !es[s.i]).slice(0, 20);
     if (missing.length === 0) return;
     try {
-      const res = await fetch("/api/translate", {
+      const res = await apiFetch("/api/translate", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ lines: missing.map((s) => s.text), from: lang }),
@@ -354,7 +355,7 @@ function Reader({ id }: { id: string }) {
           setVocabBusy(true);
           setVocabFailed(false);
           try {
-            const res = await fetch("/api/translate", {
+            const res = await apiFetch("/api/translate", {
               method: "POST",
               headers: { "content-type": "application/json" },
               body: JSON.stringify({ lines: picked.map((c) => c.word), from: lang }),
@@ -514,7 +515,7 @@ function WordCard({
     let cancelled = false;
     (async () => {
       try {
-        const res = await fetch("/api/translate", {
+        const res = await apiFetch("/api/translate", {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ mode: "word", word, context, from: lang }),

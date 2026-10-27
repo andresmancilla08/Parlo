@@ -220,4 +220,29 @@
 - **Qué:** `app/not-found.tsx` es de cliente y redirige a `/`; `proxy.ts` ya lleva a `/app` a quien tiene sesión.
 - **Por qué:** el `not-found` raíz forma parte del árbol de TODAS las páginas; con `cookies()` dentro, todas pasaban a dinámicas (ƒ) y la landing/login dejaban de servirse desde la CDN.
 - **Además:** `app/global-error.tsx` (fallos del layout raíz, sin providers: idioma y tema se leen a mano) y recarga automática UNA vez ante `ChunkLoadError` tras un despliegue (`lib/chunk-reload.ts`, marca en `sessionStorage` con ventana de 60 s).
+
+## Rutas de IA con sesión: ID token verificado con Web Crypto
+- **Qué:** `/api/coach`, `/api/translate` y `/api/tts` exigen el ID token de Firebase. `lib/firebase-token.ts` verifica el JWT RS256 contra las claves públicas de securetoken (caché según su `max-age`, tope 6 h) y comprueba `aud = projectId`, `iss = https://securetoken.google.com/<projectId>`, `exp`, `iat` y `sub`. `lib/api-guard.ts` encadena límite por IP → token → límite por uid. El cliente usa `apiFetch` (`lib/api-client.ts`).
+- **Por qué:** sin esto cualquiera con la URL gastaba la cuota gratuita de Gemini. El límite por uid evita que una cuenta reparta peticiones entre IPs.
+- **Descartado:** `firebase-admin` (pide service account, prohibida en la org, y pesa); `jose` (dependencia nueva para lo que Web Crypto ya hace en 40 líneas).
+- **Estado:** vigente. Cubierto por `lib/firebase-token.check.ts` (firma, payload manipulado, aud/iss ajenos, caducado, kid desconocido) con un par RSA generado en local.
+
+## /api/tts: token en `x-parlo-token`, audio por fetch + blob
+- **Qué:** la voz neural ya no se pide con `<audio src>`; `lib/tts.ts` hace `fetch` con la cabecera `x-parlo-token` y reproduce el blob en UN `<audio>` compartido.
+- **Por qué cabecera propia y no `Authorization`:** la CDN de Vercel no cachea peticiones que llevan `Authorization`. La URL sigue siendo la misma para la misma frase, así que la caché de la CDN y la del navegador siguen valiendo; un HIT de CDN se sirve sin verificar el token, y está bien: no gasta cuota.
+- **Descartado:** token firmado en la query (cambia la URL por usuario/hora y rompe la caché); cookie (Vercel no cachea con `set-cookie` y obliga a refrescarla cada hora).
+- **Estado:** vigente. Comprobar tras desplegar que la segunda petición de la misma frase da `x-vercel-cache: HIT`.
+
+## Coach: ventana del historial, pensamiento bajo y sin reintentos contra Gemini
+- **Ventana:** el cliente manda el primer mensaje (el escenario) + los últimos 16 turnos, recortados bajo 9.000 caracteres (`lib/coach-window.ts`); el servidor valida con las MISMAS constantes (40 mensajes / 10.000 caracteres). Antes se mandaba todo y a partir del mensaje 40 la charla fallaba para siempre.
+- **Pensamiento:** `providerOptions.google.thinkingConfig.thinkingLevel = "low"` (los Gemini 3+ usan `thinkingLevel`; `thinkingBudget` es de la serie 2.5, retirada para esta cuenta). `maxOutputTokens` 2048 porque el pensamiento cuenta en el tope.
+- **Cuota:** ante 429/503 de Gemini se responde `{error: "ai_busy", retryAfter}` con `retry-after` (plazo de `RetryInfo` si Google lo da) y `maxRetries: 0`. El límite propio responde `{error: "rate_limited"}`. El cliente distingue ambos, enseña la cuenta atrás y «Reintentar» reenvía el último turno una sola vez.
+- **Estado:** vigente.
+
+## Voz: el bloqueo de autoplay no es «servidor caído»
+- **Qué:** `NotAllowedError` de `audio.play()` ya no activa el cortafuegos de 5 min. Un `<audio>` compartido se «estrena» con un WAV de silencio en el primer toque (`unlockAudio()` en Enviar, micro y cualquier `speak`). Si aun así se bloquea, `speakAuto` devuelve `false` y la burbuja del tutor muestra «Toca para oír».
+- **Estado:** vigente.
+
+## Consejos del briefing en i18n; frases preparadas como datos bilingües
+- **Qué:** `tipEs` salió de `lib/coach.ts` a `practica.tip_<id>` (es/en). `prep[].es` se queda en el código: es la traducción al idioma del alumno (hispanohablante), contenido bilingüe como la guía, no texto de interfaz.
 - **Estado:** vigente.

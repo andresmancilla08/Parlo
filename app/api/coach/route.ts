@@ -1,13 +1,39 @@
 import { generateObject, generateText, jsonSchema, type ModelMessage } from "ai";
-import { google } from "@ai-sdk/google";
-import { allow } from "@/lib/rate-limit";
+import { google, type GoogleLanguageModelOptions } from "@ai-sdk/google";
+import { guard } from "@/lib/api-guard";
+import { busyResponse, upstreamBusy } from "@/lib/ai-errors";
 import { SCENARIOS, type CoachTurn } from "@/lib/coach";
+import { COACH_MAX_CHARS, COACH_MAX_MESSAGES } from "@/lib/coach-window";
+import type { Cefr } from "@/lib/curriculum/types";
 
 export const maxDuration = 30;
 
-const MAX_MESSAGES = 40;
-const MAX_CHARS = 10_000;
-const RATE = { store: new Map<string, number[]>(), limit: 20, windowMs: 60_000 };
+/**
+ * Alias y no versión fija: los IDs versionados desaparecen para cuentas nuevas
+ * (ver `errores-conocidos.md`). Hoy apunta a un Gemini 3 o posterior.
+ */
+const MODEL = "gemini-flash-latest";
+
+/**
+ * Pensamiento corto. Por defecto el modelo «piensa» bastante antes de
+ * contestar, y para corregir una frase y seguir la charla no hace falta: se
+ * nota en la latencia de cada turno. Los Gemini 3+ usan `thinkingLevel`
+ * (`thinkingBudget` es de la serie 2.5, que esta cuenta ya no puede usar).
+ */
+const THINKING = {
+  google: { thinkingConfig: { thinkingLevel: "low" } } satisfies GoogleLanguageModelOptions,
+};
+
+// Los mismos números con los que el cliente recorta su ventana (`coachWindow`).
+const MAX_MESSAGES = COACH_MAX_MESSAGES;
+const MAX_CHARS = COACH_MAX_CHARS;
+const CEFR: readonly Cefr[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
+const RATE = {
+  ip: { store: new Map<string, number[]>(), limit: 20, windowMs: 60_000 },
+  // Por cuenta: por debajo de las 15 RPM del free tier, para que una sola
+  // persona no deje sin tutor a las demás.
+  uid: { store: new Map<string, number[]>(), limit: 12, windowMs: 60_000 },
+};
 
 /**
  * El coach devuelve DOS cosas en una sola llamada: las correcciones de lo que
@@ -76,13 +102,8 @@ export async function POST(req: Request) {
     return Response.json({ error: "AI not configured" }, { status: 503 });
   }
 
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
-  if (!allow(ip, Date.now(), RATE)) {
-    return Response.json(
-      { error: "Too many requests" },
-      { status: 429, headers: { "retry-after": "60" } },
-    );
-  }
+  const gate = await guard(req, RATE);
+  if (gate instanceof Response) return gate;
 
   let body: { messages?: unknown; scenario?: unknown; level?: unknown };
   try {
@@ -114,33 +135,51 @@ export async function POST(req: Request) {
 
   const system = systemFor(
     typeof body.scenario === "string" ? body.scenario : undefined,
-    typeof body.level === "string" ? body.level : "A2",
+    // Va dentro del prompt: sólo se acepta un nivel real, nunca texto libre.
+    CEFR.find((l) => l === body.level) ?? "A2",
   );
 
   try {
     const { object } = await generateObject({
-      model: google("gemini-flash-latest"),
+      model: google(MODEL),
       schema: SCHEMA,
       system,
       messages: clean,
-      // 1400 y no menos: con 700 el JSON se cortaba y el texto suelto se
-      // colaba dentro de `reply` («Response*: …» truncado).
-      maxOutputTokens: 1400,
+      providerOptions: THINKING,
+      // Sin reintentos internos del SDK: ante 429/503 reintentar al momento
+      // sólo quema cuota; el reintento lo decide el usuario tras la espera.
+      maxRetries: 0,
+      // Los tokens de pensamiento CUENTAN aquí. Con el pensamiento por defecto
+      // 1400 era el mínimo (con 700 el JSON se cortaba y el texto suelto se
+      // colaba en `reply`). Con `thinkingLevel: low` el pensamiento es corto,
+      // y 2048 deja margen de sobra: el tope no cuesta nada si no se usa.
+      maxOutputTokens: 2048,
     });
     return Response.json(object satisfies CoachTurn);
   } catch (error) {
+    // Sin cuota o saturado: NO se reintenta con generateText (sería gastar
+    // dos veces lo que ya no hay). El cliente espera `retry-after` y reintenta.
+    const busy = upstreamBusy(error);
+    if (busy) {
+      console.warn("[coach] Gemini saturado o sin cuota:", busy);
+      return busyResponse(busy);
+    }
     console.error("[coach] structured output falló, se degrada a texto:", error);
     // Nunca romper la conversación por un JSON mal formado: se responde sin
     // correcciones antes que dejar al usuario colgado.
     try {
       const { text } = await generateText({
-        model: google("gemini-flash-latest"),
+        model: google(MODEL),
         system,
         messages: clean,
-        maxOutputTokens: 400,
+        providerOptions: THINKING,
+        maxRetries: 0,
+        maxOutputTokens: 800,
       });
       return Response.json({ corrections: [], reply: text } satisfies CoachTurn);
     } catch (fallbackError) {
+      const busyAgain = upstreamBusy(fallbackError);
+      if (busyAgain) return busyResponse(busyAgain);
       console.error("[coach] también falló el texto:", fallbackError);
       return Response.json({ error: "AI unavailable" }, { status: 502 });
     }

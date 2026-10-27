@@ -30,8 +30,7 @@ export type Scenario = {
    * Frases que de verdad hacen falta en esa situación, con su traducción.
    */
   prep: { en: string; es: string }[];
-  /** Consejo en español para no quedarse en blanco. */
-  tipEs: string;
+  // El consejo para no quedarse en blanco vive en i18n: `practica.tip_<id>`.
 };
 
 export const SCENARIOS: Scenario[] = [
@@ -46,8 +45,6 @@ export const SCENARIOS: Scenario[] = [
       { en: "To take away, please.", es: "Para llevar, por favor." },
       { en: "Anything else? — No, that's all, thanks.", es: "¿Algo más? — No, eso es todo, gracias." },
     ],
-    tipEs:
-      "Pide con «Can I have…?» o «I'd like…», nunca con «I want». Y si no entiendes al camarero, «Sorry, could you repeat that?» te salva.",
   },
   {
     id: "intro",
@@ -60,8 +57,6 @@ export const SCENARIOS: Scenario[] = [
       { en: "I'm from Colombia. And you?", es: "Soy de Colombia. ¿Y tú?" },
       { en: "I work as a designer.", es: "Trabajo de diseñadora." },
     ],
-    tipEs:
-      "Devuelve siempre la pregunta con «And you?»: en inglés la conversación se sostiene entre los dos, no la lleva uno solo.",
   },
   {
     id: "travel",
@@ -74,8 +69,6 @@ export const SCENARIOS: Scenario[] = [
       { en: "I have one bag to check in.", es: "Tengo una maleta para facturar." },
       { en: "Could I have a window seat?", es: "¿Me podría dar ventanilla?" },
     ],
-    tipEs:
-      "En el aeropuerto casi todo se resuelve con «Could I…?» y «Where is…?». Si te hablan rápido: «Sorry, I didn't catch that».",
   },
   {
     id: "doctor",
@@ -88,8 +81,6 @@ export const SCENARIOS: Scenario[] = [
       { en: "It hurts when I move.", es: "Me duele cuando me muevo." },
       { en: "I'm allergic to penicillin.", es: "Soy alérgico a la penicilina." },
     ],
-    tipEs:
-      "Para síntomas se usa «I've got» o «I have» + el síntoma, y «since» + cuándo empezó. Ojo: «I'm constipated» NO es estar resfriado.",
   },
   {
     id: "interview",
@@ -102,8 +93,6 @@ export const SCENARIOS: Scenario[] = [
       { en: "My greatest strength is that I'm organised.", es: "Mi mayor punto fuerte es que soy organizado." },
       { en: "I'm looking for a new challenge.", es: "Busco un nuevo reto." },
     ],
-    tipEs:
-      "Habla de tu experiencia con «I've been + -ing» y en positivo: di qué buscas, no de qué huyes.",
   },
   {
     id: "flat",
@@ -116,8 +105,6 @@ export const SCENARIOS: Scenario[] = [
       { en: "Are bills included?", es: "¿Están incluidos los gastos?" },
       { en: "Is there a supermarket nearby?", es: "¿Hay un supermercado cerca?" },
     ],
-    tipEs:
-      "Para preguntar precios, «how much»; para cantidades contables, «how many». Y «bills» son luz, agua y gas, no facturas del banco.",
   },
   {
     id: "negotiation",
@@ -132,8 +119,6 @@ export const SCENARIOS: Scenario[] = [
       { en: "Would you be flexible on the deadline?", es: "¿Tendrías flexibilidad con el plazo?" },
       { en: "I'd rather we agreed on a fixed fee.", es: "Preferiría que acordáramos una tarifa fija." },
     ],
-    tipEs:
-      "Negociar en inglés es suavizar: «that's a bit high» en vez de «that's expensive», y «would you be able to…?» en vez de «you must». Cuanto más rodeo, más firme puedes ser sin romper nada.",
   },
   {
     id: "debate",
@@ -148,8 +133,6 @@ export const SCENARIOS: Scenario[] = [
       { en: "I take your point, however the data suggest otherwise.", es: "Entiendo tu argumento, sin embargo los datos apuntan a lo contrario." },
       { en: "It may well be the case in large firms.", es: "Bien puede ser el caso en empresas grandes." },
     ],
-    tipEs:
-      "En un debate en inglés se concede antes de rebatir («I take your point, but…»). Ir de frente sin conceder suena agresivo y resta credibilidad, aunque tengas razón.",
   },
   {
     id: "board",
@@ -165,8 +148,6 @@ export const SCENARIOS: Scenario[] = [
       { en: "That's one way of looking at it.", es: "Es una forma de verlo." },
       { en: "It may well be worth parking that until we have the data.", es: "Bien puede merecer la pena aparcarlo hasta tener los datos." },
     ],
-    tipEs:
-      "Aquí no te van a decir que no: te lo van a insinuar. «Ambitious» suele ser «poco realista» y «I'm not entirely sure» es un no. Responde al mensaje de debajo, no al literal, y devuelve la pelota con la misma suavidad.",
   },
 ];
 

@@ -18,7 +18,8 @@ PWA web que enseña inglés a hispanohablantes con currículo por niveles + tuto
 - `app/` — rutas (App Router), `layout.tsx`, `globals.css`, `manifest.ts`, `sw.ts`, `register-pwa.tsx`.
 - `components/ui/` — componentes visuales reutilizables.
 - `components/lesson/` — `lesson-teach.tsx` (fase «Aprende») y `lesson-runner.tsx` (práctica).
-- `app/api/tts/` — voz neural (Gemini TTS) devuelta como WAV. GET a propósito: la misma frase es la misma URL y la cachea la CDN.
+- `app/api/tts/` — voz neural (Gemini TTS) devuelta como WAV. GET a propósito: la misma frase es la misma URL y la cachea la CDN. Exige sesión vía `x-parlo-token`.
+- `lib/api-guard.ts` + `lib/firebase-token.ts` — puerta de las rutas de IA (IP → ID token de Firebase → límite por uid). Cliente: `lib/api-client.ts` (`apiFetch`).
 - `lib/guide/` — sección de consulta: `irregulars.ts`, `phrasals.ts`, `false-friends.ts`, `regulars.ts` (datos bilingües) y `conjugate.ts` (motor puro de los 15 tiempos). `index.ts` cablea motor + tabla; los `.check.ts` corren con node y por eso `conjugate.ts` NO importa la tabla.
 - `lib/curriculum/` — `levels/*` (ejercicios base), `extra/*` (ejercicios añadidos, mapa `lessonId → Exercise[]`) y `teach/*` (teoría, mapa `lessonId → TeachStep[]`). `data.ts` los compone con `withExtra()`.
 - `lib/` — `firebase.ts` (init cliente), `utils.ts` (`cn`), `sfx.ts` (sonidos WebAudio), `dictation.ts` (voz→texto), `tts.ts` (texto→voz, normal y lenta), `pronunciation.ts` (puntuar lectura en voz alta), `league*.ts` (liga: `league-core` es la parte pura y `league` la de Firestore), `sync.ts` + `progress-merge.ts` (sync del progreso por transacción; la fusión es pura), `local-data.ts` (qué se borra del dispositivo al cerrar sesión), `chunk-reload.ts` (recarga ante `ChunkLoadError`).

@@ -1,6 +1,7 @@
 import { generateObject, jsonSchema } from "ai";
 import { google } from "@ai-sdk/google";
-import { allow } from "@/lib/rate-limit";
+import { guard } from "@/lib/api-guard";
+import { busyResponse, upstreamBusy } from "@/lib/ai-errors";
 
 // Traducción por frase y significado de palabras para el lector. Se genera en la
 // sesión del usuario y el cliente la cachea: aquí no se guarda su documento.
@@ -9,7 +10,10 @@ export const maxDuration = 30;
 
 const MAX_SENTENCES = 25;
 const MAX_CHARS = 5_000;
-const RATE = { store: new Map<string, number[]>(), limit: 40, windowMs: 60_000 };
+const RATE = {
+  ip: { store: new Map<string, number[]>(), limit: 40, windowMs: 60_000 },
+  uid: { store: new Map<string, number[]>(), limit: 30, windowMs: 60_000 },
+};
 
 const LINES = jsonSchema<{ lines: string[] }>({
   type: "object",
@@ -39,10 +43,8 @@ export async function POST(req: Request) {
   if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
     return Response.json({ error: "AI not configured" }, { status: 503 });
   }
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
-  if (!allow(ip, Date.now(), RATE)) {
-    return Response.json({ error: "Too many requests" }, { status: 429 });
-  }
+  const gate = await guard(req, RATE);
+  if (gate instanceof Response) return gate;
 
   let body: {
     mode?: unknown;
@@ -103,6 +105,8 @@ export async function POST(req: Request) {
     });
     return Response.json({ lines: clean.map((_, i) => object.lines[i] ?? "") });
   } catch (error) {
+    const busy = upstreamBusy(error);
+    if (busy) return busyResponse(busy);
     console.error("[translate] falló:", error);
     return Response.json({ error: "AI unavailable" }, { status: 502 });
   }

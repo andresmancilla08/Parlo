@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import {
   IconArrowRight,
+  IconBrandSafari,
   IconBriefcase,
   IconHeadphones,
   IconCoffee,
@@ -15,8 +16,11 @@ import {
   IconNews,
   IconPlane,
   IconPlayerStopFilled,
+  IconPresentationAnalytics,
+  IconRefresh,
   IconSend2,
   IconStethoscope,
+  IconVolume,
   IconUsers,
   type Icon,
 } from "@tabler/icons-react";
@@ -27,10 +31,12 @@ import {
   type CoachTurn,
   type Scenario,
 } from "@/lib/coach";
+import { coachWindow } from "@/lib/coach-window";
+import { apiFetch, NotSignedInError } from "@/lib/api-client";
 import { useProgress } from "@/lib/progress";
 import { firstPendingLesson, TOP_LEVEL, unitOfLesson } from "@/lib/curriculum";
-import { speak } from "@/lib/tts";
-import { useDictation } from "@/lib/dictation";
+import { speak, speakAuto, stopSpeaking, unlockAudio } from "@/lib/tts";
+import { dictationErrorKey, useDictation } from "@/lib/dictation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { BackButton } from "@/components/ui/back-button";
@@ -47,6 +53,7 @@ const SCENARIO_ICON: Record<string, Icon> = {
   flat: IconHome2,
   negotiation: IconContract,
   debate: IconNews,
+  board: IconPresentationAnalytics,
 };
 
 type Turn = { role: "user" | "assistant"; content: string };
@@ -160,7 +167,7 @@ function Briefing({
         <p className="font-display text-xs font-extrabold uppercase tracking-[0.13em] text-accent-ink">
           {t("practica.brief_tip")}
         </p>
-        <p className="mt-1 text-sm leading-relaxed text-accent-ink/90">{scenario.tipEs}</p>
+        <p className="mt-1 text-sm leading-relaxed text-accent-ink/90">{t(`practica.tip_${scenario.id}`)}</p>
       </div>
 
       <div className="mt-6">
@@ -270,6 +277,82 @@ function Picker({ onStart }: { onStart: (id: string | null) => void }) {
   );
 }
 
+/* ---------------- errores al enviar ---------------- */
+
+/**
+ * Por qué no llegó la respuesta. `busy` es Gemini sin cuota o saturado;
+ * `rate` es nuestro propio límite (demasiados mensajes seguidos). Los dos
+ * traen `until`: hasta entonces reintentar es tirar la petición.
+ */
+type SendError = {
+  kind: "busy" | "rate" | "network" | "session" | "generic";
+  until?: number;
+};
+
+function isSendError(e: unknown): e is SendError {
+  return typeof e === "object" && e !== null && "kind" in e;
+}
+
+async function sendErrorFrom(res: Response): Promise<SendError> {
+  if (res.status === 401) return { kind: "session" };
+  if (res.status !== 429 && res.status !== 503) return { kind: "generic" };
+  const body = (await res.json().catch(() => ({}))) as { error?: string; retryAfter?: number };
+  const seconds = Number(res.headers.get("retry-after")) || body.retryAfter || 30;
+  const until = Date.now() + seconds * 1000;
+  if (body.error === "rate_limited") return { kind: "rate", until };
+  if (body.error === "ai_busy") return { kind: "busy", until };
+  return { kind: "generic" };
+}
+
+function SendErrorNotice({ error, onRetry }: { error: SendError; onRetry: () => void }) {
+  const { t } = useTranslation();
+  const [now, setNow] = useState(() => Date.now());
+  const left = error.until ? Math.max(0, Math.ceil((error.until - now) / 1000)) : 0;
+
+  // Cuenta atrás: se refresca cada segundo sólo mientras queda espera.
+  useEffect(() => {
+    if (!error.until) return;
+    const id = setInterval(() => {
+      const ts = Date.now();
+      setNow(ts);
+      if (ts >= error.until!) clearInterval(id);
+    }, 1000);
+    return () => clearInterval(id);
+  }, [error.until]);
+
+  const message =
+    error.kind === "busy"
+      ? left > 0
+        ? t("practica.err_busy", { count: left })
+        : t("practica.err_busy_ready")
+      : error.kind === "rate"
+        ? left > 0
+          ? t("practica.err_rate", { count: left })
+          : t("practica.err_busy_ready")
+        : t(`practica.err_${error.kind}`);
+
+  return (
+    <div
+      role="alert"
+      className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border border-danger/30 bg-card px-4 py-3"
+    >
+      <p className="min-w-0 flex-1 text-sm font-bold text-danger-ink">{message}</p>
+      {error.kind !== "session" && (
+        <Button
+          variant="secondary"
+          size="sm"
+          className="shrink-0"
+          disabled={left > 0}
+          onClick={onRetry}
+        >
+          <IconRefresh className="size-4" />
+          {left > 0 ? t("practica.retry_in", { count: left }) : t("common.retry")}
+        </Button>
+      )}
+    </div>
+  );
+}
+
 /* ---------------- conversación con puerta de corrección ---------------- */
 
 function Conversation({
@@ -290,11 +373,18 @@ function Conversation({
   );
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<SendError | null>(null);
   /** Correcciones pendientes de leer: bloquean el avance de la charla. */
   const [gate, setGate] = useState<{ corrections: CoachCorrection[]; reply: string } | null>(null);
   const [lastSent, setLastSent] = useState("");
   const listEnd = useRef<HTMLDivElement>(null);
+  const gateCard = useRef<HTMLDivElement>(null);
+
+  // La corrección bloquea la charla: el foco va a ella para que el teclado y
+  // el lector de pantalla la encuentren sin buscarla.
+  useEffect(() => {
+    if (gate) gateCard.current?.focus();
+  }, [gate]);
 
   // Dictado: lo que ya estaba escrito se conserva y el habla se añade detrás.
   const dictationBase = useRef("");
@@ -304,11 +394,21 @@ function Conversation({
     if (final) dictationBase.current = merged;
   });
 
+  // Al salir de la conversación se calla el tutor: si no, la frase seguía
+  // sonando en la pantalla siguiente.
+  useEffect(() => stopSpeaking, []);
+
   // La respuesta de la IA se lee sola la PRIMERA vez (después, con el botón).
   const spoken = useRef(0);
+  /** Turno cuya lectura automática bloqueó el navegador. */
+  const [muted, setMuted] = useState<number | null>(null);
   useEffect(() => {
     const last = turns.at(-1);
-    if (turns.length > spoken.current && last?.role === "assistant") speak(last.content);
+    if (turns.length > spoken.current && last?.role === "assistant") {
+      const index = turns.length - 1;
+      // Si el navegador exige un toque (iOS), la burbuja ofrece «Toca para oír».
+      speakAuto(last.content).then((played) => setMuted(played ? null : index));
+    }
     spoken.current = turns.length;
   }, [turns]);
 
@@ -320,24 +420,31 @@ function Conversation({
     const clean = text.trim();
     if (!clean || busy) return;
     // Se corta el micro: si no, el reconocimiento se oiría a sí mismo cuando
-    // la respuesta se lea en voz alta.
-    mic.stop();
+    // la respuesta se lea en voz alta. `abort` y no `stop`: con `stop` aún
+    // llegaba el resultado final y reescribía en el cuadro la frase enviada.
+    mic.abort();
+    // Este toque «estrena» el audio: la respuesta llega tras un await y en
+    // iOS ya no contaría como gesto del usuario.
+    unlockAudio();
+    setMuted(null);
     dictationBase.current = "";
     const next: Turn[] = [...turns, { role: "user", content: clean }];
     setTurns(next);
     setInput("");
     setLastSent(clean);
     setBusy(true);
-    setError(false);
+    setError(null);
     noteTutorMessage();
 
     try {
-      const res = await fetch("/api/coach", {
+      const res = await apiFetch("/api/coach", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ messages: next, scenario: scenarioId, level }),
+        // Sólo una ventana (escenario + últimos turnos): el servidor rechaza
+        // historiales largos y, sin recortar, la charla moría para siempre.
+        body: JSON.stringify({ messages: coachWindow(next), scenario: scenarioId, level }),
       });
-      if (!res.ok) throw new Error(String(res.status));
+      if (!res.ok) throw await sendErrorFrom(res);
       const data = (await res.json()) as CoachTurn;
 
       if (data.corrections?.length) {
@@ -346,9 +453,17 @@ function Conversation({
       } else {
         setTurns([...next, { role: "assistant", content: data.reply }]);
       }
-    } catch {
-      setError(true);
-      setTurns(turns); // se devuelve el mensaje al usuario para reintentar
+    } catch (err) {
+      setError(
+        isSendError(err)
+          ? err
+          : err instanceof NotSignedInError
+            ? { kind: "session" }
+            : // `fetch` sólo lanza sin respuesta: red caída o servidor inalcanzable.
+              { kind: "network" },
+      );
+      // Se quita el turno enviado: «Reintentar» lo vuelve a mandar una sola vez.
+      setTurns(turns);
       setInput(clean);
     } finally {
       setBusy(false);
@@ -384,7 +499,8 @@ function Conversation({
         <BackButton onClick={onExit} className="shrink-0 px-3 py-1.5 text-xs" />
       </header>
 
-      <div className="mt-4 flex-1 space-y-3">
+      {/* Los turnos nuevos (y «Pensando…») se anuncian al lector de pantalla. */}
+      <div className="mt-4 flex-1 space-y-3" aria-live="polite" aria-relevant="additions text">
         {/* Charla libre: sin escenario no hay primer turno, y una pantalla en
             blanco no invita a hablar. Tres arranques y a andar. */}
         {turns.length === 0 && (
@@ -422,19 +538,38 @@ function Conversation({
             >
               <p className="text-sm font-semibold leading-relaxed">{turn.content}</p>
               {turn.role === "assistant" && (
-                <SpeakControls text={turn.content} size="sm" className="mt-1.5" />
+                <>
+                  {muted === i && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMuted(null);
+                        speak(turn.content);
+                      }}
+                      className="mt-2 inline-flex items-center gap-1.5 rounded-pill bg-primary px-3 py-1.5 text-xs font-extrabold text-primary-fg active:scale-[0.98]"
+                    >
+                      <IconVolume className="size-4" />
+                      {t("practica.tap_to_hear")}
+                    </button>
+                  )}
+                  <SpeakControls text={turn.content} size="sm" className="mt-1.5" />
+                </>
               )}
             </div>
           </div>
         ))}
 
         {busy && (
-          <p className="text-sm font-bold text-muted">{t("practica.thinking")}</p>
-        )}
-        {error && (
-          <p role="alert" className="text-sm font-bold text-danger-ink">
-            {t("practica.error")}
+          <p role="status" className="text-sm font-bold text-muted">
+            {t("practica.thinking")}
           </p>
+        )}
+        {error && !busy && (
+          <SendErrorNotice
+            error={error}
+            onRetry={() => send(lastSent)}
+            key={`${error.kind}-${error.until ?? 0}`}
+          />
         )}
         <div ref={listEnd} />
       </div>
@@ -447,9 +582,16 @@ function Conversation({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
             transition={spring}
-            className="sticky bottom-0 mt-3 rounded-[22px] border-2 border-primary bg-card p-4 shadow-xl shadow-primary/10"
+            ref={gateCard}
+            tabIndex={-1}
+            role="region"
+            aria-labelledby="fix-kicker"
+            className="sticky bottom-0 mt-3 rounded-[22px] border-2 border-primary bg-card p-4 shadow-xl shadow-primary/10 outline-none"
           >
-            <p className="font-display text-xs font-extrabold uppercase tracking-[0.13em] text-primary-ink">
+            <p
+              id="fix-kicker"
+              className="font-display text-xs font-extrabold uppercase tracking-[0.13em] text-primary-ink"
+            >
               {t("practica.fix_kicker")}
             </p>
             <div className="mt-3 space-y-3">
@@ -508,7 +650,13 @@ function Conversation({
           )}
           {mic.error && (
             <p role="alert" className="mb-1.5 text-xs font-bold text-danger-ink">
-              {t(mic.error === "denied" ? "practica.mic_denied" : "practica.mic_failed")}
+              {t(dictationErrorKey(mic.error))}
+            </p>
+          )}
+          {mic.iosStandalone && (
+            <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-muted">
+              <IconBrandSafari className="size-4 shrink-0" />
+              {t("practica.mic_ios_pwa")}
             </p>
           )}
           <div className="flex gap-2">
@@ -527,7 +675,12 @@ function Conversation({
               type="button"
               whileTap={{ scale: 0.95 }}
               onClick={() => {
-                if (!mic.listening) dictationBase.current = input.trim();
+                if (!mic.listening) {
+                  // Si el tutor sigue hablando, el micro lo transcribiría.
+                  stopSpeaking();
+                  unlockAudio();
+                  dictationBase.current = input.trim();
+                }
                 mic.toggle();
               }}
               disabled={busy}
