@@ -9,20 +9,20 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@ai-sdk/google": "^4.0.23",
-    "@ai-sdk/react": "^4.0.40",
+    "@ai-sdk/google": "^4.0.107",
+    "@ai-sdk/react": "^4.0.159",
     "@tabler/icons-react": "^3.45.0",
-    "ai": "^7.0.37",
+    "ai": "^7.0.155",
     "clsx": "^2.1.1",
     "fflate": "^0.8.3",
     "firebase": "^12.16.0",
     "framer-motion": "^12.42.2",
     "i18next": "^26.3.6",
     "mammoth": "^1.12.0",
-    "next": "16.2.11",
-    "pdfjs-dist": "^6.1.200",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
+    "next": "16.4.3",
+    "pdfjs-dist": "^6.4.299",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "react-i18next": "^17.0.11",
     "tailwind-merge": "^3.6.0",
     "web-push": "^3.6.7",
@@ -37,17 +37,21 @@
     "@types/react-dom": "^19",
     "@types/web-push": "^3.6.4",
     "eslint": "^9",
-    "eslint-config-next": "16.2.11",
+    "eslint-config-next": "16.4.3",
     "serwist": "^9.5.12",
     "tailwindcss": "^4",
     "typescript": "^5"
   },
   "pnpm": {
     "overrides": {
-      "postcss": ">=8.5.18",
-      "sharp": ">=0.35.0",
+      "postcss": ">=8.5.23",
+      "sharp": ">=0.35.5",
       "brace-expansion@1": "1.1.12",
-      "brace-expansion@2": ">=2.1.2"
+      "brace-expansion@2": ">=2.1.2",
+      "@xmldom/xmldom": "^0.8.15",
+      "nanoid@3": "^3.3.18",
+      "source-map-js": "^1.2.2",
+      "zod@4": "^4.6.6"
     }
   }
 }

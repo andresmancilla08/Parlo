@@ -1,10 +1,18 @@
 "use client";
 
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { IconAlertTriangle } from "@tabler/icons-react";
+import { reloadOnceForChunkError } from "@/lib/chunk-reload";
 
-export default function Error({ reset }: { error: Error; reset: () => void }) {
+export default function Error({ error, retry }: { error: unknown; retry: () => void }) {
   const { t } = useTranslation();
+
+  // Tras un despliegue: el trozo de JS ya no existe → recargar (una sola vez).
+  useEffect(() => {
+    reloadOnceForChunkError(error);
+  }, [error]);
+
   return (
     <div className="grid min-h-dvh place-items-center px-6 text-center">
       <div>
@@ -18,7 +26,7 @@ export default function Error({ reset }: { error: Error; reset: () => void }) {
           {t("error.body")}
         </p>
         <button
-          onClick={reset}
+          onClick={retry}
           className="mt-7 rounded-pill bg-primary px-6 py-3 font-display font-bold text-primary-fg shadow-lg shadow-primary/25"
         >
           {t("common.retry")}

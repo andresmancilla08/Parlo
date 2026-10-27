@@ -91,8 +91,20 @@
 
 ## Progreso: local-first con sync a Firestore
 - **Qué:** el store sigue siendo la fuente de trabajo (zustand persist en localStorage). Al iniciar sesión, `lib/sync.ts` fusiona local↔`users/{uid}` y escribe con debounce de 1,5 s.
-- **Cómo fusiona:** gana lo más avanzado (máximo de xp/gemas/racha/contadores, unión de lecciones, máximo de estrellas, y por carta SRS la de `due` más reciente). Nunca se pierde lo hecho sin red.
+- **Cómo fusiona (primera vez, sin base común):** gana lo más avanzado (máximo de xp/gemas/contadores, unión de lecciones, máximo de estrellas, por carta SRS la de `due` más reciente). La racha la manda quien cumplió el objetivo más reciente (`lastGoalDay`), no la más larga. Lógica pura en `lib/progress-merge.ts`, cubierta por `progress-merge.check.ts`.
+- **Escrituras siguientes: transacción + fusión a tres bandas (2026-10-27).** Cada escritura es `runTransaction` (leer remoto → `rebase(base, local, remoto)` → escribir). Los contadores que suben y bajan (xp, gemas, escudos, mensajes, escuchas) se aplican como diferencia `remoto + (local − base)`, donde `base` es lo último que se supo del remoto; lo demás sólo crece y usa `merge`. El resultado vuelve al store sin disparar otra escritura.
+- **Por qué:** antes cada cambio hacía `setDoc({progress: local}, {merge:true})`, que reemplaza el objeto entero: el último dispositivo en escribir borraba lo que el otro había hecho. Y con `max` a secas, gastar gemas se deshacía al fusionar.
+- **Nada se escribe antes de la fusión inicial.** Si falla (sin red), se reintenta al volver la red (`online`) o la pestaña; mientras, una escritura local no puede pisar un remoto más avanzado.
+- **Descartado:** `increment()` por campo (no sirve para conjuntos ni cartas y obliga a llevar un diario de operaciones); escuchar el documento con `onSnapshot` (lecturas continuas para un dato que sólo cambia cuando se estudia).
+- **Límite conocido:** si una transacción se confirma pero la respuesta se pierde, la siguiente reaplicará su diferencia (contadores contados dos veces). Firestore lo hace muy improbable; se acepta.
 - **Estado:** vigente.
+
+## El progreso local tiene dueño; cerrar sesión limpia el dispositivo
+- **Qué:** el store guarda `owner` (uid, persistido pero NO sincronizado). Al entrar, lo local sólo se fusiona si es de esa cuenta, anónimo (`owner` nulo: datos de antes de este cambio) o está vacío; si es de otra cuenta se descarta (`ownerDecision`). `logout` (`lib/auth.ts`) escribe lo pendiente, da de baja el push de ESTE navegador, cierra sesión y borra lo local de la cuenta (`lib/local-data.ts`).
+- **Qué se borra y qué no:** se borran `parlo-progress`, `parlo-league`, `parlo-doc-es:*` (traducciones del lector), el IndexedDB `parlo-reader`, `parlo-verify-sent` y `parlo-verify-hidden`. Se conservan las preferencias del dispositivo: tema, idioma, sonido, voz, barra lateral y el aviso de instalar.
+- **Push:** se desuscribe el navegador siempre; el campo `reminder` del documento sólo se borra si su `endpoint` es el de este dispositivo (si el aviso apunta a otro móvil del usuario, se respeta). Tope de 4 s: cerrar sesión nunca se queda colgado.
+- **Por qué:** en un dispositivo compartido, la cuenta que entraba después heredaba —y subía a su documento— el progreso, la liga y los documentos privados de la anterior.
+- **Estado:** vigente. Los datos locales de ANTES del cambio no tienen dueño y se fusionan con la primera cuenta que entre (como antes): no hay forma de saber de quién eran.
 
 ## Enseñar SIEMPRE antes de evaluar (fase «Aprende»)
 - **Qué:** cada lección abre con teoría (`TeachStep[]`: idea · tabla · error típico · ejemplos con audio) y sólo después entran los ejercicios. `progress.taught` recuerda la teoría vista: la segunda vez se entra directo a practicar, con la bombilla de la barra superior para consultarla sin perder el ejercicio en curso.
@@ -153,6 +165,9 @@
 - **Por qué el mapa `members` y no una subcolección:** con un mapa, la regla `members.diff(...).affectedKeys().hasOnly([uid])` deja que cada quien se añada o se quite **solo a sí mismo** en una sola operación, sin poder meter ni echar a nadie.
 - **Por qué un código y no invitaciones:** invitar por correo obligaría a compartir correos, justo lo que se quiere evitar. El código no es adivinable en la práctica (29⁶ con alfabeto sin vocales ni caracteres ambiguos) y `leagueCodes` sólo permite `get`, nunca `list`.
 - **El alias se valida** (`league-core.ts`) para que nadie meta un correo o un teléfono sin darse cuenta.
+- **Las reglas validan la forma (2026-10-27):** cada entrada de `members` es exactamente `{alias (2-16), joinedAt (int)}`; `leagueCodes` sólo lo puede crear el dueño de una liga que ya existe y que lleva ese mismo código; `scores` sólo admite `alias/week/xp/updatedAt` y `xp ≤ 200.000`.
+- **Tope de XP semanal = 200.000 (`MAX_WEEKLY_XP`).** Lo que más XP da por minuto es repetir una lección: 8 ejercicios × 10 XP = 80 XP en ≥ ~1 min → ≤ 4.800 XP/h. 200.000 ≈ 42 h/semana a ese ritmo máximo sin fallar (~6 h diarias): ninguna semana real llega. No es anticheat (el cliente decide su XP), es para que nadie rompa el marcador de sus amigos con un número absurdo. `pushScore` recorta al tope y `league.check.ts` falla si el número de las reglas y el del código divergen.
+- **Fallo al cargar ≠ no estar en una liga:** si `fetchLeague` falla, la pantalla muestra «No pudimos cargar tu liga» con Reintentar, nunca el alta (ofrecer crear otra a quien ya está en una le hacía duplicarla).
 - **Estado:** vigente. Cubierto por `lib/league.check.ts` y probado contra Firestore real.
 
 ## EPUB con fflate y el spine, no por nombre de fichero
@@ -194,3 +209,15 @@
 - **Cómo se distinguen los errores:** por el código de Firestore — `not-found` (liga borrada, código huérfano) y `permission-denied` (el único rechazo posible en un alta bien formada es el tope de miembros).
 - **Lección:** esto no se ve con una sola cuenta. El harness de capturas ahora sabe abrir **dos contextos de navegador aislados** (`cdp-multi.mjs`) precisamente para esto.
 - **Estado:** vigente. Probado con dos cuentas reales: B entra por código, adelanta a A y A ve el aviso.
+
+## Dependencias con CVE: subir y fijar con overrides (2026-10-27)
+- **Qué:** `next`/`eslint-config-next` 16.4.3, `pdfjs-dist` 6.4.x, `ai`/`@ai-sdk/*`/`react`/`react-dom` a su último parche, y `pnpm.overrides` para transitivas (`postcss`, `sharp`, `@xmldom/xmldom`, `nanoid@3`, `source-map-js`, `zod@4`).
+- **Por qué:** `pnpm audit --prod` daba 30 avisos (5 críticos de RCE en Next). Tras subir quedan 2 de `@grpc/grpc-js`, que Firestore fija en `~1.9.0` y sólo se usa en Node (el cliente web va por HTTP/WebChannel): no se puede subir sin que lo haga Firebase.
+- **pdfjs:** en la serie 6 ya no existe `isEvalSupported` (el build no usa `eval` ni `new Function`), así que no se pasa; se exige la versión parcheada y `enableXfa: false`.
+- **Estado:** vigente. Revisar `pnpm audit --prod` antes de cada despliegue.
+
+## Rutas estáticas: nada de APIs dinámicas en `not-found` ni en el layout raíz
+- **Qué:** `app/not-found.tsx` es de cliente y redirige a `/`; `proxy.ts` ya lleva a `/app` a quien tiene sesión.
+- **Por qué:** el `not-found` raíz forma parte del árbol de TODAS las páginas; con `cookies()` dentro, todas pasaban a dinámicas (ƒ) y la landing/login dejaban de servirse desde la CDN.
+- **Además:** `app/global-error.tsx` (fallos del layout raíz, sin providers: idioma y tema se leen a mano) y recarga automática UNA vez ante `ChunkLoadError` tras un despliegue (`lib/chunk-reload.ts`, marca en `sessionStorage` con ventana de 60 s).
+- **Estado:** vigente.

@@ -15,7 +15,9 @@ import {
   overtakenBy,
   LEAGUE_REWARD,
   EVERYONE_XP,
+  MAX_WEEKLY_XP,
 } from "./league-core.ts";
+import { readFileSync } from "node:fs";
 import { weekDays, weekKey } from "./gamification.ts";
 
 // --- alias: es lo ÚNICO público, así que se valida de verdad ---
@@ -171,3 +173,15 @@ assert.deepEqual(
 );
 
 console.log("league.check ✓ reto compartido y adelantamientos");
+
+// --- tope de XP semanal: el mismo número en el código y en las reglas ---
+const rules = readFileSync(new URL("../firestore.rules", import.meta.url), "utf8");
+assert.ok(
+  rules.includes(`request.resource.data.xp <= ${MAX_WEEKLY_XP}`),
+  "firestore.rules debe usar el mismo tope que MAX_WEEKLY_XP",
+);
+// Holgado: más de 5 h diarias a 80 XP/min (la lección más rápida posible).
+assert.ok(MAX_WEEKLY_XP >= 80 * 60 * 5 * 7);
+assert.ok(validateAlias("a".repeat(16)) === null && validateAlias("a".repeat(17)) === "long", "mismos límites que las reglas (2-16)");
+
+console.log("league.check ✓ tope semanal alineado con las reglas");

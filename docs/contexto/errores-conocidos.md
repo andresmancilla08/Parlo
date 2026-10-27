@@ -94,6 +94,7 @@
 
 ## Las reglas de la liga se prueban con la app, no con asserts
 - **Cómo:** `lib/league.check.ts` cubre alias, códigos, XP semanal y ranking (lógica pura). Lo que las reglas permiten o no se comprueba usando la app con el usuario ficticio: crear liga, ver el marcador y salir.
+- **Emulador:** `docs/pruebas/reglas.test.mjs` prueba las reglas de la liga y del progreso con `@firebase/rules-unit-testing` (proyecto `demo-parlo`, nunca producción). Instrucciones en su cabecera. Ojo: `firebase-tools` y el emulador de Firestore exigen **Java 21+**; con el `openjdk@17` de Homebrew no arrancan (`UnsupportedClassVersionError`, class file 65).
 - **Ojo:** tras tocar `firestore.rules` hay que `firebase deploy --only firestore:rules` o la app seguirá contra las reglas viejas.
 
 ## En `/app` el que scrollea es `<main>`, no el documento
@@ -111,3 +112,28 @@
 - **Síntoma:** todo parece funcionar, pero entrar por código falla en producción.
 - **Causa real:** las reglas distinguen miembro de no miembro. Con una sola cuenta (la que crea la liga) nunca se ejecuta el camino del que entra.
 - **Solución:** `cdp-multi.mjs` abre dos contextos de navegador aislados (cada uno con su `localStorage` y su sesión de Firebase) y los conduce por CDP con `sessionId`. Es la única forma de ver el adelantamiento y el alta por código.
+
+## Todas las rutas salían dinámicas (ƒ) en el build
+- **Síntoma:** `pnpm build` marca `/`, `/login` y todas las de `/app` como ƒ aunque no lean nada del servidor.
+- **Causa real:** `app/not-found.tsx` usaba `cookies()`. El not-found raíz forma parte del árbol de cada página, así que una API dinámica ahí contagia a todas.
+- **Solución:** el not-found es de cliente y redirige a `/` (el proxy hace el resto). No usar `cookies()`/`headers()` en el layout raíz ni en el not-found raíz.
+
+## «ChunkLoadError» / «Loading chunk N failed» tras desplegar
+- **Síntoma:** una pestaña abierta o la PWA instalada muestra «Algo salió mal» justo después de un despliegue.
+- **Causa real:** el JS de la versión vieja pide un trozo que ya no existe en la nueva.
+- **Solución:** `error.tsx` y `global-error.tsx` recargan UNA vez (`lib/chunk-reload.ts`); la marca en `sessionStorage` evita el bucle si el fallo es otro (sin red de verdad). Parece raro, pero es a propósito.
+
+## `permission-denied` al entrar en una liga se muestra como «llena»
+- **Síntoma:** al entrar por código sale «la liga está llena» y no lo está.
+- **Causa real:** quien aún no es miembro no puede leer la liga, así que el único dato es el código del error. `joinLeague` traduce `permission-denied` a `full` porque, si el alias llega validado, el tope es lo único que queda por rechazar. Si los límites del alias en `validateAlias` y en `firestore.rules` (2-16) se desalinean, el rechazo por alias se verá como «llena».
+- **Solución:** cambiar los límites del alias en los dos sitios a la vez (`league.check.ts` comprueba los de `validateAlias`; el de las reglas va comentado junto a `validMember`).
+
+## El progreso «salta» tras guardar
+- **Síntoma:** al terminar una lección, la XP o las gemas cambian unos segundos después.
+- **Causa real:** no es un bug: tras cada escritura, el resultado de la transacción vuelve al store y trae lo que se hizo en OTRO dispositivo del mismo usuario.
+- **Solución:** ninguna; es el sync funcionando (ver «Progreso: local-first» en `decisiones.md`).
+
+## `pdfjs-dist` 6 no tiene `isEvalSupported`
+- **Síntoma:** recomendaciones de seguridad antiguas piden `getDocument({ isEvalSupported: false })`.
+- **Causa real:** la opción se eliminó; el build de la serie 6 no usa `eval` ni `new Function` (comprobado con grep en `build/pdf*.mjs`).
+- **Solución:** la mitigación es la versión (`>= 6.2.108`); `lib/reader/parse.ts` pasa sólo `enableXfa: false`.
