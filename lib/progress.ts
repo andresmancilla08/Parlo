@@ -148,6 +148,12 @@ type ProgressState = {
   startLevel: Cefr | null; // nivel de arranque según el test de nivel
   skipped: string[]; // superadas en el test, no practicadas
   taught: string[]; // teoría ya vista (fase «Aprende»)
+  /**
+   * Cuenta dueña de este progreso local (null = anónimo o anterior a guardar
+   * el dueño). Se persiste pero NO se sincroniza: sirve para no fusionar el
+   * progreso de una cuenta con el de otra que entre en el mismo dispositivo.
+   */
+  owner: string | null;
   hydrated: boolean;
 
   snapshot: () => ProgressSnapshot;
@@ -171,6 +177,7 @@ type ProgressState = {
   claimLeague: (key: string, reward: number) => void;
   buyShield: () => void;
   reset: () => void;
+  setOwner: (uid: string) => void;
   setHydrated: () => void;
 };
 
@@ -199,6 +206,7 @@ export const useProgress = create<ProgressState>()(
   persist(
     (set, get) => ({
       ...initial,
+      owner: null,
       hydrated: false,
 
       snapshot: () => {
@@ -389,14 +397,16 @@ export const useProgress = create<ProgressState>()(
             : { gems: s.gems - SHIELD_COST, shields: s.shields + 1 },
         ),
 
-      reset: () => set({ ...initial }),
+      reset: () => set({ ...initial, owner: null }),
+
+      setOwner: (uid) => set({ owner: uid }),
 
       setHydrated: () => set({ hydrated: true }),
     }),
     {
       name: "parlo-progress",
       storage: createJSONStorage(() => localStorage),
-      partialize: (s) => s.snapshot(),
+      partialize: (s) => ({ ...s.snapshot(), owner: s.owner }),
       onRehydrateStorage: () => (state) => state?.setHydrated(),
     },
   ),

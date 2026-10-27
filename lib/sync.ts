@@ -5,6 +5,7 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db, firebaseReady } from "@/lib/firebase";
 import { DEFAULT_GOAL_XP } from "@/lib/gamification";
 import { useProgress, type ProgressSnapshot } from "@/lib/progress";
+import { merge, ownerDecision } from "@/lib/progress-merge";
 
 // Sincroniza el progreso local (zustand persist) con `users/{uid}` en Firestore.
 // Local-first: la app funciona sin red; Firestore es la copia entre dispositivos.
@@ -39,63 +40,6 @@ function sanitize(s: Partial<ProgressSnapshot> | undefined): ProgressSnapshot {
   };
 }
 
-/** Gana el progreso MÁS avanzado: nunca se pierde lo hecho offline. */
-function merge(local: ProgressSnapshot, remote: ProgressSnapshot): ProgressSnapshot {
-  const cards = { ...remote.cards };
-  for (const [key, card] of Object.entries(local.cards)) {
-    const other = cards[key];
-    // La carta más reciente es la que se repasó después (mayor `due`).
-    if (!other || card.due > other.due) cards[key] = card;
-  }
-  const stars: Record<string, number> = { ...remote.stars };
-  for (const [id, n] of Object.entries(local.stars)) {
-    stars[id] = Math.max(n, stars[id] ?? 0);
-  }
-  // Estadísticas por día: se queda el mejor valor de cada métrica en cada día.
-  const days = { ...remote.days };
-  for (const [key, day] of Object.entries(local.days ?? {})) {
-    const other = days[key];
-    days[key] = other
-      ? {
-          xp: Math.max(day.xp, other.xp),
-          lessons: Math.max(day.lessons, other.lessons),
-          correct: Math.max(day.correct, other.correct),
-          reviews: Math.max(day.reviews, other.reviews),
-          tutor: Math.max(day.tutor, other.tutor),
-          listens: Math.max(day.listens, other.listens),
-        }
-      : day;
-  }
-
-  return {
-    xp: Math.max(local.xp, remote.xp),
-    gems: Math.max(local.gems, remote.gems),
-    streak: Math.max(local.streak, remote.streak),
-    days,
-    // El objetivo lo manda este dispositivo (es lo último que tocó el usuario).
-    goalXp: local.goalXp,
-    claims: { ...remote.claims, ...local.claims },
-    shields: Math.max(local.shields, remote.shields ?? 0),
-    lastGoalDay: maxDay(local.lastGoalDay, remote.lastGoalDay),
-    // El test de nivel se hace una vez: vale el que exista (local manda).
-    startLevel: local.startLevel ?? remote.startLevel,
-    skipped: [...new Set([...local.skipped, ...remote.skipped])],
-    taught: [...new Set([...local.taught, ...remote.taught])],
-    saved: { ...remote.saved, ...local.saved },
-    lastActiveDay: maxDay(local.lastActiveDay, remote.lastActiveDay),
-    completed: [...new Set([...local.completed, ...remote.completed])],
-    stars,
-    cards,
-    tutorMessages: Math.max(local.tutorMessages, remote.tutorMessages),
-    listens: Math.max(local.listens, remote.listens),
-  };
-}
-
-/** El día más reciente de los dos (nunca `undefined`: Firestore lo rechaza). */
-function maxDay(a: string | null, b: string | null): string | null {
-  return (a ?? "") > (b ?? "") ? (a ?? null) : (b ?? null);
-}
-
 /**
  * Al iniciar sesión: fusiona local↔remoto y deja el resultado en ambos.
  * Después, cada cambio del store se escribe con debounce.
@@ -107,6 +51,15 @@ export function useProgressSync(uid: string | null) {
     if (!uid || !firebaseReady) return;
     let cancelled = false;
     const ref = doc(db(), "users", uid);
+
+    // El progreso local tiene dueño: si es de OTRA cuenta (dispositivo
+    // compartido, o una salida que no llegó a limpiar), se descarta antes de
+    // fusionar. Si no, la cuenta nueva heredaría —y subiría— lo ajeno.
+    const store = useProgress.getState();
+    if (ownerDecision(store.owner, uid, sanitize(store.snapshot())) === "discard") {
+      store.reset();
+    }
+    useProgress.getState().setOwner(uid);
 
     (async () => {
       try {
@@ -126,7 +79,7 @@ export function useProgressSync(uid: string | null) {
     })();
 
     const unsubscribe = useProgress.subscribe((state) => {
-      if (!state.hydrated) return;
+      if (!state.hydrated || state.owner !== uid) return;
       if (timer.current) clearTimeout(timer.current);
       timer.current = setTimeout(() => {
         setDoc(
