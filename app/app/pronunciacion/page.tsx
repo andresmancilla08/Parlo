@@ -19,6 +19,7 @@ import { dictationErrorKey, useDictation } from "@/lib/dictation";
 import { scoreAttempt, type Attempt } from "@/lib/pronunciation";
 import { playCorrect, playWrong } from "@/lib/sfx";
 import { SpeakControls } from "@/components/ui/speak-controls";
+import { stopSpeaking } from "@/lib/tts";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { BackButton } from "@/components/ui/back-button";
@@ -208,6 +209,8 @@ export default function PronunciacionPage() {
             whileTap={{ scale: 0.95 }}
             onClick={() => {
               reset();
+              // Si la frase modelo sigue sonando, el micro la puntuaría a ella.
+              if (!mic.listening) stopSpeaking();
               mic.toggle();
             }}
             aria-label={t(mic.listening ? "a11y.mic_stop" : "pronunciacion.record")}

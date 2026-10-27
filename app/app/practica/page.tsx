@@ -33,7 +33,7 @@ import { coachWindow } from "@/lib/coach-window";
 import { apiFetch, NotSignedInError } from "@/lib/api-client";
 import { useProgress } from "@/lib/progress";
 import { firstPendingLesson, TOP_LEVEL, unitOfLesson } from "@/lib/curriculum";
-import { speak } from "@/lib/tts";
+import { speak, stopSpeaking } from "@/lib/tts";
 import { dictationErrorKey, useDictation } from "@/lib/dictation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -384,6 +384,10 @@ function Conversation({
     if (final) dictationBase.current = merged;
   });
 
+  // Al salir de la conversación se calla el tutor: si no, la frase seguía
+  // sonando en la pantalla siguiente.
+  useEffect(() => stopSpeaking, []);
+
   // La respuesta de la IA se lee sola la PRIMERA vez (después, con el botón).
   const spoken = useRef(0);
   useEffect(() => {
@@ -400,8 +404,9 @@ function Conversation({
     const clean = text.trim();
     if (!clean || busy) return;
     // Se corta el micro: si no, el reconocimiento se oiría a sí mismo cuando
-    // la respuesta se lea en voz alta.
-    mic.stop();
+    // la respuesta se lea en voz alta. `abort` y no `stop`: con `stop` aún
+    // llegaba el resultado final y reescribía en el cuadro la frase enviada.
+    mic.abort();
     dictationBase.current = "";
     const next: Turn[] = [...turns, { role: "user", content: clean }];
     setTurns(next);
@@ -625,7 +630,11 @@ function Conversation({
               type="button"
               whileTap={{ scale: 0.95 }}
               onClick={() => {
-                if (!mic.listening) dictationBase.current = input.trim();
+                if (!mic.listening) {
+                  // Si el tutor sigue hablando, el micro lo transcribiría.
+                  stopSpeaking();
+                  dictationBase.current = input.trim();
+                }
                 mic.toggle();
               }}
               disabled={busy}
