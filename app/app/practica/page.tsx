@@ -15,6 +15,7 @@ import {
   IconNews,
   IconPlane,
   IconPlayerStopFilled,
+  IconRefresh,
   IconSend2,
   IconStethoscope,
   IconUsers,
@@ -28,7 +29,7 @@ import {
   type Scenario,
 } from "@/lib/coach";
 import { coachWindow } from "@/lib/coach-window";
-import { apiFetch } from "@/lib/api-client";
+import { apiFetch, NotSignedInError } from "@/lib/api-client";
 import { useProgress } from "@/lib/progress";
 import { firstPendingLesson, TOP_LEVEL, unitOfLesson } from "@/lib/curriculum";
 import { speak } from "@/lib/tts";
@@ -272,6 +273,82 @@ function Picker({ onStart }: { onStart: (id: string | null) => void }) {
   );
 }
 
+/* ---------------- errores al enviar ---------------- */
+
+/**
+ * Por qué no llegó la respuesta. `busy` es Gemini sin cuota o saturado;
+ * `rate` es nuestro propio límite (demasiados mensajes seguidos). Los dos
+ * traen `until`: hasta entonces reintentar es tirar la petición.
+ */
+type SendError = {
+  kind: "busy" | "rate" | "network" | "session" | "generic";
+  until?: number;
+};
+
+function isSendError(e: unknown): e is SendError {
+  return typeof e === "object" && e !== null && "kind" in e;
+}
+
+async function sendErrorFrom(res: Response): Promise<SendError> {
+  if (res.status === 401) return { kind: "session" };
+  if (res.status !== 429 && res.status !== 503) return { kind: "generic" };
+  const body = (await res.json().catch(() => ({}))) as { error?: string; retryAfter?: number };
+  const seconds = Number(res.headers.get("retry-after")) || body.retryAfter || 30;
+  const until = Date.now() + seconds * 1000;
+  if (body.error === "rate_limited") return { kind: "rate", until };
+  if (body.error === "ai_busy") return { kind: "busy", until };
+  return { kind: "generic" };
+}
+
+function SendErrorNotice({ error, onRetry }: { error: SendError; onRetry: () => void }) {
+  const { t } = useTranslation();
+  const [now, setNow] = useState(() => Date.now());
+  const left = error.until ? Math.max(0, Math.ceil((error.until - now) / 1000)) : 0;
+
+  // Cuenta atrás: se refresca cada segundo sólo mientras queda espera.
+  useEffect(() => {
+    if (!error.until) return;
+    const id = setInterval(() => {
+      const ts = Date.now();
+      setNow(ts);
+      if (ts >= error.until!) clearInterval(id);
+    }, 1000);
+    return () => clearInterval(id);
+  }, [error.until]);
+
+  const message =
+    error.kind === "busy"
+      ? left > 0
+        ? t("practica.err_busy", { count: left })
+        : t("practica.err_busy_ready")
+      : error.kind === "rate"
+        ? left > 0
+          ? t("practica.err_rate", { count: left })
+          : t("practica.err_busy_ready")
+        : t(`practica.err_${error.kind}`);
+
+  return (
+    <div
+      role="alert"
+      className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl border border-danger/30 bg-card px-4 py-3"
+    >
+      <p className="min-w-0 flex-1 text-sm font-bold text-danger-ink">{message}</p>
+      {error.kind !== "session" && (
+        <Button
+          variant="secondary"
+          size="sm"
+          className="shrink-0"
+          disabled={left > 0}
+          onClick={onRetry}
+        >
+          <IconRefresh className="size-4" />
+          {left > 0 ? t("practica.retry_in", { count: left }) : t("common.retry")}
+        </Button>
+      )}
+    </div>
+  );
+}
+
 /* ---------------- conversación con puerta de corrección ---------------- */
 
 function Conversation({
@@ -292,7 +369,7 @@ function Conversation({
   );
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<SendError | null>(null);
   /** Correcciones pendientes de leer: bloquean el avance de la charla. */
   const [gate, setGate] = useState<{ corrections: CoachCorrection[]; reply: string } | null>(null);
   const [lastSent, setLastSent] = useState("");
@@ -330,7 +407,7 @@ function Conversation({
     setInput("");
     setLastSent(clean);
     setBusy(true);
-    setError(false);
+    setError(null);
     noteTutorMessage();
 
     try {
@@ -341,7 +418,7 @@ function Conversation({
         // historiales largos y, sin recortar, la charla moría para siempre.
         body: JSON.stringify({ messages: coachWindow(next), scenario: scenarioId, level }),
       });
-      if (!res.ok) throw new Error(String(res.status));
+      if (!res.ok) throw await sendErrorFrom(res);
       const data = (await res.json()) as CoachTurn;
 
       if (data.corrections?.length) {
@@ -350,9 +427,17 @@ function Conversation({
       } else {
         setTurns([...next, { role: "assistant", content: data.reply }]);
       }
-    } catch {
-      setError(true);
-      setTurns(turns); // se devuelve el mensaje al usuario para reintentar
+    } catch (err) {
+      setError(
+        isSendError(err)
+          ? err
+          : err instanceof NotSignedInError
+            ? { kind: "session" }
+            : // `fetch` sólo lanza sin respuesta: red caída o servidor inalcanzable.
+              { kind: "network" },
+      );
+      // Se quita el turno enviado: «Reintentar» lo vuelve a mandar una sola vez.
+      setTurns(turns);
       setInput(clean);
     } finally {
       setBusy(false);
@@ -435,10 +520,12 @@ function Conversation({
         {busy && (
           <p className="text-sm font-bold text-muted">{t("practica.thinking")}</p>
         )}
-        {error && (
-          <p role="alert" className="text-sm font-bold text-danger-ink">
-            {t("practica.error")}
-          </p>
+        {error && !busy && (
+          <SendErrorNotice
+            error={error}
+            onRetry={() => send(lastSent)}
+            key={`${error.kind}-${error.until ?? 0}`}
+          />
         )}
         <div ref={listEnd} />
       </div>

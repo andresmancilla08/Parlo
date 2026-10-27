@@ -1,6 +1,7 @@
 import { generateObject, jsonSchema } from "ai";
 import { google } from "@ai-sdk/google";
 import { guard } from "@/lib/api-guard";
+import { busyResponse, upstreamBusy } from "@/lib/ai-errors";
 
 // Traducción por frase y significado de palabras para el lector. Se genera en la
 // sesión del usuario y el cliente la cachea: aquí no se guarda su documento.
@@ -104,6 +105,8 @@ export async function POST(req: Request) {
     });
     return Response.json({ lines: clean.map((_, i) => object.lines[i] ?? "") });
   } catch (error) {
+    const busy = upstreamBusy(error);
+    if (busy) return busyResponse(busy);
     console.error("[translate] falló:", error);
     return Response.json({ error: "AI unavailable" }, { status: 502 });
   }

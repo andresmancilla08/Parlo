@@ -1,6 +1,7 @@
 import { generateObject, generateText, jsonSchema, type ModelMessage } from "ai";
 import { google, type GoogleLanguageModelOptions } from "@ai-sdk/google";
 import { guard } from "@/lib/api-guard";
+import { busyResponse, upstreamBusy } from "@/lib/ai-errors";
 import { SCENARIOS, type CoachTurn } from "@/lib/coach";
 import { COACH_MAX_CHARS, COACH_MAX_MESSAGES } from "@/lib/coach-window";
 
@@ -142,6 +143,9 @@ export async function POST(req: Request) {
       system,
       messages: clean,
       providerOptions: THINKING,
+      // Sin reintentos internos del SDK: ante 429/503 reintentar al momento
+      // sólo quema cuota; el reintento lo decide el usuario tras la espera.
+      maxRetries: 0,
       // Los tokens de pensamiento CUENTAN aquí. Con el pensamiento por defecto
       // 1400 era el mínimo (con 700 el JSON se cortaba y el texto suelto se
       // colaba en `reply`). Con `thinkingLevel: low` el pensamiento es corto,
@@ -150,6 +154,13 @@ export async function POST(req: Request) {
     });
     return Response.json(object satisfies CoachTurn);
   } catch (error) {
+    // Sin cuota o saturado: NO se reintenta con generateText (sería gastar
+    // dos veces lo que ya no hay). El cliente espera `retry-after` y reintenta.
+    const busy = upstreamBusy(error);
+    if (busy) {
+      console.warn("[coach] Gemini saturado o sin cuota:", busy);
+      return busyResponse(busy);
+    }
     console.error("[coach] structured output falló, se degrada a texto:", error);
     // Nunca romper la conversación por un JSON mal formado: se responde sin
     // correcciones antes que dejar al usuario colgado.
@@ -159,10 +170,13 @@ export async function POST(req: Request) {
         system,
         messages: clean,
         providerOptions: THINKING,
+        maxRetries: 0,
         maxOutputTokens: 800,
       });
       return Response.json({ corrections: [], reply: text } satisfies CoachTurn);
     } catch (fallbackError) {
+      const busyAgain = upstreamBusy(fallbackError);
+      if (busyAgain) return busyResponse(busyAgain);
       console.error("[coach] también falló el texto:", fallbackError);
       return Response.json({ error: "AI unavailable" }, { status: 502 });
     }

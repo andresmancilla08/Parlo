@@ -247,7 +247,6 @@
     "change": "Cambiar",
     "placeholder": "Escribe en inglés…",
     "thinking": "Pensando…",
-    "error": "No se pudo responder. Vuelve a enviarlo.",
     "fix_kicker": "Antes de seguir",
     "rewrite": "Reescribir",
     "got_it": "Entendido",
@@ -265,7 +264,14 @@
     "scenario_debate": "Debate con una periodista",
     "goal_debate": "Defender tu opinión y rebatir",
     "scenario_board": "Consejo de administración",
-    "goal_board": "Defender una propuesta entre líneas"
+    "goal_board": "Defender una propuesta entre líneas",
+    "err_busy": "El tutor está saturado, prueba en {{count}} s.",
+    "err_busy_ready": "El tutor ya puede responder. Vuelve a intentarlo.",
+    "err_rate": "Vas muy rápido: espera {{count}} s antes de seguir.",
+    "err_network": "Sin conexión. Revisa tu red y vuelve a intentarlo.",
+    "err_session": "Tu sesión caducó. Vuelve a iniciar sesión para seguir.",
+    "err_generic": "No se pudo responder. Vuelve a intentarlo.",
+    "retry_in": "Reintentar en {{count}} s"
   },
   "escucha": {
     "kicker": "Escucha activa",

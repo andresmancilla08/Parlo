@@ -247,7 +247,6 @@
     "change": "Change",
     "placeholder": "Write in English…",
     "thinking": "Thinking…",
-    "error": "Couldn't reply. Send it again.",
     "fix_kicker": "Before you continue",
     "rewrite": "Rewrite",
     "got_it": "Got it",
@@ -265,7 +264,14 @@
     "scenario_debate": "Debate with a journalist",
     "goal_debate": "Defend your view and push back",
     "scenario_board": "Board meeting",
-    "goal_board": "Defend a proposal, reading between the lines"
+    "goal_board": "Defend a proposal, reading between the lines",
+    "err_busy": "The tutor is busy, try again in {{count}} s.",
+    "err_busy_ready": "The tutor can answer now. Try again.",
+    "err_rate": "You're going too fast: wait {{count}} s before continuing.",
+    "err_network": "No connection. Check your network and try again.",
+    "err_session": "Your session expired. Sign in again to continue.",
+    "err_generic": "Couldn't reply. Try again.",
+    "retry_in": "Retry in {{count}} s"
   },
   "escucha": {
     "kicker": "Active listening",
