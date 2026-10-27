@@ -3,6 +3,10 @@
 import { useSyncExternalStore } from "react";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { hasSession, idToken, NotSignedInError } from "@/lib/api-client";
+
+/** Igual que `TOKEN_HEADER` de `lib/api-guard.ts` (ese módulo es de servidor). */
+const TOKEN_HEADER = "x-parlo-token";
 
 // Voz (Web Speech API). Es gratis, pero la calidad depende MUCHO de qué voz
 // use el sistema: por defecto el navegador suele coger una compacta que suena
@@ -169,7 +173,9 @@ function serverAvailable(text: string): boolean {
   return (
     useServerVoice.getState().on &&
     text.length <= SERVER_MAX_CHARS &&
-    Date.now() >= serverDownUntil
+    Date.now() >= serverDownUntil &&
+    // /api/tts exige sesión: sin ella (landing, test de nivel) ni se intenta.
+    hasSession()
   );
 }
 
@@ -177,37 +183,85 @@ export function ttsUrl(text: string): string {
   return `/api/tts?t=${encodeURIComponent(text)}`;
 }
 
+/** Petición de audio en vuelo: se cancela si llega otra o se pide silencio. */
+let inflight: AbortController | null = null;
+/** Termina la promesa del audio que suena si se corta antes de acabar. */
+let interrupt: (() => void) | null = null;
+
 /** Corta lo que esté sonando, venga de donde venga. */
 export function stopSpeaking() {
   synth()?.cancel();
+  inflight?.abort();
+  inflight = null;
   if (current) {
     current.pause();
     current = null;
   }
+  const finish = interrupt;
+  interrupt = null;
+  finish?.();
+}
+
+/**
+ * Baja el WAV con el token en `x-parlo-token`. La URL sigue siendo la misma
+ * para la misma frase, así que la caché del navegador y la de la CDN valen
+ * igual que antes (ver `app/api/tts/route.ts`).
+ */
+async function fetchVoice(text: string, signal: AbortSignal): Promise<Blob> {
+  const token = await idToken();
+  const res = await fetch(ttsUrl(text), { headers: { [TOKEN_HEADER]: token }, signal });
+  if (!res.ok) throw new Error(`tts ${res.status}`);
+  return res.blob();
 }
 
 /**
  * Reproduce con la voz del servidor. Resuelve al terminar y RECHAZA si no se
  * puede (para que quien llama pueda tirar de Web Speech).
  */
-function playServer(text: string, rate: number): Promise<void> {
+async function playServer(text: string, rate: number): Promise<void> {
+  const ctrl = new AbortController();
+  inflight = ctrl;
+  let blob: Blob;
+  try {
+    blob = await fetchVoice(text, ctrl.signal);
+  } catch (err) {
+    // Cancelado a propósito: ni cortafuegos ni respaldo, sólo silencio.
+    if (ctrl.signal.aborted) return;
+    if (!(err instanceof NotSignedInError)) serverDownUntil = Date.now() + COOLDOWN_MS;
+    throw err;
+  } finally {
+    if (inflight === ctrl) inflight = null;
+  }
+
+  const src = URL.createObjectURL(blob);
   return new Promise((resolve, reject) => {
-    const audio = new Audio(ttsUrl(text));
+    const audio = new Audio(src);
     // El servidor devuelve la frase a velocidad normal; la tortuga se consigue
     // bajando la reproducción, que además no cambia la URL cacheada.
     audio.playbackRate = rate / RATE_NORMAL;
     audio.preservesPitch = true;
     current = audio;
+    const done = () => URL.revokeObjectURL(src);
+    // Si alguien corta (stopSpeaking u otra frase), la promesa termina igual:
+    // la lectura continua no se queda colgada esperando un `ended` que no llega.
+    interrupt = () => {
+      done();
+      resolve();
+    };
     audio.addEventListener("ended", () => {
       if (current === audio) current = null;
+      interrupt = null;
+      done();
       resolve();
     });
     audio.addEventListener("error", () => {
       serverDownUntil = Date.now() + COOLDOWN_MS;
+      done();
       reject(new Error("tts"));
     });
     audio.play().catch((err) => {
       serverDownUntil = Date.now() + COOLDOWN_MS;
+      done();
       reject(err);
     });
   });

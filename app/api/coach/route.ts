@@ -1,6 +1,6 @@
 import { generateObject, generateText, jsonSchema, type ModelMessage } from "ai";
 import { google } from "@ai-sdk/google";
-import { allow } from "@/lib/rate-limit";
+import { guard } from "@/lib/api-guard";
 import { SCENARIOS, type CoachTurn } from "@/lib/coach";
 import { COACH_MAX_CHARS, COACH_MAX_MESSAGES } from "@/lib/coach-window";
 
@@ -9,7 +9,12 @@ export const maxDuration = 30;
 // Los mismos números con los que el cliente recorta su ventana (`coachWindow`).
 const MAX_MESSAGES = COACH_MAX_MESSAGES;
 const MAX_CHARS = COACH_MAX_CHARS;
-const RATE = { store: new Map<string, number[]>(), limit: 20, windowMs: 60_000 };
+const RATE = {
+  ip: { store: new Map<string, number[]>(), limit: 20, windowMs: 60_000 },
+  // Por cuenta: por debajo de las 15 RPM del free tier, para que una sola
+  // persona no deje sin tutor a las demás.
+  uid: { store: new Map<string, number[]>(), limit: 12, windowMs: 60_000 },
+};
 
 /**
  * El coach devuelve DOS cosas en una sola llamada: las correcciones de lo que
@@ -78,13 +83,8 @@ export async function POST(req: Request) {
     return Response.json({ error: "AI not configured" }, { status: 503 });
   }
 
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
-  if (!allow(ip, Date.now(), RATE)) {
-    return Response.json(
-      { error: "Too many requests" },
-      { status: 429, headers: { "retry-after": "60" } },
-    );
-  }
+  const gate = await guard(req, RATE);
+  if (gate instanceof Response) return gate;
 
   let body: { messages?: unknown; scenario?: unknown; level?: unknown };
   try {

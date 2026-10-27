@@ -28,6 +28,7 @@ import {
   type Scenario,
 } from "@/lib/coach";
 import { coachWindow } from "@/lib/coach-window";
+import { apiFetch } from "@/lib/api-client";
 import { useProgress } from "@/lib/progress";
 import { firstPendingLesson, TOP_LEVEL, unitOfLesson } from "@/lib/curriculum";
 import { speak } from "@/lib/tts";
@@ -333,7 +334,7 @@ function Conversation({
     noteTutorMessage();
 
     try {
-      const res = await fetch("/api/coach", {
+      const res = await apiFetch("/api/coach", {
         method: "POST",
         headers: { "content-type": "application/json" },
         // Sólo una ventana (escenario + últimos turnos): el servidor rechaza
