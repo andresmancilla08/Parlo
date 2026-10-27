@@ -9,7 +9,12 @@ function maxDay(a: string | null, b: string | null): string | null {
   return (a ?? "") > (b ?? "") ? (a ?? null) : (b ?? null);
 }
 
-/** Gana el progreso MÁS avanzado: nunca se pierde lo hecho offline. */
+/**
+ * Fusión SIN base común (primer encuentro local↔remoto): gana lo más avanzado.
+ * Nunca se pierde lo hecho offline, a costa de no poder restar (lo que se
+ * gastó en un lado puede reaparecer). Por eso, tras la primera fusión, las
+ * escrituras usan `rebase`, que sí conoce la base.
+ */
 export function merge(local: ProgressSnapshot, remote: ProgressSnapshot): ProgressSnapshot {
   const cards = { ...remote.cards };
   for (const [key, card] of Object.entries(local.cards)) {
@@ -37,10 +42,16 @@ export function merge(local: ProgressSnapshot, remote: ProgressSnapshot): Progre
       : day;
   }
 
+  // La racha la manda quien cumplió el objetivo MÁS RECIENTE: si aquí se rompió
+  // y volvió a empezar hoy, una racha vieja más larga del otro lado no vale.
+  const lg = local.lastGoalDay ?? "";
+  const rg = remote.lastGoalDay ?? "";
+  const streak = lg > rg ? local.streak : rg > lg ? remote.streak : Math.max(local.streak, remote.streak);
+
   return {
     xp: Math.max(local.xp, remote.xp),
     gems: Math.max(local.gems, remote.gems),
-    streak: Math.max(local.streak, remote.streak),
+    streak,
     days,
     // El objetivo lo manda este dispositivo (es lo último que tocó el usuario).
     goalXp: local.goalXp,
@@ -59,6 +70,30 @@ export function merge(local: ProgressSnapshot, remote: ProgressSnapshot): Progre
     tutorMessages: Math.max(local.tutorMessages, remote.tutorMessages),
     listens: Math.max(local.listens, remote.listens),
   };
+}
+
+/** Contadores que suben y BAJAN (gemas gastadas, escudos usados): van por delta. */
+const COUNTERS = ["xp", "gems", "shields", "tutorMessages", "listens"] as const;
+
+/**
+ * Fusión a tres bandas para las escrituras: `base` es lo que este dispositivo
+ * sabía del remoto la última vez que sincronizó. Los contadores se aplican como
+ * DIFERENCIA (`remoto + (local − base)`), así que dos dispositivos que suman
+ * XP a la vez no se pisan y gastar gemas no se deshace al fusionar. El resto
+ * (lecciones, cartas, días, retos…) sólo crece y usa `merge`.
+ */
+export function rebase(
+  base: ProgressSnapshot,
+  local: ProgressSnapshot,
+  remote: ProgressSnapshot,
+): ProgressSnapshot {
+  const out = merge(local, remote);
+  for (const key of COUNTERS) {
+    out[key] = Math.max(0, remote[key] + (local[key] - base[key]));
+  }
+  // El objetivo sólo lo cambia este dispositivo si de verdad lo tocó.
+  out.goalXp = local.goalXp !== base.goalXp ? local.goalXp : remote.goalXp;
+  return out;
 }
 
 /** ¿Hay algo en el snapshot que valga la pena conservar? */

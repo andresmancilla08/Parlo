@@ -121,6 +121,11 @@ export const useAuth = create<AuthState>()((set, get) => ({
     const uid = get().uid;
     if (uid) {
       try {
+        // Lo estudiado en los últimos segundos aún no se ha escrito (debounce).
+        const { flushProgressSync } = await import("@/lib/sync");
+        await Promise.race([flushProgressSync(), new Promise((r) => setTimeout(r, 4000))]);
+      } catch {}
+      try {
         const { releasePushOnLogout } = await import("@/lib/push");
         await releasePushOnLogout(uid);
       } catch {
