@@ -19,6 +19,7 @@ import {
   IconRefresh,
   IconSend2,
   IconStethoscope,
+  IconVolume,
   IconUsers,
   type Icon,
 } from "@tabler/icons-react";
@@ -33,7 +34,7 @@ import { coachWindow } from "@/lib/coach-window";
 import { apiFetch, NotSignedInError } from "@/lib/api-client";
 import { useProgress } from "@/lib/progress";
 import { firstPendingLesson, TOP_LEVEL, unitOfLesson } from "@/lib/curriculum";
-import { speak, stopSpeaking } from "@/lib/tts";
+import { speak, speakAuto, stopSpeaking, unlockAudio } from "@/lib/tts";
 import { dictationErrorKey, useDictation } from "@/lib/dictation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -390,9 +391,15 @@ function Conversation({
 
   // La respuesta de la IA se lee sola la PRIMERA vez (después, con el botón).
   const spoken = useRef(0);
+  /** Turno cuya lectura automática bloqueó el navegador. */
+  const [muted, setMuted] = useState<number | null>(null);
   useEffect(() => {
     const last = turns.at(-1);
-    if (turns.length > spoken.current && last?.role === "assistant") speak(last.content);
+    if (turns.length > spoken.current && last?.role === "assistant") {
+      const index = turns.length - 1;
+      // Si el navegador exige un toque (iOS), la burbuja ofrece «Toca para oír».
+      speakAuto(last.content).then((played) => setMuted(played ? null : index));
+    }
     spoken.current = turns.length;
   }, [turns]);
 
@@ -407,6 +414,10 @@ function Conversation({
     // la respuesta se lea en voz alta. `abort` y no `stop`: con `stop` aún
     // llegaba el resultado final y reescribía en el cuadro la frase enviada.
     mic.abort();
+    // Este toque «estrena» el audio: la respuesta llega tras un await y en
+    // iOS ya no contaría como gesto del usuario.
+    unlockAudio();
+    setMuted(null);
     dictationBase.current = "";
     const next: Turn[] = [...turns, { role: "user", content: clean }];
     setTurns(next);
@@ -517,7 +528,22 @@ function Conversation({
             >
               <p className="text-sm font-semibold leading-relaxed">{turn.content}</p>
               {turn.role === "assistant" && (
-                <SpeakControls text={turn.content} size="sm" className="mt-1.5" />
+                <>
+                  {muted === i && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMuted(null);
+                        speak(turn.content);
+                      }}
+                      className="mt-2 inline-flex items-center gap-1.5 rounded-pill bg-primary px-3 py-1.5 text-xs font-extrabold text-primary-fg active:scale-[0.98]"
+                    >
+                      <IconVolume className="size-4" />
+                      {t("practica.tap_to_hear")}
+                    </button>
+                  )}
+                  <SpeakControls text={turn.content} size="sm" className="mt-1.5" />
+                </>
               )}
             </div>
           </div>
@@ -633,6 +659,7 @@ function Conversation({
                 if (!mic.listening) {
                   // Si el tutor sigue hablando, el micro lo transcribiría.
                   stopSpeaking();
+                  unlockAudio();
                   dictationBase.current = input.trim();
                 }
                 mic.toggle();

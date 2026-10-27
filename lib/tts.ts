@@ -113,6 +113,8 @@ export function speak(
   if (!text.trim()) return;
 
   if (!device && serverAvailable(text)) {
+    // `speak` casi siempre nace de un toque: se aprovecha para desbloquear.
+    unlockAudio();
     stopSpeaking();
     playServer(text, rate).catch(() => speak(text, lang, rate, true));
     return;
@@ -234,37 +236,140 @@ async function playServer(text: string, rate: number): Promise<void> {
   }
 
   const src = URL.createObjectURL(blob);
+  const audio = player();
+  if (!audio) throw new Error("tts");
   return new Promise((resolve, reject) => {
-    const audio = new Audio(src);
-    // El servidor devuelve la frase a velocidad normal; la tortuga se consigue
-    // bajando la reproducción, que además no cambia la URL cacheada.
-    audio.playbackRate = rate / RATE_NORMAL;
-    audio.preservesPitch = true;
-    current = audio;
-    const done = () => URL.revokeObjectURL(src);
+    let settled = false;
+    const finish = (err?: unknown) => {
+      if (settled) return;
+      settled = true;
+      audio.onended = null;
+      audio.onerror = null;
+      if (current === audio) current = null;
+      if (interrupt === stop) interrupt = null;
+      URL.revokeObjectURL(src);
+      if (err) reject(err);
+      else resolve();
+    };
     // Si alguien corta (stopSpeaking u otra frase), la promesa termina igual:
     // la lectura continua no se queda colgada esperando un `ended` que no llega.
-    interrupt = () => {
-      done();
-      resolve();
+    const stop = () => finish();
+    interrupt = stop;
+    current = audio;
+
+    audio.src = src;
+    // Cambiar `src` reinicia `playbackRate` a `defaultPlaybackRate`: se fijan
+    // los dos. El servidor devuelve la frase a velocidad normal; la tortuga se
+    // consigue bajando la reproducción, que además no cambia la URL cacheada.
+    audio.defaultPlaybackRate = rate / RATE_NORMAL;
+    audio.playbackRate = rate / RATE_NORMAL;
+    audio.preservesPitch = true;
+    audio.onended = () => finish();
+    audio.onerror = () => {
+      serverDownUntil = Date.now() + COOLDOWN_MS;
+      finish(new Error("tts"));
     };
-    audio.addEventListener("ended", () => {
-      if (current === audio) current = null;
-      interrupt = null;
-      done();
-      resolve();
-    });
-    audio.addEventListener("error", () => {
+    audio.play().catch((err: unknown) => {
+      // `NotAllowedError` = el navegador exige un toque antes de sonar (iOS,
+      // autoplay). El servidor está bien: NO se activa el cortafuegos, o una
+      // sola respuesta leída sin gesto apagaba la voz neural 5 min en toda la app.
+      if (isAutoplayBlock(err)) return finish(new AutoplayBlockedError());
+      // Otro corte nuestro (pausa, nueva frase) llega como AbortError: silencio.
+      if (err instanceof DOMException && err.name === "AbortError") return finish();
       serverDownUntil = Date.now() + COOLDOWN_MS;
-      done();
-      reject(new Error("tts"));
-    });
-    audio.play().catch((err) => {
-      serverDownUntil = Date.now() + COOLDOWN_MS;
-      done();
-      reject(err);
+      finish(err);
     });
   });
+}
+
+/* ---------------- autoplay (iOS y compañía) ---------------- */
+
+/** El navegador no deja sonar sin un toque previo del usuario. */
+export class AutoplayBlockedError extends Error {}
+
+function isAutoplayBlock(err: unknown): boolean {
+  return err instanceof DOMException && err.name === "NotAllowedError";
+}
+
+/**
+ * UN solo `<audio>` para toda la voz neural. iOS sólo deja reproducir sin
+ * gesto a un elemento que ya sonó dentro de un gesto; con un `new Audio()` por
+ * frase cada respuesta del tutor (que llega tras un `await`) nacía bloqueada.
+ */
+let shared: HTMLAudioElement | null = null;
+let unlocked = false;
+
+function player(): HTMLAudioElement | null {
+  if (typeof window === "undefined") return null;
+  shared ??= new Audio();
+  return shared;
+}
+
+/** WAV de 50 ms de silencio, para «estrenar» el elemento dentro de un toque. */
+function silentWav(): string {
+  const samples = 400; // 50 ms a 8 kHz, 8 bits
+  const buf = new ArrayBuffer(44 + samples);
+  const v = new DataView(buf);
+  const str = (o: number, s: string) => [...s].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+  str(0, "RIFF");
+  v.setUint32(4, 36 + samples, true);
+  str(8, "WAVE");
+  str(12, "fmt ");
+  v.setUint32(16, 16, true);
+  v.setUint16(20, 1, true); // PCM
+  v.setUint16(22, 1, true); // mono
+  v.setUint32(24, 8000, true);
+  v.setUint32(28, 8000, true);
+  v.setUint16(32, 1, true);
+  v.setUint16(34, 8, true);
+  str(36, "data");
+  v.setUint32(40, samples, true);
+  new Uint8Array(buf, 44).fill(128); // 128 = silencio en PCM de 8 bits
+  let bin = "";
+  new Uint8Array(buf).forEach((b) => (bin += String.fromCharCode(b)));
+  return `data:audio/wav;base64,${btoa(bin)}`;
+}
+
+/**
+ * Llamar DENTRO de un toque (Enviar, micro, altavoz): reproduce un silencio en
+ * el elemento compartido para que después pueda sonar sin gesto. Es inocuo
+ * llamarlo de más: sólo actúa la primera vez y nunca corta lo que suena.
+ */
+export function unlockAudio() {
+  if (unlocked) return;
+  const audio = player();
+  if (!audio || current === audio) return;
+  audio.src = silentWav();
+  audio
+    .play()
+    .then(() => {
+      unlocked = true;
+    })
+    .catch(() => {
+      // Sin gesto válido: se intentará en el siguiente toque.
+    });
+}
+
+/**
+ * Lectura automática (respuesta del tutor): devuelve `false` si el navegador la
+ * bloqueó por falta de gesto, para que la pantalla ofrezca «Toca para oír».
+ * Cualquier otro fallo cae, como siempre, a la voz del dispositivo.
+ */
+export async function speakAuto(text: string, lang: "en" | "es" = "en"): Promise<boolean> {
+  if (!text.trim()) return true;
+  if (!serverAvailable(text)) {
+    speak(text, lang, RATE_NORMAL, true);
+    return true;
+  }
+  stopSpeaking();
+  try {
+    await playServer(text, RATE_NORMAL);
+    return true;
+  } catch (err) {
+    if (err instanceof AutoplayBlockedError) return false;
+    speak(text, lang, RATE_NORMAL, true);
+    return true;
+  }
 }
 
 /**

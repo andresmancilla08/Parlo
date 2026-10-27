@@ -275,7 +275,8 @@
     "mic_nospeech": "No te oí, intenta de nuevo.",
     "mic_network": "El dictado necesita conexión. Revisa tu red o escribe la respuesta.",
     "mic_nomic": "No encontramos un micrófono. Conecta uno o escribe la respuesta.",
-    "mic_ios_pwa": "Para hablar, abre Parlo en Safari. Aquí puedes escribir tu respuesta."
+    "mic_ios_pwa": "Para hablar, abre Parlo en Safari. Aquí puedes escribir tu respuesta.",
+    "tap_to_hear": "Toca para oír"
   },
   "escucha": {
     "kicker": "Escucha activa",
