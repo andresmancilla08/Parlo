@@ -107,6 +107,28 @@
 - **Causa real:** si un Chrome de una ejecución anterior sigue escuchando en el puerto de depuración, el nuevo `spawn` no puede abrirlo y el script se conecta al VIEJO, con su `localStorage`, su sesión y sus preferencias.
 - **Solución:** `launch()` hace `pkill -f "remote-debugging-port=<puerto>"` antes de arrancar. Si una medida sale rara, comprobar primero que no hay dos Chrome vivos.
 
+## El tutor dejaba de responder tras ~20 intercambios
+- **Síntoma:** «No se pudo responder» en todos los mensajes a partir de cierto punto, aunque Gemini funcione.
+- **Causa real:** el cliente mandaba el historial entero y el servidor rechaza >40 mensajes o >10.000 caracteres.
+- **Solución:** `coachWindow()` (ver `decisiones.md`). Si se cambian los límites, cambiarlos en `lib/coach-window.ts`: cliente y servidor los leen de ahí.
+
+## La voz neural se apagaba 5 minutos en iPhone
+- **Síntoma:** en iOS la respuesta del tutor no sonaba y después TODA la app hablaba con la voz del dispositivo un rato.
+- **Causa real:** `audio.play()` sin gesto previo da `NotAllowedError` y se trataba como fallo del servidor (cortafuegos de 5 min).
+- **Solución:** `unlockAudio()` + elemento compartido; `NotAllowedError` nunca activa el cortafuegos. Ojo al tocar `lib/tts.ts`: no volver a crear un `new Audio()` por frase, iOS sólo deja sonar sin gesto al elemento que ya sonó dentro de uno.
+
+## Texto fantasma tras enviar por voz
+- **Síntoma:** después de enviar, la frase reaparecía en el cuadro de texto.
+- **Causa real:** `recognition.stop()` todavía entrega el resultado final; llegaba después de vaciar el cuadro.
+- **Solución:** `mic.abort()` (quita `onresult` y aborta). `aborted` no se muestra como error.
+
+## El micro no aparece en iPhone con Parlo instalada (es a propósito)
+- **Parece roto pero es a propósito:** en iOS en modo standalone `webkitSpeechRecognition` existe pero no funciona, así que se oculta el micro y se sugiere abrir Parlo en Safari. En Safari normal y en la APK de Android (TWA, Chrome) el micro sigue.
+
+## /api/coach, /api/translate o /api/tts responden 401
+- **Causa real:** desde esta rama exigen el ID token de Firebase (`apiFetch` o, en TTS, `x-parlo-token`). Un `fetch('/api/...')` a pelo ya no vale.
+- **Ojo en local:** el servidor necesita `NEXT_PUBLIC_FIREBASE_PROJECT_ID` (si falta responde 503) y salida a `www.googleapis.com` para bajar las claves. Para probar sin cuenta, los 401 se ven con `curl`; el camino feliz necesita una sesión real.
+
 ## La liga no se puede probar con una sola cuenta
 - **Síntoma:** todo parece funcionar, pero entrar por código falla en producción.
 - **Causa real:** las reglas distinguen miembro de no miembro. Con una sola cuenta (la que crea la liga) nunca se ejecuta el camino del que entra.
