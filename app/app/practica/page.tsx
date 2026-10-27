@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import {
   IconArrowRight,
+  IconBrandSafari,
   IconBriefcase,
   IconHeadphones,
   IconCoffee,
@@ -33,7 +34,7 @@ import { apiFetch, NotSignedInError } from "@/lib/api-client";
 import { useProgress } from "@/lib/progress";
 import { firstPendingLesson, TOP_LEVEL, unitOfLesson } from "@/lib/curriculum";
 import { speak } from "@/lib/tts";
-import { useDictation } from "@/lib/dictation";
+import { dictationErrorKey, useDictation } from "@/lib/dictation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { BackButton } from "@/components/ui/back-button";
@@ -599,7 +600,13 @@ function Conversation({
           )}
           {mic.error && (
             <p role="alert" className="mb-1.5 text-xs font-bold text-danger-ink">
-              {t(mic.error === "denied" ? "practica.mic_denied" : "practica.mic_failed")}
+              {t(dictationErrorKey(mic.error))}
+            </p>
+          )}
+          {mic.iosStandalone && (
+            <p className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-muted">
+              <IconBrandSafari className="size-4 shrink-0" />
+              {t("practica.mic_ios_pwa")}
             </p>
           )}
           <div className="flex gap-2">

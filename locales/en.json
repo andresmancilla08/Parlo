@@ -252,7 +252,7 @@
     "got_it": "Got it",
     "scenarios": "Talk to the AI",
     "listening": "Listening… speak in English",
-    "mic_denied": "Your browser blocked the microphone. Allow it in the site permissions.",
+    "mic_denied": "Parlo isn't allowed to use the microphone. Turn it on in the site settings (the padlock next to the address) and try again.",
     "mic_failed": "Couldn't use the microphone. Try again or type your answer.",
     "starters_title": "Try starting like this",
     "brief_kicker": "Before you start",
@@ -271,7 +271,11 @@
     "err_network": "No connection. Check your network and try again.",
     "err_session": "Your session expired. Sign in again to continue.",
     "err_generic": "Couldn't reply. Try again.",
-    "retry_in": "Retry in {{count}} s"
+    "retry_in": "Retry in {{count}} s",
+    "mic_nospeech": "I didn't hear you, try again.",
+    "mic_network": "Dictation needs a connection. Check your network or type your answer.",
+    "mic_nomic": "We couldn't find a microphone. Connect one or type your answer.",
+    "mic_ios_pwa": "To speak, open Parlo in Safari. Here you can type your answer."
   },
   "escucha": {
     "kicker": "Active listening",

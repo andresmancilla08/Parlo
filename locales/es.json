@@ -252,7 +252,7 @@
     "got_it": "Entendido",
     "scenarios": "Conversar con la IA",
     "listening": "Te escucho… habla en inglés",
-    "mic_denied": "El navegador bloqueó el micrófono. Actívalo en los permisos del sitio.",
+    "mic_denied": "Parlo no tiene permiso para usar el micrófono. Actívalo en los ajustes del sitio (el candado junto a la dirección) y vuelve a intentarlo.",
     "mic_failed": "No se pudo usar el micrófono. Prueba otra vez o escribe la respuesta.",
     "starters_title": "Prueba a empezar así",
     "brief_kicker": "Antes de empezar",
@@ -271,7 +271,11 @@
     "err_network": "Sin conexión. Revisa tu red y vuelve a intentarlo.",
     "err_session": "Tu sesión caducó. Vuelve a iniciar sesión para seguir.",
     "err_generic": "No se pudo responder. Vuelve a intentarlo.",
-    "retry_in": "Reintentar en {{count}} s"
+    "retry_in": "Reintentar en {{count}} s",
+    "mic_nospeech": "No te oí, intenta de nuevo.",
+    "mic_network": "El dictado necesita conexión. Revisa tu red o escribe la respuesta.",
+    "mic_nomic": "No encontramos un micrófono. Conecta uno o escribe la respuesta.",
+    "mic_ios_pwa": "Para hablar, abre Parlo en Safari. Aquí puedes escribir tu respuesta."
   },
   "escucha": {
     "kicker": "Escucha activa",

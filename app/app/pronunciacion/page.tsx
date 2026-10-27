@@ -15,7 +15,7 @@ import {
 import { allLessons, localTitle } from "@/lib/curriculum";
 import { getTeach } from "@/lib/curriculum/teach";
 import { useProgress } from "@/lib/progress";
-import { useDictation } from "@/lib/dictation";
+import { dictationErrorKey, useDictation } from "@/lib/dictation";
 import { scoreAttempt, type Attempt } from "@/lib/pronunciation";
 import { playCorrect, playWrong } from "@/lib/sfx";
 import { SpeakControls } from "@/components/ui/speak-controls";
@@ -94,7 +94,7 @@ export default function PronunciacionPage() {
     return (
       <Empty
         title={t("pronunciacion.unsupported_title")}
-        body={t("pronunciacion.unsupported_body")}
+        body={t(mic.iosStandalone ? "practica.mic_ios_pwa" : "pronunciacion.unsupported_body")}
         cta={t("escucha.home_cta")}
         href="/app/escucha"
       />
@@ -199,7 +199,7 @@ export default function PronunciacionPage() {
       <div className="sticky bottom-0 bg-bg/90 pb-2 pt-3 backdrop-blur">
         {mic.error && (
           <p role="alert" className="mb-2 text-center text-xs font-bold text-danger-ink">
-            {t(mic.error === "denied" ? "practica.mic_denied" : "practica.mic_failed")}
+            {t(dictationErrorKey(mic.error))}
           </p>
         )}
         <div className="flex items-center justify-center gap-3">
