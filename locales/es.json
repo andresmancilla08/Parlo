@@ -276,7 +276,16 @@
     "mic_network": "El dictado necesita conexión. Revisa tu red o escribe la respuesta.",
     "mic_nomic": "No encontramos un micrófono. Conecta uno o escribe la respuesta.",
     "mic_ios_pwa": "Para hablar, abre Parlo en Safari. Aquí puedes escribir tu respuesta.",
-    "tap_to_hear": "Toca para oír"
+    "tap_to_hear": "Toca para oír",
+    "tip_cafe": "Pide con «Can I have…?» o «I'd like…», nunca con «I want». Y si no entiendes al camarero, «Sorry, could you repeat that?» te salva.",
+    "tip_intro": "Devuelve siempre la pregunta con «And you?»: en inglés la conversación se sostiene entre los dos, no la lleva uno solo.",
+    "tip_travel": "En el aeropuerto casi todo se resuelve con «Could I…?» y «Where is…?». Si te hablan rápido: «Sorry, I didn't catch that».",
+    "tip_doctor": "Para síntomas se usa «I've got» o «I have» + el síntoma, y «since» + cuándo empezó. Ojo: «I'm constipated» NO es estar resfriado.",
+    "tip_interview": "Habla de tu experiencia con «I've been + -ing» y en positivo: di qué buscas, no de qué huyes.",
+    "tip_flat": "Para preguntar precios, «how much»; para cantidades contables, «how many». Y «bills» son luz, agua y gas, no facturas del banco.",
+    "tip_negotiation": "Negociar en inglés es suavizar: «that's a bit high» en vez de «that's expensive», y «would you be able to…?» en vez de «you must». Cuanto más rodeo, más firme puedes ser sin romper nada.",
+    "tip_debate": "En un debate en inglés se concede antes de rebatir («I take your point, but…»). Ir de frente sin conceder suena agresivo y resta credibilidad, aunque tengas razón.",
+    "tip_board": "Aquí no te van a decir que no: te lo van a insinuar. «Ambitious» suele ser «poco realista» y «I'm not entirely sure» es un no. Responde al mensaje de debajo, no al literal, y devuelve la pelota con la misma suavidad."
   },
   "escucha": {
     "kicker": "Escucha activa",

@@ -16,6 +16,7 @@ import {
   IconNews,
   IconPlane,
   IconPlayerStopFilled,
+  IconPresentationAnalytics,
   IconRefresh,
   IconSend2,
   IconStethoscope,
@@ -52,6 +53,7 @@ const SCENARIO_ICON: Record<string, Icon> = {
   flat: IconHome2,
   negotiation: IconContract,
   debate: IconNews,
+  board: IconPresentationAnalytics,
 };
 
 type Turn = { role: "user" | "assistant"; content: string };
@@ -165,7 +167,7 @@ function Briefing({
         <p className="font-display text-xs font-extrabold uppercase tracking-[0.13em] text-accent-ink">
           {t("practica.brief_tip")}
         </p>
-        <p className="mt-1 text-sm leading-relaxed text-accent-ink/90">{scenario.tipEs}</p>
+        <p className="mt-1 text-sm leading-relaxed text-accent-ink/90">{t(`practica.tip_${scenario.id}`)}</p>
       </div>
 
       <div className="mt-6">
@@ -376,6 +378,13 @@ function Conversation({
   const [gate, setGate] = useState<{ corrections: CoachCorrection[]; reply: string } | null>(null);
   const [lastSent, setLastSent] = useState("");
   const listEnd = useRef<HTMLDivElement>(null);
+  const gateCard = useRef<HTMLDivElement>(null);
+
+  // La corrección bloquea la charla: el foco va a ella para que el teclado y
+  // el lector de pantalla la encuentren sin buscarla.
+  useEffect(() => {
+    if (gate) gateCard.current?.focus();
+  }, [gate]);
 
   // Dictado: lo que ya estaba escrito se conserva y el habla se añade detrás.
   const dictationBase = useRef("");
@@ -490,7 +499,8 @@ function Conversation({
         <BackButton onClick={onExit} className="shrink-0 px-3 py-1.5 text-xs" />
       </header>
 
-      <div className="mt-4 flex-1 space-y-3">
+      {/* Los turnos nuevos (y «Pensando…») se anuncian al lector de pantalla. */}
+      <div className="mt-4 flex-1 space-y-3" aria-live="polite" aria-relevant="additions text">
         {/* Charla libre: sin escenario no hay primer turno, y una pantalla en
             blanco no invita a hablar. Tres arranques y a andar. */}
         {turns.length === 0 && (
@@ -550,7 +560,9 @@ function Conversation({
         ))}
 
         {busy && (
-          <p className="text-sm font-bold text-muted">{t("practica.thinking")}</p>
+          <p role="status" className="text-sm font-bold text-muted">
+            {t("practica.thinking")}
+          </p>
         )}
         {error && !busy && (
           <SendErrorNotice
@@ -570,9 +582,16 @@ function Conversation({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 8 }}
             transition={spring}
-            className="sticky bottom-0 mt-3 rounded-[22px] border-2 border-primary bg-card p-4 shadow-xl shadow-primary/10"
+            ref={gateCard}
+            tabIndex={-1}
+            role="region"
+            aria-labelledby="fix-kicker"
+            className="sticky bottom-0 mt-3 rounded-[22px] border-2 border-primary bg-card p-4 shadow-xl shadow-primary/10 outline-none"
           >
-            <p className="font-display text-xs font-extrabold uppercase tracking-[0.13em] text-primary-ink">
+            <p
+              id="fix-kicker"
+              className="font-display text-xs font-extrabold uppercase tracking-[0.13em] text-primary-ink"
+            >
               {t("practica.fix_kicker")}
             </p>
             <div className="mt-3 space-y-3">
