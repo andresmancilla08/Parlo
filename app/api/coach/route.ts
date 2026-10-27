@@ -4,6 +4,7 @@ import { guard } from "@/lib/api-guard";
 import { busyResponse, upstreamBusy } from "@/lib/ai-errors";
 import { SCENARIOS, type CoachTurn } from "@/lib/coach";
 import { COACH_MAX_CHARS, COACH_MAX_MESSAGES } from "@/lib/coach-window";
+import type { Cefr } from "@/lib/curriculum/types";
 
 export const maxDuration = 30;
 
@@ -26,6 +27,7 @@ const THINKING = {
 // Los mismos números con los que el cliente recorta su ventana (`coachWindow`).
 const MAX_MESSAGES = COACH_MAX_MESSAGES;
 const MAX_CHARS = COACH_MAX_CHARS;
+const CEFR: readonly Cefr[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
 const RATE = {
   ip: { store: new Map<string, number[]>(), limit: 20, windowMs: 60_000 },
   // Por cuenta: por debajo de las 15 RPM del free tier, para que una sola
@@ -133,7 +135,8 @@ export async function POST(req: Request) {
 
   const system = systemFor(
     typeof body.scenario === "string" ? body.scenario : undefined,
-    typeof body.level === "string" ? body.level : "A2",
+    // Va dentro del prompt: sólo se acepta un nivel real, nunca texto libre.
+    CEFR.find((l) => l === body.level) ?? "A2",
   );
 
   try {
