@@ -3,10 +3,12 @@ package co.parlo.app;
 import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import com.getcapacitor.JSObject;
+import com.getcapacitor.Logger;
 import com.getcapacitor.PermissionState;
 import com.getcapacitor.Plugin;
 import com.getcapacitor.PluginCall;
@@ -80,7 +82,7 @@ public class ParloSpeechPlugin extends Plugin {
         getActivity()
             .runOnUiThread(() -> {
                 // Sólo hay un reconocedor: el anterior se cierra avisando a su dueño.
-                if (recognizer != null) {
+                if (session != null) {
                     String old = session;
                     destroy();
                     emit(old, "error", "aborted", null, false);
@@ -93,9 +95,6 @@ public class ParloSpeechPlugin extends Plugin {
                     return;
                 }
                 session = id;
-                SpeechRecognizer r = SpeechRecognizer.createSpeechRecognizer(getContext());
-                recognizer = r;
-                r.setRecognitionListener(new Listener(r, id));
                 Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
                 intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
                 intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, lang);
@@ -103,15 +102,25 @@ public class ParloSpeechPlugin extends Plugin {
                 intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, interim);
                 intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
                 intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, getContext().getPackageName());
-                try {
-                    r.startListening(intent);
-                    emit(id, "start", null, null, false);
-                } catch (Exception ex) {
-                    emit(id, "error", "audio-capture", null, false);
-                    finish(r, id);
-                }
+                if (listen(id, intent, false)) emit(id, "start", null, null, false);
                 call.resolve();
             });
+    }
+
+    /** Crea el reconocedor de la sesión y empieza a escuchar. `false` si no pudo. */
+    private boolean listen(String id, Intent intent, boolean retried) {
+        SpeechRecognizer r = SpeechRecognizer.createSpeechRecognizer(getContext());
+        recognizer = r;
+        session = id;
+        r.setRecognitionListener(new Listener(r, id, intent, retried));
+        try {
+            r.startListening(intent);
+            return true;
+        } catch (Exception ex) {
+            emit(id, "error", "audio-capture", null, false);
+            finish(r, id);
+            return false;
+        }
     }
 
     /** Termina de escuchar y entrega lo oído (como `recognition.stop()`). */
@@ -120,7 +129,15 @@ public class ParloSpeechPlugin extends Plugin {
         final String id = call.getString("session", "");
         getActivity()
             .runOnUiThread(() -> {
-                if (recognizer != null && id.equals(session)) recognizer.stopListening();
+                if (!id.equals(session)) {
+                    // Nada.
+                } else if (recognizer != null) {
+                    recognizer.stopListening();
+                } else {
+                    // Parado durante un reintento: se cierra sin resultado.
+                    session = null;
+                    emit(id, "end", null, null, false);
+                }
                 call.resolve();
             });
     }
@@ -132,10 +149,10 @@ public class ParloSpeechPlugin extends Plugin {
         final String id = call.getString("session", "");
         getActivity()
             .runOnUiThread(() -> {
-                SpeechRecognizer r = recognizer;
-                if (r != null && id.equals(session)) {
+                if (id.equals(session)) {
+                    destroy();
                     emit(id, "error", "aborted", null, false);
-                    finish(r, id);
+                    emit(id, "end", null, null, false);
                 }
                 call.resolve();
             });
@@ -147,11 +164,12 @@ public class ParloSpeechPlugin extends Plugin {
     }
 
     private void destroy() {
-        if (recognizer == null) return;
-        try {
-            recognizer.cancel();
-            recognizer.destroy();
-        } catch (Exception ignored) {}
+        if (recognizer != null) {
+            try {
+                recognizer.cancel();
+                recognizer.destroy();
+            } catch (Exception ignored) {}
+        }
         recognizer = null;
         session = null;
     }
@@ -200,6 +218,16 @@ public class ParloSpeechPlugin extends Plugin {
         }
     }
 
+    /** Fallos del servicio que suelen arreglarse reintentando al momento. */
+    private static boolean transient_(int code) {
+        return (
+            code == SpeechRecognizer.ERROR_RECOGNIZER_BUSY ||
+            code == SpeechRecognizer.ERROR_CLIENT ||
+            code == SpeechRecognizer.ERROR_SERVER ||
+            code == 11 // ERROR_SERVER_DISCONNECTED (API 31)
+        );
+    }
+
     private static String first(Bundle bundle) {
         if (bundle == null) return null;
         ArrayList<String> list = bundle.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
@@ -211,10 +239,16 @@ public class ParloSpeechPlugin extends Plugin {
 
         private final SpeechRecognizer owner;
         private final String id;
+        private final Intent intent;
+        private final boolean retried;
+        private final long startedAt = SystemClock.elapsedRealtime();
+        private boolean heard = false;
 
-        Listener(SpeechRecognizer owner, String id) {
+        Listener(SpeechRecognizer owner, String id, Intent intent, boolean retried) {
             this.owner = owner;
             this.id = id;
+            this.intent = intent;
+            this.retried = retried;
         }
 
         private boolean stale() {
@@ -226,6 +260,7 @@ public class ParloSpeechPlugin extends Plugin {
 
         @Override
         public void onBeginningOfSpeech() {
+            heard = true;
             if (!stale()) emit(id, "speechstart", null, null, false);
         }
 
@@ -241,6 +276,23 @@ public class ParloSpeechPlugin extends Plugin {
         @Override
         public void onError(int error) {
             if (stale()) return;
+            // Al reabrir el micro justo después de cerrar otro (manos libres), el
+            // servicio de Google a veces aún se está apagando y la sesión nueva
+            // falla al instante (desconectado/ocupado). Se reintenta UNA vez, sin
+            // avisar a la web: si no, manos libres lo tomaría por «sin red».
+            boolean early = !heard && SystemClock.elapsedRealtime() - startedAt < 1500;
+            if (!retried && early && transient_(error)) {
+                Logger.debug("ParloSpeech", "reintento tras error " + error);
+                try {
+                    owner.destroy();
+                } catch (Exception ignored) {}
+                recognizer = null;
+                getBridge().getWebView().postDelayed(() -> {
+                    if (recognizer == null && id.equals(session)) listen(id, intent, true);
+                }, 300);
+                return;
+            }
+            Logger.debug("ParloSpeech", "error " + error);
             emit(id, "error", webError(error), null, false);
             finish(owner, id);
         }
