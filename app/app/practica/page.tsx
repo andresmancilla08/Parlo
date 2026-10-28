@@ -6,18 +6,9 @@ import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import {
   IconArrowRight,
-  IconBriefcase,
   IconHeadphones,
-  IconCoffee,
-  IconContract,
-  IconHome2,
   IconMicrophone,
-  IconNews,
-  IconPlane,
-  IconPresentationAnalytics,
-  IconStethoscope,
   IconUsers,
-  type Icon,
 } from "@tabler/icons-react";
 import { SCENARIOS, scenarioById, type Scenario } from "@/lib/coach";
 import { useProgress } from "@/lib/progress";
@@ -27,19 +18,9 @@ import { BackButton } from "@/components/ui/back-button";
 import { SpeakControls } from "@/components/ui/speak-controls";
 import { Conversation } from "@/components/practica/conversation";
 import { Missions } from "@/components/practica/missions";
+import { CallEntryCard } from "@/components/app/call-entry-card";
+import { SCENARIO_ICON } from "@/components/app/scenario-icons";
 import { rise, spring, stagger } from "@/lib/motion";
-
-const SCENARIO_ICON: Record<string, Icon> = {
-  cafe: IconCoffee,
-  intro: IconUsers,
-  travel: IconPlane,
-  doctor: IconStethoscope,
-  interview: IconBriefcase,
-  flat: IconHome2,
-  negotiation: IconContract,
-  debate: IconNews,
-  board: IconPresentationAnalytics,
-};
 
 export default function PracticaPage() {
   const [scenarioId, setScenarioId] = useState<string | null>(null);
@@ -179,6 +160,10 @@ function Picker({ onStart }: { onStart: (id: string | null) => void }) {
 
       {/* Los otros modos de práctica, visibles desde el primer momento */}
       <div className="mt-6 grid gap-2.5 sm:grid-cols-2">
+        {/* El modo llamada va primero y a todo el ancho: es la práctica estrella (2026-10-27). */}
+        <div className="sm:col-span-2">
+          <CallEntryCard />
+        </div>
         <Link href="/app/escucha" className="active:scale-[0.99]">
           <Card className="flex h-full items-center gap-3.5 p-4">
             <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent-soft text-accent-ink">
