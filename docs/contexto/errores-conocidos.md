@@ -175,3 +175,17 @@
 
 ## Manos libres y «Dilo tú» no se pueden probar de verdad en el harness
 - El Chrome headless de `shots.mjs` no lleva `--use-fake-ui-for-media-stream`, así que el reconocimiento da `not-allowed` (así se probó el estado de error de manos libres). La escucha real, el envío por silencio y la reapertura tras hablar el tutor están SIN verificar con micrófono: probar en un Android/Chrome real.
+## La llamada no reanuda o «Token has been used too many times»
+- **Síntoma:** tras un corte, la llamada vuelve pero el personaje no recuerda nada, o el WebSocket cierra con `1011 Token has been used too many times`.
+- **Causa real:** un token efímero de `uses: 1` no sirve para reconectar (en contra de lo que dice la doc), y con un token nuevo el `sessionResumption.handle` que manda el cliente se ignora porque el setup del token está bloqueado.
+- **Solución:** reconectar SIEMPRE pidiendo token nuevo a `/api/live-token` con el `handle`; el servidor lo mete en el setup del token (`liveSetup({ handle })`).
+
+## `getUserMedia` da `NotAllowedError` sin preguntar nada
+- **Causa real:** la cabecera `Permissions-Policy: microphone=()` lo prohíbe en toda la app. Ahora es `microphone=(self)` en `next.config.ts`. Si se vuelve a tocar esa cabecera, comprobar el modo llamada.
+
+## Modo llamada en iPhone (sin verificar en dispositivo)
+- **A vigilar:** con el micro abierto iOS puede mandar el audio al auricular (se oye bajísimo). Se pide `navigator.audioSession.type = "play-and-record"` (Safari 16.4+) y el `AudioContext` se crea dentro del toque; falta confirmarlo en un iPhone real, también con Parlo instalada (standalone: `getUserMedia` funciona desde iOS 14.3, a diferencia del dictado).
+- **Eco:** sin auriculares el modelo puede oírse a sí mismo e interrumpirse; `echoCancellation` lo reduce, por eso la pantalla recomienda auriculares.
+
+## Probar `/api/live-token` sin emulador
+- `next dev -p <puerto>` con `NEXT_PUBLIC_FIREBASE_PROJECT_ID=demo-…` y `FIREBASE_AUTH_EMULATOR_HOST` puesto (no hace falta que el emulador corra): la guarda acepta un JWT sin firma con `aud` = proyecto y `sub`. En dev, abrir la app por `localhost` y no por `127.0.0.1`: Next bloquea los recursos de dev a otros orígenes y la página no hidrata.

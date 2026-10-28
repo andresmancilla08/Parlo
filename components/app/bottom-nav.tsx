@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { navItems } from "@/lib/nav-items";
+import { isNavActive, navItems } from "@/lib/nav-items";
 import { cn } from "@/lib/utils";
 
 export function BottomNav() {
@@ -15,8 +15,9 @@ export function BottomNav() {
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-bg/90 backdrop-blur-md md:hidden">
       {/* px-1 y min-w-0: con 5 pestañas, en 320px el texto ensanchaba la app entera */}
       <div className="mx-auto flex max-w-lg items-stretch justify-around px-1 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-2 sm:px-4">
-        {navItems.map(({ href, labelKey, icon: Icon }) => {
-          const active = href === "/app" ? pathname === "/app" : pathname.startsWith(href);
+        {navItems.map((item) => {
+          const { href, labelKey, icon: Icon } = item;
+          const active = isNavActive(item, pathname);
           return (
             <Link
               key={href}
