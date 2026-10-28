@@ -100,13 +100,34 @@ export const RATE_NORMAL = 0.95;
 export const RATE_SLOW = 0.55;
 
 /**
+ * Velocidad de lectura preferida (perfil). Se aplica a TODA la voz de la app
+ * —neural y del dispositivo— salvo la tortuga, que siempre es `RATE_SLOW`.
+ * La voz neural se acelera o frena en la reproducción: la URL no cambia y la
+ * caché de la CDN sigue valiendo.
+ */
+export type SpeechSpeed = "slow" | "normal" | "fast";
+export const SPEECH_RATES: Record<SpeechSpeed, number> = { slow: 0.8, normal: RATE_NORMAL, fast: 1.15 };
+
+export const useSpeechSpeed = create<{ speed: SpeechSpeed; setSpeed: (s: SpeechSpeed) => void }>()(
+  persist((set) => ({ speed: "normal", setSpeed: (speed) => set({ speed }) }), {
+    name: "parlo-voice-speed",
+    storage: createJSONStorage(() => localStorage),
+  }),
+);
+
+/** Velocidad «normal» de este usuario (la que eligió en el perfil). */
+export function preferredRate(): number {
+  return SPEECH_RATES[useSpeechSpeed.getState().speed] ?? RATE_NORMAL;
+}
+
+/**
  * Lee `text`. Usa la voz elegida en el perfil; si no hay, la mejor puntuada.
  * `rate` baja a `RATE_SLOW` cuando se pulsa la tortuga.
  */
 export function speak(
   text: string,
   lang: "en" | "es" = "en",
-  rate = RATE_NORMAL,
+  rate = preferredRate(),
   /** `true` fuerza la voz del dispositivo (lo usa el propio respaldo). */
   device = false,
 ) {
@@ -190,8 +211,9 @@ let inflight: AbortController | null = null;
 /** Termina la promesa del audio que suena si se corta antes de acabar. */
 let interrupt: (() => void) | null = null;
 
-/** Corta lo que esté sonando, venga de donde venga. */
+/** Corta lo que esté sonando, venga de donde venga (y vacía la cola de frases). */
 export function stopSpeaking() {
+  clearQueue();
   synth()?.cancel();
   inflight?.abort();
   inflight = null;
@@ -234,10 +256,14 @@ async function playServer(text: string, rate: number): Promise<void> {
   } finally {
     if (inflight === ctrl) inflight = null;
   }
+  return playBlob(blob, rate);
+}
 
+/** Reproduce un WAV ya descargado en el `<audio>` compartido. */
+function playBlob(blob: Blob, rate: number): Promise<void> {
   const src = URL.createObjectURL(blob);
   const audio = player();
-  if (!audio) throw new Error("tts");
+  if (!audio) return Promise.reject(new Error("tts"));
   return new Promise((resolve, reject) => {
     let settled = false;
     const finish = (err?: unknown) => {
@@ -357,17 +383,18 @@ export function unlockAudio() {
  */
 export async function speakAuto(text: string, lang: "en" | "es" = "en"): Promise<boolean> {
   if (!text.trim()) return true;
+  const rate = preferredRate();
   if (!serverAvailable(text)) {
-    speak(text, lang, RATE_NORMAL, true);
+    speak(text, lang, rate, true);
     return true;
   }
   stopSpeaking();
   try {
-    await playServer(text, RATE_NORMAL);
+    await playServer(text, rate);
     return true;
   } catch (err) {
     if (err instanceof AutoplayBlockedError) return false;
-    speak(text, lang, RATE_NORMAL, true);
+    speak(text, lang, rate, true);
     return true;
   }
 }
@@ -379,7 +406,7 @@ export async function speakAuto(text: string, lang: "en" | "es" = "en"): Promise
 export async function speakAndWait(
   text: string,
   lang: "en" | "es" = "en",
-  rate = RATE_NORMAL,
+  rate = preferredRate(),
 ): Promise<void> {
   if (!text.trim()) return;
   if (serverAvailable(text)) {
@@ -391,17 +418,159 @@ export async function speakAndWait(
       // Sigue con la voz del dispositivo.
     }
   }
-  await new Promise<void>((resolve) => {
+  await deviceAndWait(text, lang, rate);
+}
+
+/** Voz del dispositivo, esperando a que termine. */
+function deviceAndWait(text: string, lang: "en" | "es", rate: number): Promise<void> {
+  return new Promise<void>((resolve) => {
     speak(text, lang, rate, true);
     const s = synth();
     if (!s) return resolve();
+    // Chrome tarda un instante en marcar `speaking`: sin este margen, el
+    // primer sondeo veía «nada sonando» y daba la frase por terminada.
+    let grace = 1;
+    const done = () => {
+      clearInterval(check);
+      deviceWaiters.delete(done);
+      resolve();
+    };
     const check = setInterval(() => {
-      if (!s.speaking && !s.pending) {
-        clearInterval(check);
-        resolve();
-      }
-    }, 200);
+      if (!s.speaking && !s.pending && grace-- <= 0) done();
+    }, 100);
+    deviceWaiters.add(done);
   });
+}
+
+/** Esperas de la voz del dispositivo que `stopSpeaking` debe soltar. */
+const deviceWaiters = new Set<() => void>();
+
+/* ---------------- cola de frases (respuesta del tutor en streaming) ---------------- */
+
+/**
+ * La respuesta del tutor llega por trozos; cada frase entra aquí en cuanto se
+ * completa y suena en orden. La voz neural de las DOS siguientes se pide por
+ * adelantado mientras suena la actual, para que no haya silencios entre
+ * frases. Si una frase no se puede pedir, esa frase suena con la voz del
+ * dispositivo y la cola sigue. `stopSpeaking()` la vacía.
+ */
+type QueueItem = { text: string; voice: Promise<Blob | null> | null };
+
+const PREFETCH = 2;
+let queue: QueueItem[] = [];
+let queueRunning = false;
+/** Cambia en cada `clearQueue`: una vuelta vieja de la cola deja de actuar. */
+let queueGen = 0;
+let queueCtrl: AbortController | null = null;
+let onQueueBlocked: (() => void) | null = null;
+let onQueueStart: (() => void) | null = null;
+const queueListeners = new Set<() => void>();
+
+function setQueueRunning(next: boolean) {
+  if (queueRunning === next) return;
+  queueRunning = next;
+  for (const l of queueListeners) l();
+}
+
+function clearQueue() {
+  queueGen++;
+  queue = [];
+  queueCtrl?.abort();
+  queueCtrl = null;
+  onQueueBlocked = null;
+  onQueueStart = null;
+  for (const release of deviceWaiters) release();
+  deviceWaiters.clear();
+  setQueueRunning(false);
+}
+
+/** Pide por adelantado la voz de las primeras frases de la cola. */
+function prefetch() {
+  for (const item of queue.slice(0, PREFETCH)) {
+    if (item.voice || !serverAvailable(item.text)) continue;
+    queueCtrl ??= new AbortController();
+    const signal = queueCtrl.signal;
+    item.voice = fetchVoice(item.text, signal).catch((err) => {
+      if (!signal.aborted && !(err instanceof NotSignedInError)) {
+        serverDownUntil = Date.now() + COOLDOWN_MS;
+      }
+      return null;
+    });
+  }
+}
+
+async function runQueue(gen: number) {
+  setQueueRunning(true);
+  let first = true;
+  while (gen === queueGen && queue.length > 0) {
+    prefetch();
+    const item = queue[0];
+    const blob = item.voice ? await item.voice : null;
+    if (gen !== queueGen) return;
+    queue.shift();
+    prefetch();
+    if (first) {
+      first = false;
+      onQueueStart?.();
+      onQueueStart = null;
+    }
+    const rate = preferredRate();
+    if (blob) {
+      try {
+        await playBlob(blob, rate);
+        continue;
+      } catch (err) {
+        if (gen !== queueGen) return;
+        if (err instanceof AutoplayBlockedError) {
+          // Sin gesto previo (iOS): se avisa para que la UI ofrezca «Toca para oír».
+          const blocked = onQueueBlocked;
+          clearQueue();
+          blocked?.();
+          return;
+        }
+      }
+    }
+    if (gen !== queueGen) return;
+    await deviceAndWait(item.text, "en", rate);
+  }
+  if (gen === queueGen) setQueueRunning(false);
+}
+
+/**
+ * Añade una frase a la cola de lectura. `onStart` se llama cuando empieza a
+ * sonar la primera frase de esta tanda (sirve para medir la latencia);
+ * `onBlocked` si el navegador bloqueó el audio por falta de gesto.
+ */
+export function enqueueSpeech(
+  text: string,
+  opts: { onStart?: () => void; onBlocked?: () => void } = {},
+) {
+  const clean = text.trim();
+  if (!clean) return;
+  if (opts.onBlocked) onQueueBlocked = opts.onBlocked;
+  if (opts.onStart && !queueRunning) onQueueStart = opts.onStart;
+  // Antes de la primera frase se calla lo que sonara (otra frase suelta).
+  if (!queueRunning) {
+    const keep = { blocked: onQueueBlocked, start: onQueueStart };
+    stopSpeaking();
+    onQueueBlocked = keep.blocked;
+    onQueueStart = keep.start;
+  }
+  queue.push({ text: clean, voice: null });
+  prefetch();
+  if (!queueRunning) void runQueue(queueGen);
+}
+
+/** ¿Está sonando (o por sonar) la cola de frases? Para el modo manos libres. */
+export function useQueueSpeaking(): boolean {
+  return useSyncExternalStore(
+    (cb) => {
+      queueListeners.add(cb);
+      return () => queueListeners.delete(cb);
+    },
+    () => queueRunning,
+    () => false,
+  );
 }
 
 /** ¿Sólo hay voces malas instaladas? Sirve para avisar en la UI. */

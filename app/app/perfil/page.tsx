@@ -33,6 +33,7 @@ import { LangToggle } from "@/components/ui/lang-toggle";
 import { VoicePicker } from "@/components/ui/voice-picker";
 import { speak, useServerVoice } from "@/lib/tts";
 import { ReminderSetting } from "@/components/app/reminder-setting";
+import { CoachSettings } from "@/components/app/coach-settings";
 import { playCorrect, useSfx } from "@/lib/sfx";
 import { spring } from "@/lib/motion";
 import { cn } from "@/lib/utils";
@@ -178,6 +179,8 @@ export default function PerfilPage() {
       </div>
 
       <NeuralVoiceSetting />
+
+      <CoachSettings />
 
       <div className="mt-8">
         <p className="mb-2 text-sm font-semibold text-muted">

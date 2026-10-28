@@ -18,7 +18,7 @@ import { deleteAllDocs } from "@/lib/reader/store";
 //
 // Se CONSERVA (es del dispositivo, no de la persona):
 //   parlo-theme, parlo-lang, parlo-sfx, parlo-sidebar, parlo-pwa-dismissed,
-//   parlo-voice, parlo-voice-server.
+//   parlo-voice, parlo-voice-server, parlo-voice-speed, parlo-coach-prefs.
 
 const DOC_CACHE_PREFIX = "parlo-doc-es:";
 const SESSION_KEYS = ["parlo-verify-hidden"];
