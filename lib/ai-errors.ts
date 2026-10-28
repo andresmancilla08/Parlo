@@ -43,6 +43,17 @@ export function upstreamBusy(err: unknown): { status: 429 | 503; retryAfter: num
   return null;
 }
 
+/**
+ * ¿Es el tope DIARIO del free tier? (`generate_content_free_tier_requests`,
+ * «per day»). Ese no se arregla esperando un minuto: el modelo no vuelve hasta
+ * el día siguiente, así que tiene sentido pasar a otro modelo con cuota propia.
+ */
+export function dailyQuotaExceeded(err: unknown): boolean {
+  const e = apiError(err);
+  if (e?.statusCode !== 429) return false;
+  return /per\s*day|PerDay/i.test(e.responseBody ?? "");
+}
+
 /** Respuesta JSON que entiende el cliente (`error: "ai_busy"`). */
 export function busyResponse(busy: { status: 429 | 503; retryAfter: number }): Response {
   return Response.json(

@@ -1,6 +1,6 @@
 // Check runnable. Correr: node --experimental-strip-types lib/ai-errors.check.ts
 import assert from "node:assert";
-import { busyResponse, upstreamBusy } from "./ai-errors.ts";
+import { busyResponse, dailyQuotaExceeded, upstreamBusy } from "./ai-errors.ts";
 
 const quota = {
   statusCode: 429,
@@ -30,6 +30,17 @@ assert.equal(upstreamBusy({ cause: { lastError: { statusCode: 503 } } })?.status
 assert.equal(upstreamBusy({ statusCode: 400 }), null);
 assert.equal(upstreamBusy(new Error("JSON roto")), null);
 assert.equal(upstreamBusy(null), null);
+
+// Tope diario del free tier: se distingue del de por minuto.
+const daily = {
+  statusCode: 429,
+  responseBody:
+    '{"error":{"code":429,"message":"Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-3.8-flash, description: Generate content requests per day limit exceeded on Free Tier.","details":[{"quotaId":"GenerateRequestsPerDayPerProjectPerModel-FreeTier"}]}}',
+};
+assert.equal(dailyQuotaExceeded(daily), true, "tope diario");
+assert.equal(dailyQuotaExceeded({ lastError: daily }), true, "tope diario envuelto");
+assert.equal(dailyQuotaExceeded(quota), false, "el de por minuto no es diario");
+assert.equal(dailyQuotaExceeded({ statusCode: 503, responseBody: "per day" }), false, "sólo 429");
 
 const res = busyResponse({ status: 429, retryAfter: 23 });
 assert.equal(res.status, 429);

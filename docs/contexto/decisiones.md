@@ -246,3 +246,34 @@
 ## Consejos del briefing en i18n; frases preparadas como datos bilingües
 - **Qué:** `tipEs` salió de `lib/coach.ts` a `practica.tip_<id>` (es/en). `prep[].es` se queda en el código: es la traducción al idioma del alumno (hispanohablante), contenido bilingüe como la guía, no texto de interfaz.
 - **Estado:** vigente.
+
+## Coach en streaming: `reply` primero y lectura por frases (2026-10-27, fase 2 de voz)
+- **Qué:** `/api/coach` usa `streamText` + `Output.object` y reenvía el JSON del modelo tal cual llega (texto plano). El esquema pone `reply` → `goalsMet` → `corrections`; con `responseJsonSchema` Gemini respeta ese orden (comprobado con Gemini real). El cliente saca `reply` del JSON a medias (`extractReply`, `lib/coach-stream.ts`), lo parte en trozos de ≥40 caracteres que acaban en fin de oración (`takeSentences`, `lib/sentences.ts`) y los manda a `enqueueSpeech` (`lib/tts.ts`). Al terminar valida el JSON entero (`parseCoachFinal`); si llegó roto se salva la respuesta sin correcciones.
+- **Errores:** los 429/503 sólo se pueden convertir en `ai_busy` ANTES del primer byte, así que la ruta espera al primer trozo de texto antes de responder. A mitad de stream se corta y el cliente se queda con lo que llegó.
+- **Cola de voz:** frases en orden con la voz neural, pedidas de UNA en una (la siguiente se pide al llegar la anterior, mientras suena); si una falla, esa frase va con la voz del dispositivo. `stopSpeaking()` vacía la cola. `useQueueSpeaking()` dice si suena algo (lo usa manos libres).
+- **Descartado:** `streamObject` (en `ai` 7 lo recomendado es `streamText` + `output`); `useObject` de `@ai-sdk/react` (habría que cambiar el protocolo y el manejo de 429 propio); pedir la voz de dos frases a la vez (daba 429 en `/api/tts` y apagaba la voz neural 5 min).
+- **Latencia medida (Gemini real, dev:emu, 3 turnos):** primer texto de la respuesta 1,2-1,6 s y primera frase lista 1,3-1,7 s desde que se envía; primer AUDIO neural 4,7-6,9 s, porque `/api/tts` tarda 2,6-5,6 s por frase. Ver `errores-conocidos.md`.
+- **Estado:** vigente.
+
+## Modelo de respaldo ante el tope DIARIO del free tier
+- **Qué:** si `gemini-flash-latest` devuelve 429 por el tope de peticiones AL DÍA (`dailyQuotaExceeded`, `lib/ai-errors.ts`), el turno y el resumen se reintentan UNA vez con `gemini-flash-lite-latest`, que tiene cuota propia. El de por minuto sigue sin reintentarse.
+- **Por qué:** el free tier del modelo principal es de ~20 peticiones al día por proyecto; con eso el tutor se apagaba a media mañana. Esperar no sirve (vuelve al día siguiente) y el ligero conversa bien. Coste cero igual.
+- **Estado:** vigente.
+
+## Corrección suave por defecto; la puerta pasa a «modo estricto»
+- **Qué:** la respuesta suena enseguida y las correcciones aparecen como tarjeta debajo de tu mensaje (`CorrectionCard`), con los `original` subrayados en tu burbuja; al tocar uno se ve lo corregido en su sitio (`markFragments`, `lib/corrections.ts`). La puerta de antes (leer antes de seguir) es el «modo estricto» del perfil (`useCoachPrefs`, `parlo-coach-prefs`), apagado por defecto. En manos libres siempre es suave.
+- **Por qué:** cortar la charla en cada error rompe el ritmo de una conversación hablada; la corrección sigue a la vista y con su porqué.
+- **Estado:** vigente.
+
+## «Dilo tú», misiones, resumen y velocidad de voz
+- **Dilo tú:** en la tarjeta de corrección; repite la frase entera ya corregida (`applyCorrections`) y se puntúa con `scoreAttempt` + `completeSpeaking` (2 XP por palabra), igual que Pronunciación.
+- **Misiones:** cada escenario lleva 2-3 `goals` (`lib/coach.ts`, texto en `practica.mission_<escenario>_<id>`). El esquema limita `goalsMet` a esos ids (enum) y el cliente vuelve a filtrar. Se enseñan en el briefing.
+- **Resumen:** «Terminar» llama a `/api/coach` con `mode: "summary"` (misma puerta y mismo límite por uid) con la ventana de la charla y las correcciones hechas; devuelve errores recurrentes, 5-8 frases con traducción y una nota. «Añadir al repaso» usa `addCard(en, es)`, que no duplica.
+- **Velocidad:** lenta/normal/rápida (0,8/0,95/1,15) en el perfil (`useSpeechSpeed`, `parlo-voice-speed`). Vale para TODA la voz (neural por `playbackRate`, la URL cacheada no cambia; dispositivo por `rate`). La tortuga sigue siendo `RATE_SLOW`.
+- **Estado:** vigente.
+
+## Manos libres: medio dúplex con Web Speech
+- **Qué:** `useHandsFree` (`lib/hands-free.ts`): reconocimiento continuo, envío tras 1,2 s de silencio, y el micro sólo está abierto cuando no se piensa ni habla el tutor (`canListen` en la conversación). Si el navegador cierra la sesión sola, se reabre. Un fallo serio (permiso, sin micro) deja el panel «En pausa» con el aviso.
+- **Dónde:** Chrome/Android/APK (TWA). Oculto donde no hay reconocimiento (Firefox) o no funciona (iOS instalada), igual que el dictado.
+- **Descartado:** escuchar mientras habla el tutor (se transcribiría a sí mismo) y VAD/librerías de audio (peso y coste para lo que la API del navegador ya hace).
+- **Estado:** vigente. Sin probar con micrófono real (ver `errores-conocidos.md`).

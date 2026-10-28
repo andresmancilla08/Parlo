@@ -159,3 +159,19 @@
 - **Síntoma:** recomendaciones de seguridad antiguas piden `getDocument({ isEvalSupported: false })`.
 - **Causa real:** la opción se eliminó; el build de la serie 6 no usa `eval` ni `new Function` (comprobado con grep en `build/pdf*.mjs`).
 - **Solución:** la mitigación es la versión (`>= 6.2.108`); `lib/reader/parse.ts` pasa sólo `enableXfa: false`.
+
+## El stream del coach se quedaba colgado minutos (`pull` que vuelve sin encolar)
+- **Síntoma:** `/api/coach` respondía 200 y el cliente esperaba para siempre (3,5 min en el log hasta que se cortó).
+- **Causa real:** en un `ReadableStream`, si `pull()` vuelve sin `enqueue` ni `close` (llegó una parte que no es texto: `start-step`, `finish`…), el navegador no lo vuelve a llamar y la lectura pendiente no se resuelve nunca.
+- **Solución:** `pull` itera `result.stream` hasta encolar texto, cerrar o fallar. No volver a un `pull` de «una parte por llamada».
+
+## El tutor responde «ai_busy» con 120 s pero no vuelve en 2 minutos
+- **Causa real:** el free tier de `gemini-flash-latest` tiene un tope de ~20 peticiones AL DÍA por proyecto (`generate_content_free_tier_requests`); Google pide esperar horas. El plazo que enseña el cliente está topado a 120 s. La clave es la misma para todo (tutor, traducción, y lo que añada la fase 3), así que se agota entre todos.
+- **Solución:** ante el tope diario la ruta pasa a `gemini-flash-lite-latest` (ver `decisiones.md`). Si también se agota, sigue el aviso normal.
+
+## La primera frase se LEE en ~1,5 s pero SUENA a los ~5 s
+- **Parece roto pero es el coste de la voz neural:** el texto llega en 1,2-1,7 s, pero `/api/tts` (Gemini TTS) tarda 2,6-5,6 s en generar cada frase y el free tier del modelo de voz admite muy pocas peticiones por minuto (dos a la vez ya daban 429). La CDN sólo ayuda con frases repetidas.
+- **Opciones si se quiere bajar:** apagar la voz neural en el perfil (la del dispositivo suena al instante) o leer la PRIMERA frase con la del dispositivo y el resto con la neural (mezcla dos voces en la misma respuesta; no se hizo).
+
+## Manos libres y «Dilo tú» no se pueden probar de verdad en el harness
+- El Chrome headless de `shots.mjs` no lleva `--use-fake-ui-for-media-stream`, así que el reconocimiento da `not-allowed` (así se probó el estado de error de manos libres). La escucha real, el envío por silencio y la reapertura tras hablar el tutor están SIN verificar con micrófono: probar en un Android/Chrome real.

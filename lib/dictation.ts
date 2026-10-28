@@ -11,9 +11,9 @@ import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "
 
 type RecognitionAlternative = { transcript: string };
 type RecognitionResult = ArrayLike<RecognitionAlternative> & { isFinal: boolean };
-type RecognitionEvent = { resultIndex: number; results: ArrayLike<RecognitionResult> };
+export type RecognitionEvent = { resultIndex: number; results: ArrayLike<RecognitionResult> };
 
-type Recognition = {
+export type Recognition = {
   lang: string;
   continuous: boolean;
   interimResults: boolean;
@@ -28,7 +28,7 @@ type Recognition = {
 
 type RecognitionCtor = new () => Recognition;
 
-function ctor(): RecognitionCtor | null {
+export function recognitionCtor(): RecognitionCtor | null {
   if (typeof window === "undefined") return null;
   const w = window as unknown as {
     SpeechRecognition?: RecognitionCtor;
@@ -133,7 +133,7 @@ export function useDictation(
   const iosStandalone = useSyncExternalStore(subscribeNever, isIosStandalone, () => false);
   const available = useSyncExternalStore(
     subscribeNever,
-    () => ctor() !== null,
+    () => recognitionCtor() !== null,
     () => false,
   );
   const supported = available && !iosStandalone;
@@ -172,7 +172,7 @@ export function useDictation(
       stop();
       return;
     }
-    const Ctor = ctor();
+    const Ctor = recognitionCtor();
     if (!Ctor) return;
 
     const r = new Ctor();

@@ -20,6 +20,7 @@ PWA web que enseña inglés a hispanohablantes con currículo por niveles + tuto
 - `components/lesson/` — `lesson-teach.tsx` (fase «Aprende») y `lesson-runner.tsx` (práctica).
 - `app/api/tts/` — voz neural (Gemini TTS) devuelta como WAV. GET a propósito: la misma frase es la misma URL y la cachea la CDN. Exige sesión vía `x-parlo-token`.
 - `lib/api-guard.ts` + `lib/firebase-token.ts` — puerta de las rutas de IA (IP → ID token de Firebase → límite por uid). Cliente: `lib/api-client.ts` (`apiFetch`).
+- `components/practica/` — la conversación con el tutor: `conversation.tsx` (streaming, cola de voz, manos libres, puerta estricta), `corrections.tsx` (burbuja subrayada + tarjeta suave), `say-it.tsx`, `missions.tsx`, `hands-free-panel.tsx`, `summary.tsx`, `send-error.tsx`. Lógica pura en `lib/coach-stream.ts`, `lib/sentences.ts` y `lib/corrections.ts` (con `.check.ts`); manos libres en `lib/hands-free.ts`.
 - `lib/guide/` — sección de consulta: `irregulars.ts`, `phrasals.ts`, `false-friends.ts`, `regulars.ts` (datos bilingües) y `conjugate.ts` (motor puro de los 15 tiempos). `index.ts` cablea motor + tabla; los `.check.ts` corren con node y por eso `conjugate.ts` NO importa la tabla.
 - `lib/curriculum/` — `levels/*` (ejercicios base), `extra/*` (ejercicios añadidos, mapa `lessonId → Exercise[]`) y `teach/*` (teoría, mapa `lessonId → TeachStep[]`). `data.ts` los compone con `withExtra()`.
 - `lib/` — `firebase.ts` (init cliente), `utils.ts` (`cn`), `sfx.ts` (sonidos WebAudio), `dictation.ts` (voz→texto), `tts.ts` (texto→voz, normal y lenta), `pronunciation.ts` (puntuar lectura en voz alta), `league*.ts` (liga: `league-core` es la parte pura y `league` la de Firestore), `sync.ts` + `progress-merge.ts` (sync del progreso por transacción; la fusión es pura), `local-data.ts` (qué se borra del dispositivo al cerrar sesión), `chunk-reload.ts` (recarga ante `ChunkLoadError`).
@@ -29,7 +30,7 @@ PWA web que enseña inglés a hispanohablantes con currículo por niveles + tuto
 - **Aprendizaje:** currículo curado A1→B2 (24 unidades) → **teoría** (`getTeach`) → lección → ejercicios → progreso/SRS en Firestore.
   Cada lección enseña ANTES de evaluar: `/app/leccion?id=…` arranca en la fase «Aprende» y sólo entra a los
   ejercicios al terminarla (o si `progress.taught` ya la contiene). `?mode=teoria|practica` fuerza una u otra.
-- **IA (tutor/corrección):** cliente → Route Handler `/api/...` → Gemini vía AI SDK (streaming) → respuesta. La clave de IA vive solo en el servidor.
+- **IA (tutor/corrección):** cliente → `/api/coach` (token de Firebase) → `streamText` con `Output.object` → JSON en texto plano por streaming → el cliente extrae `reply`, lo parte en frases y las lee en cola (`/api/tts` por frase) → al final valida correcciones y misiones. La clave de IA vive solo en el servidor.
 - **PWA:** `manifest.ts` sirve `/manifest.webmanifest`; `sw.ts` precachea y da offline parcial (solo en producción).
 
 - **Liga:** el ÚNICO dato compartido. `leagues/{id}` + `leagues/{id}/scores/{uid}` + `leagueCodes/{code}`; sólo viajan alias y XP semanal, y las reglas impiden tocar la entrada de otro.
