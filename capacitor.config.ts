@@ -26,12 +26,9 @@ const config: CapacitorConfig = {
   },
   plugins: {
     SystemBars: {
-      // El WebView va de borde a borde (la web ya pide `viewport-fit=cover` y
-      // respeta `env(safe-area-inset-*)`): detrás de la barra de estado se ve
-      // el color de la propia pantalla, como en la PWA instalada.
-      insetsHandling: "css",
-      initialViewportFitValueHint: "cover",
-      style: "DEFAULT",
+      // Los márgenes de las barras los pone MainActivity (encoge el WebView
+      // para que nada quede debajo de la barra de estado ni del teclado).
+      insetsHandling: "disable",
     },
     SplashScreen: {
       launchShowDuration: 1200,

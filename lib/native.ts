@@ -1,6 +1,6 @@
 "use client";
 
-import { Capacitor, registerPlugin, SystemBars, SystemBarsStyle } from "@capacitor/core";
+import { Capacitor, registerPlugin } from "@capacitor/core";
 
 // Puente con la APK de Android (Capacitor). La APK carga ESTA web desde
 // Vercel y le inyecta `window.Capacitor`; en el navegador nada de esto existe
@@ -61,8 +61,14 @@ export const NativeSpeech = registerPlugin<ParloSpeechPlugin>("ParloSpeech");
 
 /* ---------------- barra de estado ---------------- */
 
-/** Iconos de la barra de estado claros u oscuros según el tema de la web. */
+type ParloShellPlugin = { setTheme(o: { dark: boolean }): Promise<void> };
+const ParloShell = registerPlugin<ParloShellPlugin>("ParloShell");
+
+/**
+ * Franjas de la barra de estado y de navegación del color del tema de la web
+ * (que puede no ser el del sistema), con iconos legibles.
+ */
 export function syncStatusBar(dark: boolean) {
-  if (!isNativeApp()) return;
-  SystemBars.setStyle({ style: dark ? SystemBarsStyle.Dark : SystemBarsStyle.Light }).catch(() => {});
+  if (!hasNativePlugin("ParloShell")) return;
+  ParloShell.setTheme({ dark }).catch(() => {});
 }
