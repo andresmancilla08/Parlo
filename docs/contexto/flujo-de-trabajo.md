@@ -48,15 +48,19 @@ Ningún servicio tiene facturación activada y así debe seguir:
 - El tutor, la voz y la traducción usan Gemini DE VERDAD (la clave de `.env.local`). Las rutas aceptan los tokens sin firma del emulador solo si `NODE_ENV != production`, hay `FIREBASE_AUTH_EMULATOR_HOST` y el proyecto empieza con `demo-` (`emulatorMode()`, probado en `firebase-token.check.ts`).
 - Capturas: `~/.claude/skills/visual-team/tools/shots.mjs` con un plan que se registra en `/registro` y navega (React: asignar `value` con el setter nativo + evento `input`).
 - Nunca crear cuentas de prueba en el Firebase de producción.
-## APK de Android (TWA, instalación manual)
+## APK de Android (Capacitor, instalación manual)
 
 ```bash
-cd android
-JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew assembleDebug
-cp app/build/outputs/apk/debug/app-debug.apk ~/Downloads/parlo-$(node -p "require('../package.json').version").apk
+export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"   # Java 21
+pnpm android:apk            # cap sync android + ./gradlew assembleDebug
+cp android/app/build/outputs/apk/debug/app-debug.apk ~/Downloads/parlo-$(node -p "require('./package.json').version").apk
 ```
 
-- Necesita `android/local.properties` con `sdk.dir=/Users/<usuario>/Library/Android/sdk` (no se versiona).
-- La APK carga producción: no hay que recompilarla al cambiar la web. Solo al cambiar ícono, nombre, URL o versión.
-- Instalar en el teléfono: pasar el `.apk` (WhatsApp/Drive), abrirlo y permitir «Instalar apps desconocidas» para la app desde la que se abre. Requiere Chrome instalado (si no, abre en otro navegador con barra).
-- Probar en emulador sin ventana: `emulator -avd Pixel_9_Pro -no-window -no-audio`, `adb install -r <apk>`, `adb exec-out screencap -p > shot.png`.
+- `android/local.properties` (`sdk.dir=…/Library/Android/sdk`) lo crea Gradle/Android Studio; no se versiona.
+- La APK carga producción (`server.url` en `capacitor.config.ts`): los cambios WEB llegan sin recompilarla, al desplegar. Recompilar sólo al cambiar código nativo (`android/`), plugins, ícono, nombre, URL o versión.
+- Versión: `versionName`/`versionCode` salen de `package.json` (`maj*10000+min*100+pat`; 0.11.0 → 1100). Subirla antes de cada APK.
+- Firma: debug keystore de la Mac del dueño (`~/.android/debug.keystore`, SHA-256 `49:B2:2F:…:68:9D`), la misma de la TWA: se instala encima. Desde otra Mac la firma cambia y hay que desinstalar antes.
+- `pnpm build` (Vercel) no toca `android/`; `capacitor.config.ts` y `capacitor/www/` no entran en el bundle.
+- Instalar en el teléfono: pasar el `.apk` (WhatsApp/Drive), abrirlo y permitir «Instalar apps desconocidas». Ya no necesita Chrome.
+- Probar en emulador sin ventana: `emulator -avd Pixel_9_Pro -no-window -no-audio`, `adb install -r <apk>`, `adb exec-out screencap -p > shot.png`. Contra `next dev`: ver `errores-conocidos.md` («probarla contra next dev»).
+- Checklist de la APK: carga Parlo sin rastro de Chrome; atrás navega y en la portada minimiza; un enlace externo abre el navegador; modo avión → «Sin conexión»; el micro pide permiso y, denegado, avisa de Ajustes; tema oscuro → barras oscuras.

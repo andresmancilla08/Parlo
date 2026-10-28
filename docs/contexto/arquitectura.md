@@ -25,6 +25,8 @@ PWA web que enseña inglés a hispanohablantes con currículo por niveles + tuto
 - `lib/guide/` — sección de consulta: `irregulars.ts`, `phrasals.ts`, `false-friends.ts`, `regulars.ts` (datos bilingües) y `conjugate.ts` (motor puro de los 15 tiempos). `index.ts` cablea motor + tabla; los `.check.ts` corren con node y por eso `conjugate.ts` NO importa la tabla.
 - `lib/curriculum/` — `levels/*` (ejercicios base), `extra/*` (ejercicios añadidos, mapa `lessonId → Exercise[]`) y `teach/*` (teoría, mapa `lessonId → TeachStep[]`). `data.ts` los compone con `withExtra()`.
 - `lib/` — `firebase.ts` (init cliente), `utils.ts` (`cn`), `sfx.ts` (sonidos WebAudio), `dictation.ts` (voz→texto), `tts.ts` (texto→voz, normal y lenta), `pronunciation.ts` (puntuar lectura en voz alta), `league*.ts` (liga: `league-core` es la parte pura y `league` la de Firestore), `sync.ts` + `progress-merge.ts` (sync del progreso por transacción; la fusión es pura), `local-data.ts` (qué se borra del dispositivo al cerrar sesión), `chunk-reload.ts` (recarga ante `ChunkLoadError`).
+- `lib/native.ts` + `lib/native-speech.ts` — puente con la APK (Capacitor): detección (`isNativeApp`), voz del dispositivo (plugin TextToSpeech), reconocimiento de voz (`NativeRecognition`, con la forma de la Web Speech API) y color de las barras. En el navegador no hacen nada.
+- `android/` — proyecto Capacitor 8 (APK `co.parlo.app`): `MainActivity.java` (atrás, márgenes de las barras y el teclado), `ParloSpeechPlugin.java` (SpeechRecognizer de Android), `ParloShellPlugin.java` (tema de las barras). `capacitor.config.ts` en la raíz; `capacitor/www/` sólo tiene la página «Sin conexión».
 - `docs/` — `roadmap-mvp.md` y `docs/contexto/`.
 
 ## Flujo de datos
@@ -39,7 +41,7 @@ PWA web que enseña inglés a hispanohablantes con currículo por niveles + tuto
 - **Liga:** el ÚNICO dato compartido. `leagues/{id}` + `leagues/{id}/scores/{uid}` + `leagueCodes/{code}`; sólo viajan alias y XP semanal, y las reglas impiden tocar la entrada de otro.
 
 ## Lo que NO existe (descartado)
-- **Nada nativo** (sin Expo/React Native): Parlo es SIEMPRE web PWA. `android/` es solo un envoltorio TWA que abre la web de producción en Chrome (ver decisiones).
+- **Nada de Expo/React Native:** la app es la web PWA. `android/` es un envoltorio Capacitor cuyo WebView carga la web de producción; lo nativo se limita a lo que el WebView no trae (voz, reconocimiento, barras). Ya no hay TWA (ver decisiones).
 - **Sin Anthropic/OpenAI de pago:** se usa Gemini free tier para no tener coste.
 - **Sin i18n de UI (aún):** v1 solo español; strings centralizados para extraer con i18next más adelante.
 - **Sin Postgres:** se eligió Firebase.

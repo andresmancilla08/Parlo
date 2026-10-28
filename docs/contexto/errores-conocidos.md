@@ -124,7 +124,7 @@
 - **Solución:** `mic.abort()` (quita `onresult` y aborta). `aborted` no se muestra como error.
 
 ## El micro no aparece en iPhone con Parlo instalada (es a propósito)
-- **Parece roto pero es a propósito:** en iOS en modo standalone `webkitSpeechRecognition` existe pero no funciona, así que se oculta el micro y se sugiere abrir Parlo en Safari. En Safari normal y en la APK de Android (TWA, Chrome) el micro sigue.
+- **Parece roto pero es a propósito:** en iOS en modo standalone `webkitSpeechRecognition` existe pero no funciona, así que se oculta el micro y se sugiere abrir Parlo en Safari. En Safari normal y en la APK de Android (reconocedor nativo, `lib/native-speech.ts`) el micro sigue.
 
 ## /api/coach, /api/translate o /api/tts responden 401
 - **Causa real:** desde esta rama exigen el ID token de Firebase (`apiFetch` o, en TTS, `x-parlo-token`). Un `fetch('/api/...')` a pelo ya no vale.
@@ -189,7 +189,31 @@
 
 ## Probar `/api/live-token` sin emulador
 - `next dev -p <puerto>` con `NEXT_PUBLIC_FIREBASE_PROJECT_ID=demo-…` y `FIREBASE_AUTH_EMULATOR_HOST` puesto (no hace falta que el emulador corra): la guarda acepta un JWT sin firma con `aud` = proyecto y `sub`. En dev, abrir la app por `localhost` y no por `127.0.0.1`: Next bloquea los recursos de dev a otros orígenes y la página no hidrata.
-## La APK muestra la barra de URL arriba
-- **Síntoma:** la app de Android abre con barra «parlo-lilac.vercel.app» y botón de cerrar.
-- **Causa real:** Chrome no pudo verificar Digital Asset Links: `/.well-known/assetlinks.json` no está desplegado o no contiene la huella SHA-256 del certificado que firmó esa APK.
-- **Solución:** desplegar `public/.well-known/assetlinks.json` con la huella correcta (`keytool -list -v -keystore <ks>`). Chrome cachea la verificación: tras corregir, borrar datos de la app o reinstalar.
+## La APK muestra la barra de URL arriba (sólo la TWA vieja, ≤ 0.10.0)
+- **Síntoma:** la app de Android 0.10.0 abría con barra «parlo-lilac.vercel.app» o avisaba de que corría en Chrome.
+- **Causa real:** era una TWA (Chrome) y dependía de Digital Asset Links.
+- **Solución:** desde 0.11.0 la APK es Capacitor (WebView propio): no hay Chrome ni barra. `public/.well-known/assetlinks.json` se deja (no estorba).
+
+## APK: la voz del dispositivo y el dictado no funcionan con la web de producción vieja
+- **Síntoma:** en la APK 0.11.0 la tortuga o el respaldo de la voz no suenan, o el micro se queda «escuchando» sin resultado.
+- **Causa real:** el WebView de Android no tiene `speechSynthesis`, y su `webkitSpeechRecognition` existe pero no reconoce (arranca y termina sin resultados). El código que usa los plugins nativos (`lib/native*.ts`, `tts.ts`, `dictation.ts`) vive en la WEB: hasta desplegarla, la APK carga la versión anterior.
+- **Solución:** desplegar la web. La voz neural (`<audio>`) y el modo llamada (`getUserMedia` + AudioWorklet) ya funcionan con la web vieja.
+
+## APK: «sin red» al reabrir el micro en manos libres
+- **Síntoma:** el reconocedor fallaba con «network» justo al volver a escuchar.
+- **Causa real:** al destruir un `SpeechRecognizer` y crear otro enseguida, el servicio de Google devuelve `ERROR_SERVER_DISCONNECTED` (11) al instante; manos libres lo tomaba por fallo serio y se pausaba.
+- **Solución:** `ParloSpeechPlugin` reintenta una vez, sin avisar a la web, los errores 5/8/11/servidor que llegan en los primeros 1,5 s sin voz.
+
+## APK: la cabecera quedaba debajo del reloj (Android 15+)
+- **Síntoma:** en /registro, Pronunciación, etc., el título y «Atrás» se montaban sobre la barra de estado.
+- **Causa real:** Android 15+ dibuja de borde a borde y esas pantallas no reservan `env(safe-area-inset-top)` (en la PWA de iOS no hace falta: `statusBarStyle: "default"`).
+- **Solución:** `MainActivity` encoge el WebView con los insets de las barras y del teclado (SystemBars de Capacitor con `insetsHandling: "disable"`); las franjas toman el color del tema vía `ParloShellPlugin`. No pasar a `insetsHandling: "css"` sin revisar todas las pantallas.
+
+## APK: el pitido del micro en manos libres (a propósito, por ahora)
+- **Parece roto pero es a propósito:** el reconocedor de Android escucha UNA frase y se cierra; manos libres lo reabre y Android puede sonar al empezar cada escucha. Silenciarlo exige tocar el volumen del sistema; no se hace.
+
+## APK: probarla contra `next dev` sin desplegar
+- `PARLO_CAP_DEV_URL=http://localhost:3123 pnpm android:apk` + `adb reverse tcp:3123 tcp:3123` (y 9099/8080 para los emuladores de Firebase, que la web busca en `127.0.0.1`). `localhost` es contexto seguro, así que `getUserMedia` funciona; con `10.0.2.2` no lo sería. Volver a compilar SIN la variable antes de entregar la APK (el `usesCleartextTraffic` sólo se activa con ella).
+- `pnpm dev:emu` necesita Java 21 también en el `PATH` (firebase-tools mira `java`, no `JAVA_HOME`).
+- Depurar el WebView: `adb forward tcp:9333 localabstract:webview_devtools_remote_<pid>` y CDP en `http://127.0.0.1:9333/json` (la APK debug lo permite).
+- En dev, la portada da un aviso de hidratación si el dispositivo está en inglés (`aria-label` de `LangToggle`): pasa igual en el navegador, no es de la APK.
