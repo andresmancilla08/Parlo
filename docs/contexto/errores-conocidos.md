@@ -189,3 +189,7 @@
 
 ## Probar `/api/live-token` sin emulador
 - `next dev -p <puerto>` con `NEXT_PUBLIC_FIREBASE_PROJECT_ID=demo-…` y `FIREBASE_AUTH_EMULATOR_HOST` puesto (no hace falta que el emulador corra): la guarda acepta un JWT sin firma con `aud` = proyecto y `sub`. En dev, abrir la app por `localhost` y no por `127.0.0.1`: Next bloquea los recursos de dev a otros orígenes y la página no hidrata.
+## La APK muestra la barra de URL arriba
+- **Síntoma:** la app de Android abre con barra «parlo-lilac.vercel.app» y botón de cerrar.
+- **Causa real:** Chrome no pudo verificar Digital Asset Links: `/.well-known/assetlinks.json` no está desplegado o no contiene la huella SHA-256 del certificado que firmó esa APK.
+- **Solución:** desplegar `public/.well-known/assetlinks.json` con la huella correcta (`keytool -list -v -keystore <ks>`). Chrome cachea la verificación: tras corregir, borrar datos de la app o reinstalar.

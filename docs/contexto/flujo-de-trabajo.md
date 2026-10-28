@@ -48,3 +48,15 @@ Ningún servicio tiene facturación activada y así debe seguir:
 - El tutor, la voz y la traducción usan Gemini DE VERDAD (la clave de `.env.local`). Las rutas aceptan los tokens sin firma del emulador solo si `NODE_ENV != production`, hay `FIREBASE_AUTH_EMULATOR_HOST` y el proyecto empieza con `demo-` (`emulatorMode()`, probado en `firebase-token.check.ts`).
 - Capturas: `~/.claude/skills/visual-team/tools/shots.mjs` con un plan que se registra en `/registro` y navega (React: asignar `value` con el setter nativo + evento `input`).
 - Nunca crear cuentas de prueba en el Firebase de producción.
+## APK de Android (TWA, instalación manual)
+
+```bash
+cd android
+JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew assembleDebug
+cp app/build/outputs/apk/debug/app-debug.apk ~/Downloads/parlo-$(node -p "require('../package.json').version").apk
+```
+
+- Necesita `android/local.properties` con `sdk.dir=/Users/<usuario>/Library/Android/sdk` (no se versiona).
+- La APK carga producción: no hay que recompilarla al cambiar la web. Solo al cambiar ícono, nombre, URL o versión.
+- Instalar en el teléfono: pasar el `.apk` (WhatsApp/Drive), abrirlo y permitir «Instalar apps desconocidas» para la app desde la que se abre. Requiere Chrome instalado (si no, abre en otro navegador con barra).
+- Probar en emulador sin ventana: `emulator -avd Pixel_9_Pro -no-window -no-audio`, `adb install -r <apk>`, `adb exec-out screencap -p > shot.png`.
