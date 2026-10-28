@@ -462,6 +462,8 @@ let queueRunning = false;
 /** Cambia en cada `clearQueue`: una vuelta vieja de la cola deja de actuar. */
 let queueGen = 0;
 let queueCtrl: AbortController | null = null;
+/** Hay una petición de voz de la cola en vuelo (se piden de una en una). */
+let voiceInFlight = false;
 let onQueueBlocked: (() => void) | null = null;
 let onQueueStart: (() => void) | null = null;
 const queueListeners = new Set<() => void>();
@@ -477,6 +479,7 @@ function clearQueue() {
   queue = [];
   queueCtrl?.abort();
   queueCtrl = null;
+  voiceInFlight = false;
   onQueueBlocked = null;
   onQueueStart = null;
   for (const release of deviceWaiters) release();
@@ -484,18 +487,36 @@ function clearQueue() {
   setQueueRunning(false);
 }
 
-/** Pide por adelantado la voz de las primeras frases de la cola. */
+/**
+ * Pide por adelantado la voz de las primeras frases de la cola, DE UNA EN UNA:
+ * la cuota del modelo de voz es de pocas peticiones por minuto y dos a la vez
+ * daban 429 (que además apaga la voz neural 5 min). La siguiente se pide en
+ * cuanto llega la anterior, mientras ésta suena.
+ */
 function prefetch() {
   for (const item of queue.slice(0, PREFETCH)) {
-    if (item.voice || !serverAvailable(item.text)) continue;
+    if (item.voice) continue;
+    if (!serverAvailable(item.text)) continue;
+    // Hay otra en vuelo: ya se pedirá ésta cuando llegue aquélla.
+    if (voiceInFlight) return;
     queueCtrl ??= new AbortController();
     const signal = queueCtrl.signal;
-    item.voice = fetchVoice(item.text, signal).catch((err) => {
-      if (!signal.aborted && !(err instanceof NotSignedInError)) {
-        serverDownUntil = Date.now() + COOLDOWN_MS;
-      }
-      return null;
-    });
+    voiceInFlight = true;
+    item.voice = fetchVoice(item.text, signal)
+      .catch((err) => {
+        if (!signal.aborted && !(err instanceof NotSignedInError)) {
+          serverDownUntil = Date.now() + COOLDOWN_MS;
+        }
+        return null;
+      })
+      .finally(() => {
+        // Una petición cancelada ya la dio por libre `clearQueue`; si la
+        // soltara aquí podría pisar la de una cola nueva.
+        if (signal.aborted) return;
+        voiceInFlight = false;
+        prefetch();
+      });
+    return;
   }
 }
 

@@ -143,19 +143,22 @@ export function useHandsFree({
     startRef.current = start;
   });
 
+  // Tras un fallo serio (permiso, sin micro) no se reabre hasta que el
+  // usuario lo pida: `clearError` vuelve a encenderlo.
+  const on = active && !error;
   useEffect(() => {
-    if (!active) return;
+    if (!on) return;
     start();
     return () => {
       kill();
       pending.current = "";
     };
-  }, [active, start, kill]);
+  }, [on, start, kill]);
 
   // Al desmontar, nada escuchando.
   useEffect(() => kill, [kill]);
 
   const clearError = useCallback(() => setError(null), []);
 
-  return { listening: listening && active, heard: active ? heard : "", error, clearError };
+  return { listening: listening && on, heard: on ? heard : "", error, clearError };
 }

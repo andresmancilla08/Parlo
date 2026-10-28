@@ -43,8 +43,9 @@ export function UserMessage({ content, corrections }: { content: string; correct
               })
             }
             className={cn(
-              // El objetivo táctil crece con padding vertical sin mover las líneas.
-              "-my-1 inline rounded-md py-1 text-left transition-colors",
+              // El objetivo táctil crece con un pseudo-elemento: ≥44 px de alto
+              // sin mover las líneas del texto.
+              "relative inline rounded-md text-left transition-colors after:absolute after:-inset-x-1 after:-inset-y-3 after:content-['']",
               shown
                 ? "bg-primary-fg px-1 font-extrabold text-primary"
                 : "underline decoration-primary-fg/70 decoration-wavy decoration-2 underline-offset-4 hover:bg-primary-fg/15",

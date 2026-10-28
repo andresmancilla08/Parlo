@@ -312,7 +312,10 @@ export function Conversation({ scenarioId, onExit }: { scenarioId: string | null
   const canListen =
     handsFree && !paused && !busy && !speaking && !gate && !sayingIt && !error && summary === null;
   const hf = useHandsFree({ active: canListen, onUtterance: (text) => void send(text) });
-  const hfStatus: HandsFreeStatus = paused
+  // Con un fallo del micro (permiso, sin micro) se queda en pausa con el aviso:
+  // «Reanudar» lo vuelve a intentar.
+  const hfStatus: HandsFreeStatus =
+    paused || hf.error
     ? "paused"
     : busy
       ? "thinking"
@@ -591,20 +594,6 @@ export function Conversation({ scenarioId, onExit }: { scenarioId: string | null
                 send(input);
               }}
             >
-              {hfSupported && (
-                <div className="mb-2 flex justify-end">
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={false}
-                    onClick={startHandsFree}
-                    className="inline-flex min-h-11 items-center gap-2 rounded-pill border border-border bg-surface px-3.5 text-xs font-extrabold text-fg transition-colors hover:border-primary active:scale-[0.98]"
-                  >
-                    <IconHeadset className="size-4 text-primary-ink" aria-hidden />
-                    {t("practica.hf_toggle")}
-                  </button>
-                </div>
-              )}
               {mic.listening && (
                 <p className="mb-1.5 flex items-center gap-2 text-xs font-bold text-primary-ink">
                   <motion.span
@@ -638,6 +627,22 @@ export function Conversation({ scenarioId, onExit }: { scenarioId: string | null
                   disabled={busy}
                   className="min-w-0 flex-1 rounded-2xl border border-border bg-surface px-4 py-3 text-sm font-semibold outline-none placeholder:text-muted focus:border-primary"
                 />
+                {hfSupported && (
+                  <motion.button
+                    type="button"
+                    role="switch"
+                    aria-checked={false}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={startHandsFree}
+                    disabled={busy}
+                    aria-label={t("practica.hf_toggle")}
+                    title={t("practica.hf_toggle")}
+                    className="inline-flex h-11 min-w-11 shrink-0 items-center justify-center gap-2 rounded-2xl border border-border bg-surface px-3 text-xs font-extrabold text-primary-ink transition-colors hover:border-primary disabled:text-muted"
+                  >
+                    <IconHeadset className="size-5" aria-hidden />
+                    <span className="hidden text-fg sm:inline">{t("practica.hf_toggle")}</span>
+                  </motion.button>
+                )}
                 {mic.supported && (
                   <motion.button
                     type="button"
