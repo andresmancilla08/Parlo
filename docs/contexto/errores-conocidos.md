@@ -94,6 +94,7 @@
 
 ## Las reglas de la liga se prueban con la app, no con asserts
 - **Cómo:** `lib/league.check.ts` cubre alias, códigos, XP semanal y ranking (lógica pura). Lo que las reglas permiten o no se comprueba usando la app con el usuario ficticio: crear liga, ver el marcador y salir.
+- **Emulador:** `docs/pruebas/reglas.test.mjs` prueba las reglas de la liga y del progreso con `@firebase/rules-unit-testing` (proyecto `demo-parlo`, nunca producción). Instrucciones en su cabecera. Ojo: `firebase-tools` y el emulador de Firestore exigen **Java 21+**; con el `openjdk@17` de Homebrew no arrancan (`UnsupportedClassVersionError`, class file 65).
 - **Ojo:** tras tocar `firestore.rules` hay que `firebase deploy --only firestore:rules` o la app seguirá contra las reglas viejas.
 
 ## En `/app` el que scrollea es `<main>`, no el documento
@@ -107,7 +108,88 @@
 - **Causa real:** si un Chrome de una ejecución anterior sigue escuchando en el puerto de depuración, el nuevo `spawn` no puede abrirlo y el script se conecta al VIEJO, con su `localStorage`, su sesión y sus preferencias.
 - **Solución:** `launch()` hace `pkill -f "remote-debugging-port=<puerto>"` antes de arrancar. Si una medida sale rara, comprobar primero que no hay dos Chrome vivos.
 
+## El tutor dejaba de responder tras ~20 intercambios
+- **Síntoma:** «No se pudo responder» en todos los mensajes a partir de cierto punto, aunque Gemini funcione.
+- **Causa real:** el cliente mandaba el historial entero y el servidor rechaza >40 mensajes o >10.000 caracteres.
+- **Solución:** `coachWindow()` (ver `decisiones.md`). Si se cambian los límites, cambiarlos en `lib/coach-window.ts`: cliente y servidor los leen de ahí.
+
+## La voz neural se apagaba 5 minutos en iPhone
+- **Síntoma:** en iOS la respuesta del tutor no sonaba y después TODA la app hablaba con la voz del dispositivo un rato.
+- **Causa real:** `audio.play()` sin gesto previo da `NotAllowedError` y se trataba como fallo del servidor (cortafuegos de 5 min).
+- **Solución:** `unlockAudio()` + elemento compartido; `NotAllowedError` nunca activa el cortafuegos. Ojo al tocar `lib/tts.ts`: no volver a crear un `new Audio()` por frase, iOS sólo deja sonar sin gesto al elemento que ya sonó dentro de uno.
+
+## Texto fantasma tras enviar por voz
+- **Síntoma:** después de enviar, la frase reaparecía en el cuadro de texto.
+- **Causa real:** `recognition.stop()` todavía entrega el resultado final; llegaba después de vaciar el cuadro.
+- **Solución:** `mic.abort()` (quita `onresult` y aborta). `aborted` no se muestra como error.
+
+## El micro no aparece en iPhone con Parlo instalada (es a propósito)
+- **Parece roto pero es a propósito:** en iOS en modo standalone `webkitSpeechRecognition` existe pero no funciona, así que se oculta el micro y se sugiere abrir Parlo en Safari. En Safari normal y en la APK de Android (TWA, Chrome) el micro sigue.
+
+## /api/coach, /api/translate o /api/tts responden 401
+- **Causa real:** desde esta rama exigen el ID token de Firebase (`apiFetch` o, en TTS, `x-parlo-token`). Un `fetch('/api/...')` a pelo ya no vale.
+- **Ojo en local:** el servidor necesita `NEXT_PUBLIC_FIREBASE_PROJECT_ID` (si falta responde 503) y salida a `www.googleapis.com` para bajar las claves. Para probar sin cuenta, los 401 se ven con `curl`; el camino feliz necesita una sesión real.
+
 ## La liga no se puede probar con una sola cuenta
 - **Síntoma:** todo parece funcionar, pero entrar por código falla en producción.
 - **Causa real:** las reglas distinguen miembro de no miembro. Con una sola cuenta (la que crea la liga) nunca se ejecuta el camino del que entra.
 - **Solución:** `cdp-multi.mjs` abre dos contextos de navegador aislados (cada uno con su `localStorage` y su sesión de Firebase) y los conduce por CDP con `sessionId`. Es la única forma de ver el adelantamiento y el alta por código.
+
+## Todas las rutas salían dinámicas (ƒ) en el build
+- **Síntoma:** `pnpm build` marca `/`, `/login` y todas las de `/app` como ƒ aunque no lean nada del servidor.
+- **Causa real:** `app/not-found.tsx` usaba `cookies()`. El not-found raíz forma parte del árbol de cada página, así que una API dinámica ahí contagia a todas.
+- **Solución:** el not-found es de cliente y redirige a `/` (el proxy hace el resto). No usar `cookies()`/`headers()` en el layout raíz ni en el not-found raíz.
+
+## «ChunkLoadError» / «Loading chunk N failed» tras desplegar
+- **Síntoma:** una pestaña abierta o la PWA instalada muestra «Algo salió mal» justo después de un despliegue.
+- **Causa real:** el JS de la versión vieja pide un trozo que ya no existe en la nueva.
+- **Solución:** `error.tsx` y `global-error.tsx` recargan UNA vez (`lib/chunk-reload.ts`); la marca en `sessionStorage` evita el bucle si el fallo es otro (sin red de verdad). Parece raro, pero es a propósito.
+
+## `permission-denied` al entrar en una liga se muestra como «llena»
+- **Síntoma:** al entrar por código sale «la liga está llena» y no lo está.
+- **Causa real:** quien aún no es miembro no puede leer la liga, así que el único dato es el código del error. `joinLeague` traduce `permission-denied` a `full` porque, si el alias llega validado, el tope es lo único que queda por rechazar. Si los límites del alias en `validateAlias` y en `firestore.rules` (2-16) se desalinean, el rechazo por alias se verá como «llena».
+- **Solución:** cambiar los límites del alias en los dos sitios a la vez (`league.check.ts` comprueba los de `validateAlias`; el de las reglas va comentado junto a `validMember`).
+
+## El progreso «salta» tras guardar
+- **Síntoma:** al terminar una lección, la XP o las gemas cambian unos segundos después.
+- **Causa real:** no es un bug: tras cada escritura, el resultado de la transacción vuelve al store y trae lo que se hizo en OTRO dispositivo del mismo usuario.
+- **Solución:** ninguna; es el sync funcionando (ver «Progreso: local-first» en `decisiones.md`).
+
+## `pdfjs-dist` 6 no tiene `isEvalSupported`
+- **Síntoma:** recomendaciones de seguridad antiguas piden `getDocument({ isEvalSupported: false })`.
+- **Causa real:** la opción se eliminó; el build de la serie 6 no usa `eval` ni `new Function` (comprobado con grep en `build/pdf*.mjs`).
+- **Solución:** la mitigación es la versión (`>= 6.2.108`); `lib/reader/parse.ts` pasa sólo `enableXfa: false`.
+
+## El stream del coach se quedaba colgado minutos (`pull` que vuelve sin encolar)
+- **Síntoma:** `/api/coach` respondía 200 y el cliente esperaba para siempre (3,5 min en el log hasta que se cortó).
+- **Causa real:** en un `ReadableStream`, si `pull()` vuelve sin `enqueue` ni `close` (llegó una parte que no es texto: `start-step`, `finish`…), el navegador no lo vuelve a llamar y la lectura pendiente no se resuelve nunca.
+- **Solución:** `pull` itera `result.stream` hasta encolar texto, cerrar o fallar. No volver a un `pull` de «una parte por llamada».
+
+## El tutor responde «ai_busy» con 120 s pero no vuelve en 2 minutos
+- **Causa real:** el free tier de `gemini-flash-latest` tiene un tope de ~20 peticiones AL DÍA por proyecto (`generate_content_free_tier_requests`); Google pide esperar horas. El plazo que enseña el cliente está topado a 120 s. La clave es la misma para todo (tutor, traducción, y lo que añada la fase 3), así que se agota entre todos.
+- **Solución:** ante el tope diario la ruta pasa a `gemini-flash-lite-latest` (ver `decisiones.md`). Si también se agota, sigue el aviso normal.
+
+## La primera frase se LEE en ~1,5 s pero SUENA a los ~5 s
+- **Parece roto pero es el coste de la voz neural:** el texto llega en 1,2-1,7 s, pero `/api/tts` (Gemini TTS) tarda 2,6-5,6 s en generar cada frase y el free tier del modelo de voz admite muy pocas peticiones por minuto (dos a la vez ya daban 429). La CDN sólo ayuda con frases repetidas.
+- **Opciones si se quiere bajar:** apagar la voz neural en el perfil (la del dispositivo suena al instante) o leer la PRIMERA frase con la del dispositivo y el resto con la neural (mezcla dos voces en la misma respuesta; no se hizo).
+
+## Manos libres y «Dilo tú» no se pueden probar de verdad en el harness
+- El Chrome headless de `shots.mjs` no lleva `--use-fake-ui-for-media-stream`, así que el reconocimiento da `not-allowed` (así se probó el estado de error de manos libres). La escucha real, el envío por silencio y la reapertura tras hablar el tutor están SIN verificar con micrófono: probar en un Android/Chrome real.
+## La llamada no reanuda o «Token has been used too many times»
+- **Síntoma:** tras un corte, la llamada vuelve pero el personaje no recuerda nada, o el WebSocket cierra con `1011 Token has been used too many times`.
+- **Causa real:** un token efímero de `uses: 1` no sirve para reconectar (en contra de lo que dice la doc), y con un token nuevo el `sessionResumption.handle` que manda el cliente se ignora porque el setup del token está bloqueado.
+- **Solución:** reconectar SIEMPRE pidiendo token nuevo a `/api/live-token` con el `handle`; el servidor lo mete en el setup del token (`liveSetup({ handle })`).
+
+## `getUserMedia` da `NotAllowedError` sin preguntar nada
+- **Causa real:** la cabecera `Permissions-Policy: microphone=()` lo prohíbe en toda la app. Ahora es `microphone=(self)` en `next.config.ts`. Si se vuelve a tocar esa cabecera, comprobar el modo llamada.
+
+## Modo llamada en iPhone (sin verificar en dispositivo)
+- **A vigilar:** con el micro abierto iOS puede mandar el audio al auricular (se oye bajísimo). Se pide `navigator.audioSession.type = "play-and-record"` (Safari 16.4+) y el `AudioContext` se crea dentro del toque; falta confirmarlo en un iPhone real, también con Parlo instalada (standalone: `getUserMedia` funciona desde iOS 14.3, a diferencia del dictado).
+- **Eco:** sin auriculares el modelo puede oírse a sí mismo e interrumpirse; `echoCancellation` lo reduce, por eso la pantalla recomienda auriculares.
+
+## Probar `/api/live-token` sin emulador
+- `next dev -p <puerto>` con `NEXT_PUBLIC_FIREBASE_PROJECT_ID=demo-…` y `FIREBASE_AUTH_EMULATOR_HOST` puesto (no hace falta que el emulador corra): la guarda acepta un JWT sin firma con `aud` = proyecto y `sub`. En dev, abrir la app por `localhost` y no por `127.0.0.1`: Next bloquea los recursos de dev a otros orígenes y la página no hidrata.
+## La APK muestra la barra de URL arriba
+- **Síntoma:** la app de Android abre con barra «parlo-lilac.vercel.app» y botón de cerrar.
+- **Causa real:** Chrome no pudo verificar Digital Asset Links: `/.well-known/assetlinks.json` no está desplegado o no contiene la huella SHA-256 del certificado que firmó esa APK.
+- **Solución:** desplegar `public/.well-known/assetlinks.json` con la huella correcta (`keytool -list -v -keystore <ks>`). Chrome cachea la verificación: tras corregir, borrar datos de la app o reinstalar.

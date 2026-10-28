@@ -1,0 +1,52 @@
+// Envoltorio TWA (Trusted Web Activity): la APK abre la web de producción en
+// Chrome a pantalla completa. No hay código web aquí; ver docs/contexto/decisiones.md.
+plugins {
+    id 'com.android.application'
+}
+
+def pkg = new groovy.json.JsonSlurper().parse(file('../../package.json'))
+def (maj, min, pat) = pkg.version.tokenize('.').collect { it.toInteger() }
+
+def twa = [
+    host        : 'parlo-lilac.vercel.app',
+    launchUrl   : '/',
+    name        : 'Parlo',
+    themeColor  : '#FF6B4A',
+    background  : '#FFF9F5',
+]
+
+android {
+    namespace 'co.parlo.app'
+    compileSdk 36
+
+    defaultConfig {
+        applicationId 'co.parlo.app'
+        minSdk 24
+        targetSdk 36
+        versionCode maj * 10000 + min * 100 + pat
+        versionName pkg.version
+
+        resValue 'string', 'app_name', twa.name
+        resValue 'string', 'launchUrl', "https://${twa.host}${twa.launchUrl}"
+        resValue 'string', 'hostName', twa.host
+        resValue 'string', 'providerAuthority', 'co.parlo.app.fileprovider'
+        resValue 'color', 'colorPrimary', twa.themeColor
+        resValue 'color', 'backgroundColor', twa.background
+        resValue 'string', 'assetStatements',
+            "[{ \"relation\": [\"delegate_permission/common.handle_all_urls\"], \"target\": {\"namespace\": \"web\", \"site\": \"https://${twa.host}\"}}]"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.6.2'
+}

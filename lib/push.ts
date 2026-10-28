@@ -121,6 +121,34 @@ export async function setReminderHour(uid: string, hour: number) {
   await setDoc(doc(db(), "users", uid), { reminder: { hour } }, { merge: true });
 }
 
+/**
+ * Al cerrar sesión: este navegador deja de recibir avisos de ESTA cuenta.
+ * Sólo se borra `reminder` del documento si la suscripción guardada es la de
+ * este dispositivo; si el aviso apunta a otro móvil del usuario, se respeta.
+ * Nunca lanza ni se queda colgado (sin red, sin service worker): cerrar sesión
+ * no puede depender de esto.
+ */
+export async function releasePushOnLogout(uid: string): Promise<void> {
+  const run = async () => {
+    let endpoint: string | null = null;
+    if (pushSupported()) {
+      const registration = await navigator.serviceWorker.getRegistration();
+      const subscription = await registration?.pushManager.getSubscription();
+      endpoint = subscription?.endpoint ?? null;
+      await subscription?.unsubscribe().catch(() => false);
+    }
+    if (!endpoint || !firebaseReady) return;
+    const ref = doc(db(), "users", uid);
+    const saved = (await getDoc(ref)).data()?.reminder as Reminder | undefined;
+    if (saved?.subscription?.endpoint === endpoint) {
+      await setDoc(ref, { reminder: deleteField() }, { merge: true });
+    }
+  };
+  await withTimeout(run(), 4000).catch((err) =>
+    console.warn("[parlo] no se pudo dar de baja el aviso al cerrar sesión", err),
+  );
+}
+
 export async function disableReminder(uid: string) {
   // Se borra el campo entero: una suscripción sin dueño sólo genera 410 en el cron.
   await setDoc(doc(db(), "users", uid), { reminder: deleteField() }, { merge: true });

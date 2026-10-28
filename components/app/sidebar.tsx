@@ -11,7 +11,7 @@ import Image from "next/image";
 import { Logo } from "@/components/ui/logo";
 import logoMark from "@/public/brand/logo-mark.png";
 import { SidebarMenu } from "@/components/app/sidebar-menu";
-import { navItems } from "@/lib/nav-items";
+import { isNavActive, navItems } from "@/lib/nav-items";
 import { cn } from "@/lib/utils";
 
 /** Plegado del lateral: se recuerda entre sesiones. */
@@ -70,9 +70,9 @@ export function Sidebar() {
       </div>
 
       <nav className="flex flex-col gap-1">
-        {navItems.map(({ href, labelKey, icon: Icon }) => {
-          const active =
-            href === "/app" ? pathname === "/app" : pathname.startsWith(href);
+        {navItems.map((item) => {
+          const { href, labelKey, icon: Icon } = item;
+          const active = isNavActive(item, pathname);
           return (
             <Link
               key={href}

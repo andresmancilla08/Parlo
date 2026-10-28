@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "co.parlo.app",
+      "sha256_cert_fingerprints": [
+        "49:B2:2F:E7:0D:6D:9B:B2:39:E2:9A:14:1C:08:B4:CF:4A:F9:18:FB:32:D9:74:25:C9:38:D4:5F:00:4F:68:9D"
+      ]
+    }
+  }
+]

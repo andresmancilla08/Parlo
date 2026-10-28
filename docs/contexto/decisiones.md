@@ -91,8 +91,20 @@
 
 ## Progreso: local-first con sync a Firestore
 - **Qué:** el store sigue siendo la fuente de trabajo (zustand persist en localStorage). Al iniciar sesión, `lib/sync.ts` fusiona local↔`users/{uid}` y escribe con debounce de 1,5 s.
-- **Cómo fusiona:** gana lo más avanzado (máximo de xp/gemas/racha/contadores, unión de lecciones, máximo de estrellas, y por carta SRS la de `due` más reciente). Nunca se pierde lo hecho sin red.
+- **Cómo fusiona (primera vez, sin base común):** gana lo más avanzado (máximo de xp/gemas/contadores, unión de lecciones, máximo de estrellas, por carta SRS la de `due` más reciente). La racha la manda quien cumplió el objetivo más reciente (`lastGoalDay`), no la más larga. Lógica pura en `lib/progress-merge.ts`, cubierta por `progress-merge.check.ts`.
+- **Escrituras siguientes: transacción + fusión a tres bandas (2026-10-27).** Cada escritura es `runTransaction` (leer remoto → `rebase(base, local, remoto)` → escribir). Los contadores que suben y bajan (xp, gemas, escudos, mensajes, escuchas) se aplican como diferencia `remoto + (local − base)`, donde `base` es lo último que se supo del remoto; lo demás sólo crece y usa `merge`. El resultado vuelve al store sin disparar otra escritura.
+- **Por qué:** antes cada cambio hacía `setDoc({progress: local}, {merge:true})`, que reemplaza el objeto entero: el último dispositivo en escribir borraba lo que el otro había hecho. Y con `max` a secas, gastar gemas se deshacía al fusionar.
+- **Nada se escribe antes de la fusión inicial.** Si falla (sin red), se reintenta al volver la red (`online`) o la pestaña; mientras, una escritura local no puede pisar un remoto más avanzado.
+- **Descartado:** `increment()` por campo (no sirve para conjuntos ni cartas y obliga a llevar un diario de operaciones); escuchar el documento con `onSnapshot` (lecturas continuas para un dato que sólo cambia cuando se estudia).
+- **Límite conocido:** si una transacción se confirma pero la respuesta se pierde, la siguiente reaplicará su diferencia (contadores contados dos veces). Firestore lo hace muy improbable; se acepta.
 - **Estado:** vigente.
+
+## El progreso local tiene dueño; cerrar sesión limpia el dispositivo
+- **Qué:** el store guarda `owner` (uid, persistido pero NO sincronizado). Al entrar, lo local sólo se fusiona si es de esa cuenta, anónimo (`owner` nulo: datos de antes de este cambio) o está vacío; si es de otra cuenta se descarta (`ownerDecision`). `logout` (`lib/auth.ts`) escribe lo pendiente, da de baja el push de ESTE navegador, cierra sesión y borra lo local de la cuenta (`lib/local-data.ts`).
+- **Qué se borra y qué no:** se borran `parlo-progress`, `parlo-league`, `parlo-doc-es:*` (traducciones del lector), el IndexedDB `parlo-reader`, `parlo-verify-sent` y `parlo-verify-hidden`. Se conservan las preferencias del dispositivo: tema, idioma, sonido, voz, barra lateral y el aviso de instalar.
+- **Push:** se desuscribe el navegador siempre; el campo `reminder` del documento sólo se borra si su `endpoint` es el de este dispositivo (si el aviso apunta a otro móvil del usuario, se respeta). Tope de 4 s: cerrar sesión nunca se queda colgado.
+- **Por qué:** en un dispositivo compartido, la cuenta que entraba después heredaba —y subía a su documento— el progreso, la liga y los documentos privados de la anterior.
+- **Estado:** vigente. Los datos locales de ANTES del cambio no tienen dueño y se fusionan con la primera cuenta que entre (como antes): no hay forma de saber de quién eran.
 
 ## Enseñar SIEMPRE antes de evaluar (fase «Aprende»)
 - **Qué:** cada lección abre con teoría (`TeachStep[]`: idea · tabla · error típico · ejemplos con audio) y sólo después entran los ejercicios. `progress.taught` recuerda la teoría vista: la segunda vez se entra directo a practicar, con la bombilla de la barra superior para consultarla sin perder el ejercicio en curso.
@@ -153,6 +165,9 @@
 - **Por qué el mapa `members` y no una subcolección:** con un mapa, la regla `members.diff(...).affectedKeys().hasOnly([uid])` deja que cada quien se añada o se quite **solo a sí mismo** en una sola operación, sin poder meter ni echar a nadie.
 - **Por qué un código y no invitaciones:** invitar por correo obligaría a compartir correos, justo lo que se quiere evitar. El código no es adivinable en la práctica (29⁶ con alfabeto sin vocales ni caracteres ambiguos) y `leagueCodes` sólo permite `get`, nunca `list`.
 - **El alias se valida** (`league-core.ts`) para que nadie meta un correo o un teléfono sin darse cuenta.
+- **Las reglas validan la forma (2026-10-27):** cada entrada de `members` es exactamente `{alias (2-16), joinedAt (int)}`; `leagueCodes` sólo lo puede crear el dueño de una liga que ya existe y que lleva ese mismo código; `scores` sólo admite `alias/week/xp/updatedAt` y `xp ≤ 200.000`.
+- **Tope de XP semanal = 200.000 (`MAX_WEEKLY_XP`).** Lo que más XP da por minuto es repetir una lección: 8 ejercicios × 10 XP = 80 XP en ≥ ~1 min → ≤ 4.800 XP/h. 200.000 ≈ 42 h/semana a ese ritmo máximo sin fallar (~6 h diarias): ninguna semana real llega. No es anticheat (el cliente decide su XP), es para que nadie rompa el marcador de sus amigos con un número absurdo. `pushScore` recorta al tope y `league.check.ts` falla si el número de las reglas y el del código divergen.
+- **Fallo al cargar ≠ no estar en una liga:** si `fetchLeague` falla, la pantalla muestra «No pudimos cargar tu liga» con Reintentar, nunca el alta (ofrecer crear otra a quien ya está en una le hacía duplicarla).
 - **Estado:** vigente. Cubierto por `lib/league.check.ts` y probado contra Firestore real.
 
 ## EPUB con fflate y el spine, no por nombre de fichero
@@ -194,3 +209,97 @@
 - **Cómo se distinguen los errores:** por el código de Firestore — `not-found` (liga borrada, código huérfano) y `permission-denied` (el único rechazo posible en un alta bien formada es el tope de miembros).
 - **Lección:** esto no se ve con una sola cuenta. El harness de capturas ahora sabe abrir **dos contextos de navegador aislados** (`cdp-multi.mjs`) precisamente para esto.
 - **Estado:** vigente. Probado con dos cuentas reales: B entra por código, adelanta a A y A ve el aviso.
+
+## Dependencias con CVE: subir y fijar con overrides (2026-10-27)
+- **Qué:** `next`/`eslint-config-next` 16.4.3, `pdfjs-dist` 6.4.x, `ai`/`@ai-sdk/*`/`react`/`react-dom` a su último parche, y `pnpm.overrides` para transitivas (`postcss`, `sharp`, `@xmldom/xmldom`, `nanoid@3`, `source-map-js`, `zod@4`).
+- **Por qué:** `pnpm audit --prod` daba 30 avisos (5 críticos de RCE en Next). Tras subir quedan 2 de `@grpc/grpc-js`, que Firestore fija en `~1.9.0` y sólo se usa en Node (el cliente web va por HTTP/WebChannel): no se puede subir sin que lo haga Firebase.
+- **pdfjs:** en la serie 6 ya no existe `isEvalSupported` (el build no usa `eval` ni `new Function`), así que no se pasa; se exige la versión parcheada y `enableXfa: false`.
+- **Estado:** vigente. Revisar `pnpm audit --prod` antes de cada despliegue.
+
+## Rutas estáticas: nada de APIs dinámicas en `not-found` ni en el layout raíz
+- **Qué:** `app/not-found.tsx` es de cliente y redirige a `/`; `proxy.ts` ya lleva a `/app` a quien tiene sesión.
+- **Por qué:** el `not-found` raíz forma parte del árbol de TODAS las páginas; con `cookies()` dentro, todas pasaban a dinámicas (ƒ) y la landing/login dejaban de servirse desde la CDN.
+- **Además:** `app/global-error.tsx` (fallos del layout raíz, sin providers: idioma y tema se leen a mano) y recarga automática UNA vez ante `ChunkLoadError` tras un despliegue (`lib/chunk-reload.ts`, marca en `sessionStorage` con ventana de 60 s).
+
+## Rutas de IA con sesión: ID token verificado con Web Crypto
+- **Qué:** `/api/coach`, `/api/translate` y `/api/tts` exigen el ID token de Firebase. `lib/firebase-token.ts` verifica el JWT RS256 contra las claves públicas de securetoken (caché según su `max-age`, tope 6 h) y comprueba `aud = projectId`, `iss = https://securetoken.google.com/<projectId>`, `exp`, `iat` y `sub`. `lib/api-guard.ts` encadena límite por IP → token → límite por uid. El cliente usa `apiFetch` (`lib/api-client.ts`).
+- **Por qué:** sin esto cualquiera con la URL gastaba la cuota gratuita de Gemini. El límite por uid evita que una cuenta reparta peticiones entre IPs.
+- **Descartado:** `firebase-admin` (pide service account, prohibida en la org, y pesa); `jose` (dependencia nueva para lo que Web Crypto ya hace en 40 líneas).
+- **Estado:** vigente. Cubierto por `lib/firebase-token.check.ts` (firma, payload manipulado, aud/iss ajenos, caducado, kid desconocido) con un par RSA generado en local.
+
+## /api/tts: token en `x-parlo-token`, audio por fetch + blob
+- **Qué:** la voz neural ya no se pide con `<audio src>`; `lib/tts.ts` hace `fetch` con la cabecera `x-parlo-token` y reproduce el blob en UN `<audio>` compartido.
+- **Por qué cabecera propia y no `Authorization`:** la CDN de Vercel no cachea peticiones que llevan `Authorization`. La URL sigue siendo la misma para la misma frase, así que la caché de la CDN y la del navegador siguen valiendo; un HIT de CDN se sirve sin verificar el token, y está bien: no gasta cuota.
+- **Descartado:** token firmado en la query (cambia la URL por usuario/hora y rompe la caché); cookie (Vercel no cachea con `set-cookie` y obliga a refrescarla cada hora).
+- **Estado:** vigente. Comprobar tras desplegar que la segunda petición de la misma frase da `x-vercel-cache: HIT`.
+
+## Coach: ventana del historial, pensamiento bajo y sin reintentos contra Gemini
+- **Ventana:** el cliente manda el primer mensaje (el escenario) + los últimos 16 turnos, recortados bajo 9.000 caracteres (`lib/coach-window.ts`); el servidor valida con las MISMAS constantes (40 mensajes / 10.000 caracteres). Antes se mandaba todo y a partir del mensaje 40 la charla fallaba para siempre.
+- **Pensamiento:** `providerOptions.google.thinkingConfig.thinkingLevel = "low"` (los Gemini 3+ usan `thinkingLevel`; `thinkingBudget` es de la serie 2.5, retirada para esta cuenta). `maxOutputTokens` 2048 porque el pensamiento cuenta en el tope.
+- **Cuota:** ante 429/503 de Gemini se responde `{error: "ai_busy", retryAfter}` con `retry-after` (plazo de `RetryInfo` si Google lo da) y `maxRetries: 0`. El límite propio responde `{error: "rate_limited"}`. El cliente distingue ambos, enseña la cuenta atrás y «Reintentar» reenvía el último turno una sola vez.
+- **Estado:** vigente.
+
+## Voz: el bloqueo de autoplay no es «servidor caído»
+- **Qué:** `NotAllowedError` de `audio.play()` ya no activa el cortafuegos de 5 min. Un `<audio>` compartido se «estrena» con un WAV de silencio en el primer toque (`unlockAudio()` en Enviar, micro y cualquier `speak`). Si aun así se bloquea, `speakAuto` devuelve `false` y la burbuja del tutor muestra «Toca para oír».
+- **Estado:** vigente.
+
+## Consejos del briefing en i18n; frases preparadas como datos bilingües
+- **Qué:** `tipEs` salió de `lib/coach.ts` a `practica.tip_<id>` (es/en). `prep[].es` se queda en el código: es la traducción al idioma del alumno (hispanohablante), contenido bilingüe como la guía, no texto de interfaz.
+- **Estado:** vigente.
+
+## Coach en streaming: `reply` primero y lectura por frases (2026-10-27, fase 2 de voz)
+- **Qué:** `/api/coach` usa `streamText` + `Output.object` y reenvía el JSON del modelo tal cual llega (texto plano). El esquema pone `reply` → `goalsMet` → `corrections`; con `responseJsonSchema` Gemini respeta ese orden (comprobado con Gemini real). El cliente saca `reply` del JSON a medias (`extractReply`, `lib/coach-stream.ts`), lo parte en trozos de ≥40 caracteres que acaban en fin de oración (`takeSentences`, `lib/sentences.ts`) y los manda a `enqueueSpeech` (`lib/tts.ts`). Al terminar valida el JSON entero (`parseCoachFinal`); si llegó roto se salva la respuesta sin correcciones.
+- **Errores:** los 429/503 sólo se pueden convertir en `ai_busy` ANTES del primer byte, así que la ruta espera al primer trozo de texto antes de responder. A mitad de stream se corta y el cliente se queda con lo que llegó.
+- **Cola de voz:** frases en orden con la voz neural, pedidas de UNA en una (la siguiente se pide al llegar la anterior, mientras suena); si una falla, esa frase va con la voz del dispositivo. `stopSpeaking()` vacía la cola. `useQueueSpeaking()` dice si suena algo (lo usa manos libres).
+- **Descartado:** `streamObject` (en `ai` 7 lo recomendado es `streamText` + `output`); `useObject` de `@ai-sdk/react` (habría que cambiar el protocolo y el manejo de 429 propio); pedir la voz de dos frases a la vez (daba 429 en `/api/tts` y apagaba la voz neural 5 min).
+- **Latencia medida (Gemini real, dev:emu, 3 turnos):** primer texto de la respuesta 1,2-1,6 s y primera frase lista 1,3-1,7 s desde que se envía; primer AUDIO neural 4,7-6,9 s, porque `/api/tts` tarda 2,6-5,6 s por frase. Ver `errores-conocidos.md`.
+- **Estado:** vigente.
+
+## Modelo de respaldo ante el tope DIARIO del free tier
+- **Qué:** si `gemini-flash-latest` devuelve 429 por el tope de peticiones AL DÍA (`dailyQuotaExceeded`, `lib/ai-errors.ts`), el turno y el resumen se reintentan UNA vez con `gemini-flash-lite-latest`, que tiene cuota propia. El de por minuto sigue sin reintentarse.
+- **Por qué:** el free tier del modelo principal es de ~20 peticiones al día por proyecto; con eso el tutor se apagaba a media mañana. Esperar no sirve (vuelve al día siguiente) y el ligero conversa bien. Coste cero igual.
+- **Estado:** vigente.
+
+## Corrección suave por defecto; la puerta pasa a «modo estricto»
+- **Qué:** la respuesta suena enseguida y las correcciones aparecen como tarjeta debajo de tu mensaje (`CorrectionCard`), con los `original` subrayados en tu burbuja; al tocar uno se ve lo corregido en su sitio (`markFragments`, `lib/corrections.ts`). La puerta de antes (leer antes de seguir) es el «modo estricto» del perfil (`useCoachPrefs`, `parlo-coach-prefs`), apagado por defecto. En manos libres siempre es suave.
+- **Por qué:** cortar la charla en cada error rompe el ritmo de una conversación hablada; la corrección sigue a la vista y con su porqué.
+- **Estado:** vigente.
+
+## «Dilo tú», misiones, resumen y velocidad de voz
+- **Dilo tú:** en la tarjeta de corrección; repite la frase entera ya corregida (`applyCorrections`) y se puntúa con `scoreAttempt` + `completeSpeaking` (2 XP por palabra), igual que Pronunciación.
+- **Misiones:** cada escenario lleva 2-3 `goals` (`lib/coach.ts`, texto en `practica.mission_<escenario>_<id>`). El esquema limita `goalsMet` a esos ids (enum) y el cliente vuelve a filtrar. Se enseñan en el briefing.
+- **Resumen:** «Terminar» llama a `/api/coach` con `mode: "summary"` (misma puerta y mismo límite por uid) con la ventana de la charla y las correcciones hechas; devuelve errores recurrentes, 5-8 frases con traducción y una nota. «Añadir al repaso» usa `addCard(en, es)`, que no duplica.
+- **Velocidad:** lenta/normal/rápida (0,8/0,95/1,15) en el perfil (`useSpeechSpeed`, `parlo-voice-speed`). Vale para TODA la voz (neural por `playbackRate`, la URL cacheada no cambia; dispositivo por `rate`). La tortuga sigue siendo `RATE_SLOW`.
+- **Estado:** vigente.
+
+## Manos libres: medio dúplex con Web Speech
+- **Qué:** `useHandsFree` (`lib/hands-free.ts`): reconocimiento continuo, envío tras 1,2 s de silencio, y el micro sólo está abierto cuando no se piensa ni habla el tutor (`canListen` en la conversación). Si el navegador cierra la sesión sola, se reabre. Un fallo serio (permiso, sin micro) deja el panel «En pausa» con el aviso.
+- **Dónde:** Chrome/Android/APK (TWA). Oculto donde no hay reconocimiento (Firefox) o no funciona (iOS instalada), igual que el dictado.
+- **Descartado:** escuchar mientras habla el tutor (se transcribiría a sí mismo) y VAD/librerías de audio (peso y coste para lo que la API del navegador ya hace).
+- **Estado:** vigente. Sin probar con micrófono real (ver `errores-conocidos.md`).
+## Modo llamada: Gemini Live con token efímero y WebSocket directo (2026-10-27)
+- **Qué:** `/app/llamada` habla en tiempo real con Gemini Live. El navegador abre el WebSocket de Google directamente (el audio NO pasa por Vercel); `/api/live-token` (protegida con `guard`) le da un **token efímero de un solo uso** con el setup completo dentro: modelo, `systemInstruction` (escenario + nivel CEFR, ambos validados contra listas), VAD, transcripciones, reanudación y compresión de contexto.
+- **Modelo:** `gemini-3.8-live` (`lib/live/protocol.ts`, `LIVE_MODEL`). La guía lo da como opción por defecto para voz de baja latencia y la página de precios lo marca «Free of charge» en el free tier (también `gemini-3.1-flash-live-preview`, que la guía ya trata como heredado, y `gemini-2.5-flash-native-audio-preview-12-2025`). Probados 3.8 y 3.1: los dos funcionan con esta clave y latencias parecidas.
+- **Sin `@google/genai`:** el SDK pesa ~12 MB, su soporte de tokens efímeros es «experimental, v1alpha» y lo que hace son dos cosas: un `POST /v1beta/auth_tokens` y un WebSocket con JSON. Ambas están en ~150 líneas puras y probadas (`protocol.ts`). El cuerpo del token se tomó del propio SDK 2.31.0 (`bidiGenerateContentSetup` + `fieldMask`), porque la referencia no lo documenta entero.
+- **Hallazgos probados contra la API real (no están claros en la doc):**
+  - `v1beta` funciona para crear el token y para `BidiGenerateContentConstrained?access_token=…` (la doc dice v1beta; el SDK avisa de v1alpha).
+  - Sin `fieldMask`, el servidor **bloquea todo el setup del token**: un `systemInstruction` mandado por el cliente se ignora. Por eso el cliente sólo manda `{setup:{model}}` y el prompt no se puede manipular desde el navegador.
+  - **Reanudar con el mismo token falla** (`1011 Token has been used too many times`) aunque la doc diga lo contrario. Y con un token nuevo, el handle mandado sólo desde el cliente **se ignora** (el token lo pisa con `sessionResumption: {}`). Solución: el cliente pide un token nuevo pasando el `handle`, y el servidor lo mete DENTRO del setup del token. Probado: la sesión reanudada recuerda lo dicho.
+  - Que el personaje descuelgue primero: un `clientContent` de texto (`CALL_START_CUE`) tras el `setupComplete`; no aparece en la transcripción de entrada.
+  - Llega un mensaje nuevo `voiceActivity` (`ACTIVITY_START`/`ACTIVITY_END`); se parsea y de momento no se usa.
+- **Audio:** micro con `getUserMedia({echoCancellation, noiseSuppression, autoGainControl})` → AudioWorklet (cargado desde un Blob) que manda trozos de 2048 muestras → `Downsampler` (filtro de caja) a 16 kHz → PCM16 → bloques de 100 ms en base64. Salida: PCM16 24 kHz → `AudioBuffer` de 24 kHz encolados uno tras otro en el MISMO `AudioContext` (el navegador remuestrea al reproducir); `interrupted` para y vacía la cola. Un solo contexto, creado y reanudado dentro del toque de «Llamar» (iOS).
+- **VAD:** el del servidor, con `silenceDurationMs` por nivel (A1–A2 1200, B1–B2 1000, C1–C2 800): quien aprende hace pausas y con los ~800 ms por defecto le pisaban.
+- **Sesión larga:** `contextWindowCompression.slidingWindow` (sin ella, 15 min de tope) + `sessionResumption`. `goAway` → se cambia de conexión en la siguiente pausa. Corte inesperado → hasta 4 reintentos con token nuevo + handle. Tope propio de 15 min por llamada (`MAX_CALL_MS`).
+- **Cuota y límites:** `/api/live-token` 12/min por IP, 6/min por uid y 40 tokens/24 h por uid (en memoria por instancia, como el resto). Una llamada gasta 1 token + 1 por reconexión. La página de rate limits no publica los límites del free tier para Live («se ven en AI Studio»): **no confirmados**.
+- **Al colgar:** lo que dijo el usuario se manda a `/api/coach` como UN mensaje (el coach corrige el último mensaje del usuario; juntarlo todo es la forma de revisar la llamada entera, `reviewText`, ≤1800 caracteres). La `reply` en personaje se ignora. Si algún día hace falta, un modo `review` propio en `/api/coach` daría más de 3 correcciones.
+- **Permissions-Policy:** pasó de `microphone=()` a `microphone=(self)`. Con `()` el navegador rechaza `getUserMedia` aunque el usuario dé permiso.
+- **Latencia medida (2026-10-27, Node, voz sintética de `say`):** token 0,4–1,3 s; `setupComplete` 0,6–0,9 s; primer audio tras el saludo por texto 0,65–0,8 s; primer audio tras terminar de hablar 1,3 s con el VAD por defecto y 1,6–2,2 s con los 1200 ms de A2 (incluye esa espera de silencio). Interrupción detectada (`interrupted`) y transcripciones de entrada y salida correctas.
+- **Fuentes:** ai.google.dev/gemini-api/docs/{live-guide, live-session, ephemeral-tokens, pricing (act. 2026-10-27), rate-limits (act. 2026-10-26)}, ai.google.dev/api/live, npm `@google/genai` 2.31.0 (`dist/web/index.mjs`: `Tokens.create`, `Live.connect`).
+- **Estado:** vigente. Falta probar con micro y altavoz reales en Android (Chrome/TWA) e iPhone (Safari y PWA instalada).
+## APK de Android: envoltorio TWA, no Capacitor
+- **Qué:** `android/` es un proyecto Gradle mínimo con `androidbrowserhelper` (Trusted Web Activity). La APK (`co.parlo.app`) abre `https://parlo-lilac.vercel.app/` en Chrome a pantalla completa. No contiene código web: todo sigue siendo la PWA desplegada, así que se mantiene la regla «siempre web».
+- **Por qué TWA:** en el WebView de Android (lo que usa Capacitor) no existen `speechSynthesis` (la pronunciación de lecciones quedaría muda), `SpeechRecognition` (sin dictado) ni Web Push. En una TWA corre Chrome: voz, dictado, notificaciones, service worker y sesión de Firebase funcionan igual que en la PWA. Además no hace falta `webDir` ni plugins.
+- **Descartado:** Capacitor con `server.url` (pierde las APIs de voz); Bubblewrap CLI (`init` es interactivo y descarga su propio JDK/SDK; el proyecto a mano son 6 archivos).
+- **Pantalla completa:** depende de `public/.well-known/assetlinks.json` con el SHA-256 del certificado que firma la APK. Hoy está el de la debug keystore de la Mac del dueño (`~/.android/debug.keystore`, `49:B2:2F:…:68:9D`). Hasta desplegar ese archivo, la APK abre con barra de URL (modo Custom Tab); funciona igual. Firmar con otra clave = añadir su huella al JSON.
+- **Versión:** `versionName`/`versionCode` salen de `package.json` (`maj*10000+min*100+pat`).
+- **Estado:** vigente. APK debug para instalación manual; para Play haría falta keystore de release.

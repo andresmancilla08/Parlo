@@ -38,3 +38,16 @@
 - **Código de liga:** 6 caracteres sin vocales ni ambigüedades (`BCDFGHJKLMNPQRSTVWXYZ23456789`); es la única forma de entrar.
 - **Nominalización (C1):** convertir el verbo en sustantivo (implement → implementation) para elevar el registro.
 - **Inversión (C1):** adelantar el auxiliar al sujeto tras un negativo al principio («Never had I seen…»).
+
+## Añadidos 2026-10-27 (voz, fase 2)
+- **Corrección suave:** las correcciones aparecen debajo de tu mensaje sin parar la charla. Lo contrario es el **modo estricto** (la puerta de antes).
+- **Dilo tú:** repetir en voz alta la frase ya corregida; puntúa como Pronunciación.
+- **Manos libres:** conversación sin tocar la pantalla: escucha, envía al callar 1,2 s y vuelve a escuchar cuando el tutor termina (medio dúplex).
+- **Misión:** objetivo de un escenario (2-3 por escenario) que el tutor marca en `goalsMet` cuando lo cumples.
+- **Resumen:** lo que devuelve el coach en `mode: "summary"` al terminar: errores recurrentes, frases útiles y una nota.
+- **Cola de voz:** `enqueueSpeech`; las frases de la respuesta del tutor se leen en orden mientras llega el resto.
+## Añadidos 2026-10-27 (modo llamada)
+- **Modo llamada:** conversación HABLADA en tiempo real con Gemini Live (`/app/llamada`). Se puede interrumpir; las correcciones llegan al colgar, no durante la llamada.
+- **Token efímero:** credencial de un solo uso y vida corta que da `/api/live-token`; lleva dentro el modelo y el prompt bloqueados. La clave de Gemini nunca sale del servidor.
+- **Handle de reanudación:** identificador opaco que manda Gemini (`sessionResumptionUpdate`) para retomar la misma conversación tras un corte; viaja dentro del siguiente token.
+- **VAD:** detección de voz del servidor; decide cuándo terminó de hablar el usuario (`silenceDurationMs` por nivel).

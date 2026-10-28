@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import {
   IconCheck,
   IconCopy,
+  IconCloudOff,
   IconCrown,
   IconFlame,
   IconLogout2,
@@ -60,6 +61,10 @@ export default function LigaPage() {
   // `undefined` = todavía cargando; `null` = no estoy en ninguna liga.
   const [league, setLeague] = useState<League | null | undefined>(undefined);
   const [scores, setScores] = useState<LeagueScore[]>([]);
+  // No se pudo cargar la liga (sin red, Firestore caído). NO es «no estoy en
+  // ninguna»: ofrecer crear otra a quien ya está en una le haría duplicarla.
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   const myXp = weeklyXp(days, weekDays(new Date()));
 
@@ -84,8 +89,8 @@ export default function LigaPage() {
         if (alive) setScores(list);
       })
       .catch(() => {
-        // Sin red: se muestra el alta y ya se reintentará al volver.
-        if (alive) setLeague(null);
+        // Sin red: estado de error con «Reintentar», nunca la pantalla de alta.
+        if (alive) setFailed(true);
       });
 
     return () => {
@@ -93,11 +98,23 @@ export default function LigaPage() {
     };
     // `myXp` a propósito fuera: cambia con cada XP y recargaría la liga sin parar.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [leagueId, uid, alias, leaveLocal]);
+  }, [leagueId, uid, alias, leaveLocal, attempt]);
 
   // Se espera también a saber si el usuario ya está en una liga según la nube:
   // enseñar «crear liga» antes de tiempo invita a crear una segunda.
   const loading = (Boolean(leagueId) && league === undefined) || !checked;
+
+  if (failed) {
+    return (
+      <LoadError
+        onRetry={() => {
+          setFailed(false);
+          setLeague(undefined);
+          setAttempt((n) => n + 1);
+        }}
+      />
+    );
+  }
 
   if (loading) {
     return (
@@ -132,6 +149,28 @@ export default function LigaPage() {
         setScores([]);
       }}
     />
+  );
+}
+
+/* ---------------- error de carga ---------------- */
+
+function LoadError({ onRetry }: { onRetry: () => void }) {
+  const { t } = useTranslation();
+  return (
+    <div className="mx-auto grid min-h-[60vh] w-full max-w-2xl place-items-center px-4 text-center">
+      <div role="alert">
+        <span className="mx-auto mb-4 inline-flex size-14 items-center justify-center rounded-3xl bg-danger/15 text-danger-ink">
+          <IconCloudOff className="size-7" />
+        </span>
+        <h1 className="font-display text-xl font-extrabold tracking-tight">
+          {t("liga.load_error_title")}
+        </h1>
+        <p className="mx-auto mt-2 max-w-xs text-sm text-muted">{t("liga.load_error_body")}</p>
+        <Button className="mt-6" onClick={onRetry}>
+          {t("common.retry")}
+        </Button>
+      </div>
+    </div>
   );
 }
 

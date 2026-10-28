@@ -109,11 +109,39 @@ export const useAuth = create<AuthState>()((set, get) => ({
     }
   },
 
+  /**
+   * Cerrar sesión deja el dispositivo limpio para la siguiente persona:
+   *  1. Da de baja el aviso push de ESTE navegador (antes de `signOut`: después
+   *     ya no hay permiso para tocar `users/{uid}`). Nunca bloquea.
+   *  2. Cierra la sesión de Firebase.
+   *  3. Borra lo local de la cuenta (progreso, liga, lector): ver `local-data.ts`.
+   * Imports dinámicos: el login no tiene por qué cargar el currículo entero.
+   */
   logout: async () => {
+    const uid = get().uid;
+    if (uid) {
+      try {
+        // Lo estudiado en los últimos segundos aún no se ha escrito (debounce).
+        const { flushProgressSync } = await import("@/lib/sync");
+        await Promise.race([flushProgressSync(), new Promise((r) => setTimeout(r, 4000))]);
+      } catch {}
+      try {
+        const { releasePushOnLogout } = await import("@/lib/push");
+        await releasePushOnLogout(uid);
+      } catch {
+        // Sin red ni el trozo de código: el cron limpia las suscripciones muertas.
+      }
+    }
     try {
       await signOut(auth());
     } finally {
       localStorage.removeItem(SENT_KEY);
+      try {
+        const { clearLocalUserData } = await import("@/lib/local-data");
+        await clearLocalUserData();
+      } catch (err) {
+        console.warn("[parlo] no se pudo limpiar el dispositivo al salir", err);
+      }
       apply(set, null);
     }
   },

@@ -1,4 +1,4 @@
-import { allow } from "@/lib/rate-limit";
+import { guard } from "@/lib/api-guard";
 
 // Voz neural para el lector. La calidad de Web Speech depende del dispositivo
 // (en un Android barato suena metálica), y en un lector de textos largos eso
@@ -7,6 +7,11 @@ import { allow } from "@/lib/rate-limit";
 // Es un GET a propósito: la misma frase es siempre la misma URL, así que la
 // CDN de Vercel la cachea y la segunda vez ni siquiera llega aquí. Ese es todo
 // el «cacheado»: sin base de datos, sin bucket y sin coste de almacenamiento.
+//
+// El token de Firebase viaja en `x-parlo-token` y NO en `Authorization`: la CDN
+// de Vercel no cachea peticiones que llevan `Authorization`, y sin caché cada
+// clic gastaría cuota. El cliente pide el audio con `fetch` (que sí puede
+// mandar cabeceras, al contrario que `<audio src>`) y lo reproduce como blob.
 
 export const maxDuration = 30;
 
@@ -17,7 +22,10 @@ const MODEL = "gemini-2.5-flash-preview-tts";
 /** Voces del modelo; `Kore` es neutra y clara para aprender. */
 const VOICES: Record<string, string> = { f: "Kore", m: "Puck" };
 
-const RATE = { store: new Map<string, number[]>(), limit: 60, windowMs: 60_000 };
+const RATE = {
+  ip: { store: new Map<string, number[]>(), limit: 60, windowMs: 60_000 },
+  uid: { store: new Map<string, number[]>(), limit: 40, windowMs: 60_000 },
+};
 
 /**
  * El modelo devuelve PCM crudo (L16 24 kHz mono). El navegador no lo reproduce
@@ -53,16 +61,17 @@ export async function GET(req: Request) {
   if (!text) return new Response("Missing text", { status: 400 });
   if (text.length > MAX_CHARS) return new Response("Text too long", { status: 413 });
 
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
-  if (!allow(ip, Date.now(), RATE)) {
-    return new Response("Too many requests", { status: 429 });
-  }
+  // Sólo llega aquí lo que la CDN no tenía: una frase ya generada se sirve sin
+  // pasar por esta comprobación (y sin gastar cuota), que es lo que se quiere.
+  const gate = await guard(req, RATE);
+  if (gate instanceof Response) return gate;
 
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${key}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`,
     {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      // La clave por cabecera y no en la URL: las URLs acaban en logs.
+      headers: { "content-type": "application/json", "x-goog-api-key": key },
       body: JSON.stringify({
         contents: [{ parts: [{ text }] }],
         generationConfig: {

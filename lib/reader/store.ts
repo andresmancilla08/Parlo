@@ -27,7 +27,13 @@ function open(): Promise<IDBDatabase> {
       const db = req.result;
       if (!db.objectStoreNames.contains(STORE)) db.createObjectStore(STORE, { keyPath: "id" });
     };
-    req.onsuccess = () => resolve(req.result);
+    req.onsuccess = () => {
+      const db = req.result;
+      // Si alguien pide borrar la base (cerrar sesión), se suelta la conexión:
+      // si no, `deleteDatabase` se queda bloqueado mientras viva esta pestaña.
+      db.onversionchange = () => db.close();
+      resolve(db);
+    };
     req.onerror = () => reject(req.error);
   });
 }
@@ -60,4 +66,19 @@ export function saveDoc(doc: StoredDoc): Promise<unknown> {
 
 export function deleteDoc(id: string): Promise<unknown> {
   return tx("readwrite", (s) => s.delete(id));
+}
+
+/**
+ * Borra TODOS los documentos del dispositivo (al cerrar sesión: son de esa
+ * cuenta). Nunca rechaza ni espera para siempre: si otra pestaña tiene la base
+ * abierta, el borrado queda en cola y el navegador lo completa al soltarla.
+ */
+export function deleteAllDocs(): Promise<void> {
+  if (typeof indexedDB === "undefined") return Promise.resolve();
+  return new Promise((resolve) => {
+    const req = indexedDB.deleteDatabase(DB);
+    req.onsuccess = () => resolve();
+    req.onerror = () => resolve();
+    req.onblocked = () => resolve();
+  });
 }

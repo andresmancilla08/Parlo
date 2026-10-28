@@ -25,7 +25,7 @@ export function AddToReview({ en, es, className }: { en: string; es: string; cla
       title={label}
       className={cn(
         "grid size-8 shrink-0 place-items-center rounded-full transition-transform active:scale-95",
-        inReview ? "bg-success-soft text-success-ink" : "bg-primary-soft text-primary",
+        inReview ? "bg-success/15 text-success-ink" : "bg-primary-soft text-primary",
         className,
       )}
     >

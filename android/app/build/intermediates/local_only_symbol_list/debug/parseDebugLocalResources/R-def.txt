@@ -1,0 +1,14 @@
+R_DEF: Internal format may change without notice
+local
+color backgroundColor
+color colorPrimary
+color iconBackground
+drawable splash
+mipmap ic_launcher
+mipmap ic_launcher_foreground
+string app_name
+string assetStatements
+string hostName
+string launchUrl
+string providerAuthority
+xml filepaths
