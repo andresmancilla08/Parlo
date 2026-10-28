@@ -12,6 +12,7 @@
     "on": "Daily nudge at {{hour}} if you haven't practised.",
     "off": "One nudge a day so you don't lose your streak.",
     "unsupported": "This browser doesn't support notifications. On iPhone, add Parlo to your home screen.",
+    "unsupported_app": "Reminders don't reach the Android app yet. If you want them, turn them on from Parlo in Chrome.",
     "denied": "You blocked notifications. Enable them for Parlo in your browser settings.",
     "error": "We couldn't turn the reminder on. Check your connection and try again."
   },
@@ -254,6 +255,7 @@
     "scenarios": "Talk to the AI",
     "listening": "Listening… speak in English",
     "mic_denied": "Parlo isn't allowed to use the microphone. Turn it on in the site settings (the padlock next to the address) and try again.",
+    "mic_denied_app": "Parlo isn't allowed to use the microphone. Turn it on in Settings > Apps > Parlo > Permissions and try again.",
     "mic_failed": "Couldn't use the microphone. Try again or type your answer.",
     "starters_title": "Try starting like this",
     "brief_kicker": "Before you start",

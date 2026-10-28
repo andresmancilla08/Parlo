@@ -12,6 +12,7 @@
     "on": "Aviso diario a las {{hour}} si no has practicado.",
     "off": "Un aviso al día para no perder la racha.",
     "unsupported": "Este navegador no admite avisos. En iPhone, instala Parlo en la pantalla de inicio.",
+    "unsupported_app": "En la app de Android los avisos todavía no llegan. Si los quieres, actívalos desde Parlo en Chrome.",
     "denied": "Bloqueaste las notificaciones. Actívalas para Parlo en los ajustes del navegador.",
     "error": "No se pudo activar el aviso. Revisa tu conexión e inténtalo otra vez."
   },
@@ -254,6 +255,7 @@
     "scenarios": "Conversar con la IA",
     "listening": "Te escucho… habla en inglés",
     "mic_denied": "Parlo no tiene permiso para usar el micrófono. Actívalo en los ajustes del sitio (el candado junto a la dirección) y vuelve a intentarlo.",
+    "mic_denied_app": "Parlo no tiene permiso para usar el micrófono. Actívalo en Ajustes > Apps > Parlo > Permisos y vuelve a intentarlo.",
     "mic_failed": "No se pudo usar el micrófono. Prueba otra vez o escribe la respuesta.",
     "starters_title": "Prueba a empezar así",
     "brief_kicker": "Antes de empezar",

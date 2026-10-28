@@ -4,6 +4,7 @@ import { useSyncExternalStore } from "react";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { hasSession, idToken, NotSignedInError } from "@/lib/api-client";
+import { hasNativePlugin, NativeTTS } from "@/lib/native";
 
 /** Igual que `TOKEN_HEADER` de `lib/api-guard.ts` (ese módulo es de servidor). */
 const TOKEN_HEADER = "x-parlo-token";
@@ -43,7 +44,43 @@ function synth(): SpeechSynthesis | null {
     : null;
 }
 
+/**
+ * APK nativa: el WebView de Android no tiene `speechSynthesis`; la voz del
+ * dispositivo sale del motor de Android (plugin TextToSpeech). La voz neural
+ * no cambia: es un `<audio>` y suena igual en el WebView.
+ */
+function nativeTts(): boolean {
+  return hasNativePlugin("TextToSpeech");
+}
+
+/** Índice de cada voz nativa en la lista del plugin (lo que pide `speak`). */
+const nativeVoiceIndex = new Map<string, number>();
+let nativeVoicesLoading = false;
+
+function loadNativeVoices() {
+  if (nativeVoicesLoading || voices !== EMPTY) return;
+  nativeVoicesLoading = true;
+  NativeTTS.getSupportedVoices()
+    .then(({ voices: list }) => {
+      nativeVoiceIndex.clear();
+      // El nombre que da Android («English United States») se repite; el
+      // `voiceURI` (en-us-x-iol-local…) es único y es el que se guarda.
+      const mapped = list.map((v, i) => {
+        nativeVoiceIndex.set(v.voiceURI, i);
+        return { ...v, name: v.voiceURI } as unknown as SpeechSynthesisVoice;
+      });
+      if (mapped.length === 0) return;
+      voices = mapped;
+      for (const l of listeners) l();
+    })
+    .catch(() => {})
+    .finally(() => {
+      nativeVoicesLoading = false;
+    });
+}
+
 function refresh() {
+  if (nativeTts()) return loadNativeVoices();
   const next = synth()?.getVoices() ?? EMPTY;
   // Sólo se publica si cambió de verdad: `getSnapshot` debe ser estable.
   const same =
@@ -141,15 +178,17 @@ export function speak(
     return;
   }
 
+  if (nativeTts()) {
+    void nativeSpeak(text, lang, rate);
+    return;
+  }
+
   const s = synth();
   if (!s) return;
   refresh(); // en Chrome la lista llega tarde la primera vez
   s.cancel();
 
-  const preferred = lang === "en" ? useVoicePref.getState().name : null;
-  const list = voicesFor(lang);
-  const chosen = preferred ? list.find((v) => v.name === preferred) : undefined;
-  const voice = chosen ?? list[0] ?? null;
+  const voice = pickVoice(lang);
 
   const u = new SpeechSynthesisUtterance(text);
   u.voice = voice;
@@ -158,6 +197,50 @@ export function speak(
   u.pitch = 1;
   u.volume = 1;
   s.speak(u);
+}
+
+/** Voz elegida en el perfil (sólo inglés) o, si no hay, la mejor puntuada. */
+function pickVoice(lang: "en" | "es"): SpeechSynthesisVoice | null {
+  const preferred = lang === "en" ? useVoicePref.getState().name : null;
+  const list = voicesFor(lang);
+  const chosen = preferred ? list.find((v) => v.name === preferred) : undefined;
+  return chosen ?? list[0] ?? null;
+}
+
+/** Termina la promesa de la frase nativa en curso (se cortó o la pisó otra). */
+let nativeRelease: (() => void) | null = null;
+
+/**
+ * Voz del dispositivo en la APK. Resuelve al terminar la frase, al cortarla
+ * (`stopSpeaking`) o cuando otra frase la sustituye; nunca rechaza. El plugin
+ * no resuelve una frase cortada, de ahí `nativeRelease`.
+ */
+function nativeSpeak(text: string, lang: "en" | "es", rate: number): Promise<void> {
+  nativeRelease?.();
+  refresh();
+  const voice = pickVoice(lang);
+  const index = voice ? nativeVoiceIndex.get(voice.name) : undefined;
+  return new Promise<void>((resolve) => {
+    const done = () => {
+      if (nativeRelease === done) nativeRelease = null;
+      resolve();
+    };
+    nativeRelease = done;
+    NativeTTS.speak({
+      text,
+      lang: voice?.lang ?? (lang === "en" ? "en-US" : "es-ES"),
+      rate,
+      pitch: 1,
+      volume: 1,
+      ...(index !== undefined ? { voice: index } : {}),
+    }).then(done, done);
+  });
+}
+
+function nativeStop() {
+  if (!nativeTts()) return;
+  nativeRelease?.();
+  NativeTTS.stop().catch(() => {});
 }
 
 /* ---------------- voz neural del servidor ---------------- */
@@ -215,6 +298,7 @@ let interrupt: (() => void) | null = null;
 export function stopSpeaking() {
   clearQueue();
   synth()?.cancel();
+  nativeStop();
   inflight?.abort();
   inflight = null;
   if (current) {
@@ -423,6 +507,17 @@ export async function speakAndWait(
 
 /** Voz del dispositivo, esperando a que termine. */
 function deviceAndWait(text: string, lang: "en" | "es", rate: number): Promise<void> {
+  if (nativeTts()) {
+    // El plugin avisa al terminar: nada de sondeos. `stopSpeaking` la suelta.
+    return new Promise<void>((resolve) => {
+      const done = () => {
+        deviceWaiters.delete(done);
+        resolve();
+      };
+      deviceWaiters.add(done);
+      void nativeSpeak(text, lang, rate).then(done);
+    });
+  }
   return new Promise<void>((resolve) => {
     speak(text, lang, rate, true);
     const s = synth();

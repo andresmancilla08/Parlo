@@ -15,6 +15,7 @@ import {
 import { DEFAULT_REMINDER_HOUR, REMINDER_HOURS, type Reminder } from "@/lib/reminders";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
+import { isNativeApp } from "@/lib/native";
 
 /** Recordatorio diario de racha: aviso del navegador a la hora que elija. */
 export function ReminderSetting() {
@@ -47,7 +48,8 @@ export function ReminderSetting() {
     status === null
       ? t("common.loading")
       : status === "unsupported"
-        ? t("reminder.unsupported")
+        ? // En la APK no hay Web Push (WebView): el aviso no puede llegar.
+          t(isNativeApp() ? "reminder.unsupported_app" : "reminder.unsupported")
         : status === "denied"
           ? t("reminder.denied")
           : status === "error"
