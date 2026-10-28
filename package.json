@@ -1,17 +1,22 @@
 {
   "name": "parlo",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build --webpack",
     "start": "next start",
     "lint": "eslint",
-    "dev:emu": "firebase emulators:exec --only auth,firestore --project demo-parlo \"NEXT_PUBLIC_FIREBASE_PROJECT_ID=demo-parlo NEXT_PUBLIC_FIREBASE_EMULATOR=1 next dev\""
+    "dev:emu": "firebase emulators:exec --only auth,firestore --project demo-parlo \"NEXT_PUBLIC_FIREBASE_PROJECT_ID=demo-parlo NEXT_PUBLIC_FIREBASE_EMULATOR=1 next dev\"",
+    "android:sync": "cap sync android",
+    "android:apk": "cap sync android && cd android && ./gradlew assembleDebug"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.107",
     "@ai-sdk/react": "^4.0.159",
+    "@capacitor-community/text-to-speech": "8.0.2",
+    "@capacitor/core": "8.5.3",
+    "@capacitor/splash-screen": "8.0.2",
     "@tabler/icons-react": "^3.45.0",
     "ai": "^7.0.155",
     "clsx": "^2.1.1",
@@ -30,6 +35,8 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@capacitor/android": "8.5.3",
+    "@capacitor/cli": "8.5.3",
     "@serwist/next": "^9.5.12",
     "@serwist/window": "^9.5.12",
     "@tailwindcss/postcss": "^4",

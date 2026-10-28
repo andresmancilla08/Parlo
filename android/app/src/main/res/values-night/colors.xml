@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tema oscuro del sistema: el fondo oscuro de la web. -->
+<resources>
+    <color name="parlo_background">#140E24</color>
+    <color name="colorPrimaryDark">#140E24</color>
+</resources>

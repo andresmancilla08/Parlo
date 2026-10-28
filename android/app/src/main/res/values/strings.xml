@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Parlo</string>
+    <string name="title_activity_main">Parlo</string>
+    <string name="package_name">co.parlo.app</string>
+    <string name="custom_url_scheme">co.parlo.app</string>
+</resources>
