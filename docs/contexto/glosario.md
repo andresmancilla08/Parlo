@@ -38,3 +38,9 @@
 - **Código de liga:** 6 caracteres sin vocales ni ambigüedades (`BCDFGHJKLMNPQRSTVWXYZ23456789`); es la única forma de entrar.
 - **Nominalización (C1):** convertir el verbo en sustantivo (implement → implementation) para elevar el registro.
 - **Inversión (C1):** adelantar el auxiliar al sujeto tras un negativo al principio («Never had I seen…»).
+
+## Añadidos 2026-10-27 (modo llamada)
+- **Modo llamada:** conversación HABLADA en tiempo real con Gemini Live (`/app/llamada`). Se puede interrumpir; las correcciones llegan al colgar, no durante la llamada.
+- **Token efímero:** credencial de un solo uso y vida corta que da `/api/live-token`; lleva dentro el modelo y el prompt bloqueados. La clave de Gemini nunca sale del servidor.
+- **Handle de reanudación:** identificador opaco que manda Gemini (`sessionResumptionUpdate`) para retomar la misma conversación tras un corte; viaja dentro del siguiente token.
+- **VAD:** detección de voz del servidor; decide cuándo terminó de hablar el usuario (`silenceDurationMs` por nivel).

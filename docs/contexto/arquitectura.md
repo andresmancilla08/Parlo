@@ -11,7 +11,7 @@ PWA web que enseña inglés a hispanohablantes con currículo por niveles + tuto
 - **Estado cliente:** Zustand.
 - **Auth + BD:** Firebase (Auth + Firestore).
 - **IA:** Vercel AI SDK (`ai`) + `@ai-sdk/google` (Gemini free tier). Rutas de IA en el servidor (Route Handlers).
-- **Voz:** Web Speech API del navegador.
+- **Voz:** Web Speech API del navegador; Gemini TTS (`/api/tts`); Gemini Live por WebSocket (modo llamada, sin SDK).
 - **Hosting:** Vercel.
 
 ## Mapa de carpetas
@@ -20,6 +20,7 @@ PWA web que enseña inglés a hispanohablantes con currículo por niveles + tuto
 - `components/lesson/` — `lesson-teach.tsx` (fase «Aprende») y `lesson-runner.tsx` (práctica).
 - `app/api/tts/` — voz neural (Gemini TTS) devuelta como WAV. GET a propósito: la misma frase es la misma URL y la cachea la CDN. Exige sesión vía `x-parlo-token`.
 - `lib/api-guard.ts` + `lib/firebase-token.ts` — puerta de las rutas de IA (IP → ID token de Firebase → límite por uid). Cliente: `lib/api-client.ts` (`apiFetch`).
+- `lib/live/` — modo llamada (Gemini Live). Puros y con `.check.ts`: `protocol.ts` (modelo, URL, setup del token, mensajes in/out), `pcm.ts` (remuestreo a 16 kHz, PCM16, base64, medidor), `transcript.ts` (transcripción en vivo y texto a revisar), `prompt.ts` (instrucciones por escenario y nivel). De navegador: `session.ts` (`LiveCall`: micro, WebSocket, cola de reproducción, reanudación) y `mic-worklet.ts` (AudioWorklet desde Blob). Servidor: `app/api/live-token/` (token efímero). UI: `app/app/llamada/` + `components/app/llamada/` (vistas sin lógica) + `components/app/call-entry-card.tsx` (entrada para el selector de práctica).
 - `lib/guide/` — sección de consulta: `irregulars.ts`, `phrasals.ts`, `false-friends.ts`, `regulars.ts` (datos bilingües) y `conjugate.ts` (motor puro de los 15 tiempos). `index.ts` cablea motor + tabla; los `.check.ts` corren con node y por eso `conjugate.ts` NO importa la tabla.
 - `lib/curriculum/` — `levels/*` (ejercicios base), `extra/*` (ejercicios añadidos, mapa `lessonId → Exercise[]`) y `teach/*` (teoría, mapa `lessonId → TeachStep[]`). `data.ts` los compone con `withExtra()`.
 - `lib/` — `firebase.ts` (init cliente), `utils.ts` (`cn`), `sfx.ts` (sonidos WebAudio), `dictation.ts` (voz→texto), `tts.ts` (texto→voz, normal y lenta), `pronunciation.ts` (puntuar lectura en voz alta), `league*.ts` (liga: `league-core` es la parte pura y `league` la de Firestore), `sync.ts` + `progress-merge.ts` (sync del progreso por transacción; la fusión es pura), `local-data.ts` (qué se borra del dispositivo al cerrar sesión), `chunk-reload.ts` (recarga ante `ChunkLoadError`).
@@ -29,6 +30,7 @@ PWA web que enseña inglés a hispanohablantes con currículo por niveles + tuto
 - **Aprendizaje:** currículo curado A1→B2 (24 unidades) → **teoría** (`getTeach`) → lección → ejercicios → progreso/SRS en Firestore.
   Cada lección enseña ANTES de evaluar: `/app/leccion?id=…` arranca en la fase «Aprende» y sólo entra a los
   ejercicios al terminarla (o si `progress.taught` ya la contiene). `?mode=teoria|practica` fuerza una u otra.
+- **Llamada (voz en tiempo real):** botón «Llamar» → `/api/live-token` (sesión Firebase) → token efímero → el navegador abre el WebSocket de Gemini Live directamente (micro PCM 16 kHz ↑, voz PCM 24 kHz ↓, transcripciones) → al colgar, lo dicho va a `/api/coach` y se muestran las correcciones.
 - **IA (tutor/corrección):** cliente → Route Handler `/api/...` → Gemini vía AI SDK (streaming) → respuesta. La clave de IA vive solo en el servidor.
 - **PWA:** `manifest.ts` sirve `/manifest.webmanifest`; `sw.ts` precachea y da offline parcial (solo en producción).
 
