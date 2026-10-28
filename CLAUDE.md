@@ -2,7 +2,7 @@
 
 # Parlo
 
-PWA (siempre web, nunca nativo) para aprender inglés. Contexto completo en:
+PWA para aprender inglés (la web es la app; la APK de Android es un envoltorio Capacitor que carga la web desplegada, ver `docs/contexto/decisiones.md`). Contexto completo en:
 
 - `docs/roadmap-mvp.md` — visión, alcance MVP, fases.
 - `docs/contexto/arquitectura.md` · `convenciones.md` · `decisiones.md` · `glosario.md` · `flujo-de-trabajo.md` · `errores-conocidos.md`

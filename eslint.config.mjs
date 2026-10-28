@@ -15,6 +15,8 @@ const eslintConfig = defineConfig([
     // Service worker generado por Serwist (no editar/lint).
     "public/sw.js",
     "public/swe-worker-*.js",
+    // Proyecto Android (Capacitor): builds y JS copiado por `cap sync`.
+    "android/**",
   ]),
 ]);
 

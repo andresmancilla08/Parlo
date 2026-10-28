@@ -1,6 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { hasNativePlugin, isNativeApp } from "@/lib/native";
+import { NativeRecognition } from "@/lib/native-speech";
 
 // Dictado por voz con la Web Speech API (SpeechRecognition). Es gratis y va en
 // el navegador: nada de audio a un servidor. Chrome/Edge/Safari la traen;
@@ -30,6 +32,8 @@ type RecognitionCtor = new () => Recognition;
 
 export function recognitionCtor(): RecognitionCtor | null {
   if (typeof window === "undefined") return null;
+  // APK nativa: el WebView no reconoce voz; lo hace Android (plugin ParloSpeech).
+  if (hasNativePlugin("ParloSpeech")) return NativeRecognition;
   const w = window as unknown as {
     SpeechRecognition?: RecognitionCtor;
     webkitSpeechRecognition?: RecognitionCtor;
@@ -41,6 +45,8 @@ export type DictationError = "denied" | "nospeech" | "network" | "nomic" | "fail
 
 /** Clave i18n del aviso que corresponde a cada fallo. */
 export function dictationErrorKey(error: Exclude<DictationError, null>): string {
+  // En la APK el permiso se da en los ajustes de Android, no junto a la URL.
+  if (error === "denied" && isNativeApp()) return "practica.mic_denied_app";
   return `practica.mic_${error}`;
 }
 
@@ -73,7 +79,7 @@ const ERROR_TTL_MS = 6_000;
  * iOS con Parlo instalada en la pantalla de inicio: WebKit expone
  * `webkitSpeechRecognition` pero en modo standalone no funciona (no pide
  * permiso o falla en silencio). Mejor no enseñar un micro roto.
- * La APK de Android es una TWA (Chrome) y ahí sí funciona: no entra aquí.
+ * La APK de Android usa el reconocedor nativo (`lib/native-speech.ts`): no entra aquí.
  */
 export function isIosStandalone(): boolean {
   if (typeof window === "undefined") return false;

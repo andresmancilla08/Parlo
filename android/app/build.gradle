@@ -1,52 +1,55 @@
-// Envoltorio TWA (Trusted Web Activity): la APK abre la web de producción en
-// Chrome a pantalla completa. No hay código web aquí; ver docs/contexto/decisiones.md.
-plugins {
-    id 'com.android.application'
-}
+apply plugin: 'com.android.application'
 
+// Versión desde package.json: versionCode = maj*10000 + min*100 + pat (0.11.0 → 1100).
+// Sigue el mismo esquema que la TWA anterior (0.10.0 → 1000) para instalar encima.
 def pkg = new groovy.json.JsonSlurper().parse(file('../../package.json'))
 def (maj, min, pat) = pkg.version.tokenize('.').collect { it.toInteger() }
 
-def twa = [
-    host        : 'parlo-lilac.vercel.app',
-    launchUrl   : '/',
-    name        : 'Parlo',
-    themeColor  : '#FF6B4A',
-    background  : '#FFF9F5',
-]
+// Build de prueba contra un `next dev` local (ver capacitor.config.ts): sólo
+// entonces se permite HTTP en claro.
+def devUrl = System.getenv('PARLO_CAP_DEV_URL')
 
 android {
-    namespace 'co.parlo.app'
-    compileSdk 36
-
+    namespace = "co.parlo.app"
+    compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId 'co.parlo.app'
-        minSdk 24
-        targetSdk 36
+        applicationId "co.parlo.app"
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode maj * 10000 + min * 100 + pat
         versionName pkg.version
-
-        resValue 'string', 'app_name', twa.name
-        resValue 'string', 'launchUrl', "https://${twa.host}${twa.launchUrl}"
-        resValue 'string', 'hostName', twa.host
-        resValue 'string', 'providerAuthority', 'co.parlo.app.fileprovider'
-        resValue 'color', 'colorPrimary', twa.themeColor
-        resValue 'color', 'backgroundColor', twa.background
-        resValue 'string', 'assetStatements',
-            "[{ \"relation\": [\"delegate_permission/common.handle_all_urls\"], \"target\": {\"namespace\": \"web\", \"site\": \"https://${twa.host}\"}}]"
+        manifestPlaceholders = [usesCleartext: devUrl ? 'true' : 'false']
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        aaptOptions {
+             // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
+             // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
+            ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
+        }
     }
-
     buildTypes {
         release {
             minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+}
+
+repositories {
+    flatDir{
+        dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
     }
 }
 
 dependencies {
-    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.6.2'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
+    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
+    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
+    implementation project(':capacitor-android')
+    testImplementation "junit:junit:$junitVersion"
+    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
+    implementation project(':capacitor-cordova-android-plugins')
 }
+
+apply from: 'capacitor.build.gradle'

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { syncStatusBar } from "@/lib/native";
 
 export type Theme = "light" | "dark" | "system";
 
@@ -30,4 +31,6 @@ export function applyTheme(theme: Theme) {
     (theme === "system" &&
       window.matchMedia("(prefers-color-scheme: dark)").matches);
   document.documentElement.classList.toggle("dark", dark);
+  // APK nativa: iconos de la barra de estado legibles sobre el fondo del tema.
+  syncStatusBar(dark);
 }

@@ -274,7 +274,7 @@
 
 ## Manos libres: medio dúplex con Web Speech
 - **Qué:** `useHandsFree` (`lib/hands-free.ts`): reconocimiento continuo, envío tras 1,2 s de silencio, y el micro sólo está abierto cuando no se piensa ni habla el tutor (`canListen` en la conversación). Si el navegador cierra la sesión sola, se reabre. Un fallo serio (permiso, sin micro) deja el panel «En pausa» con el aviso.
-- **Dónde:** Chrome/Android/APK (TWA). Oculto donde no hay reconocimiento (Firefox) o no funciona (iOS instalada), igual que el dictado.
+- **Dónde:** Chrome/Android/APK (en la APK, con el reconocedor nativo de Android). Oculto donde no hay reconocimiento (Firefox) o no funciona (iOS instalada), igual que el dictado.
 - **Descartado:** escuchar mientras habla el tutor (se transcribiría a sí mismo) y VAD/librerías de audio (peso y coste para lo que la API del navegador ya hace).
 - **Estado:** vigente. Sin probar con micrófono real (ver `errores-conocidos.md`).
 ## Modo llamada: Gemini Live con token efímero y WebSocket directo (2026-10-27)
@@ -295,11 +295,17 @@
 - **Permissions-Policy:** pasó de `microphone=()` a `microphone=(self)`. Con `()` el navegador rechaza `getUserMedia` aunque el usuario dé permiso.
 - **Latencia medida (2026-10-27, Node, voz sintética de `say`):** token 0,4–1,3 s; `setupComplete` 0,6–0,9 s; primer audio tras el saludo por texto 0,65–0,8 s; primer audio tras terminar de hablar 1,3 s con el VAD por defecto y 1,6–2,2 s con los 1200 ms de A2 (incluye esa espera de silencio). Interrupción detectada (`interrupted`) y transcripciones de entrada y salida correctas.
 - **Fuentes:** ai.google.dev/gemini-api/docs/{live-guide, live-session, ephemeral-tokens, pricing (act. 2026-10-27), rate-limits (act. 2026-10-26)}, ai.google.dev/api/live, npm `@google/genai` 2.31.0 (`dist/web/index.mjs`: `Tokens.create`, `Live.connect`).
-- **Estado:** vigente. Falta probar con micro y altavoz reales en Android (Chrome/TWA) e iPhone (Safari y PWA instalada).
-## APK de Android: envoltorio TWA, no Capacitor
-- **Qué:** `android/` es un proyecto Gradle mínimo con `androidbrowserhelper` (Trusted Web Activity). La APK (`co.parlo.app`) abre `https://parlo-lilac.vercel.app/` en Chrome a pantalla completa. No contiene código web: todo sigue siendo la PWA desplegada, así que se mantiene la regla «siempre web».
-- **Por qué TWA:** en el WebView de Android (lo que usa Capacitor) no existen `speechSynthesis` (la pronunciación de lecciones quedaría muda), `SpeechRecognition` (sin dictado) ni Web Push. En una TWA corre Chrome: voz, dictado, notificaciones, service worker y sesión de Firebase funcionan igual que en la PWA. Además no hace falta `webDir` ni plugins.
-- **Descartado:** Capacitor con `server.url` (pierde las APIs de voz); Bubblewrap CLI (`init` es interactivo y descarga su propio JDK/SDK; el proyecto a mano son 6 archivos).
-- **Pantalla completa:** depende de `public/.well-known/assetlinks.json` con el SHA-256 del certificado que firma la APK. Hoy está el de la debug keystore de la Mac del dueño (`~/.android/debug.keystore`, `49:B2:2F:…:68:9D`). Hasta desplegar ese archivo, la APK abre con barra de URL (modo Custom Tab); funciona igual. Firmar con otra clave = añadir su huella al JSON.
-- **Versión:** `versionName`/`versionCode` salen de `package.json` (`maj*10000+min*100+pat`).
-- **Estado:** vigente. APK debug para instalación manual; para Play haría falta keystore de release.
+- **Estado:** vigente. Falta probar con micro y altavoz reales en Android (Chrome y la APK; en el emulador de la APK conecta, saluda y escucha) e iPhone (Safari y PWA instalada).
+## APK de Android: Capacitor, ya no TWA (2026-10-27, 0.11.0)
+- **Qué:** `android/` es un proyecto Capacitor 8 (`co.parlo.app`, nombre Parlo). Su WebView carga `https://parlo-lilac.vercel.app` (`server.url`): la app sigue siendo la web desplegada (tiene rutas `/api/*`, no se puede exportar estática). Lo que el WebView no trae lo cubren plugins nativos, y la web los usa sólo si `Capacitor.isNativePlatform()` (el puente también se inyecta en la URL remota: comprobado en el emulador).
+- **Por qué se dejó la TWA:** el dueño no quiere una app que «se ejecuta en Chrome» (aviso de Chrome, dependencia de Chrome y de Digital Asset Links). La razón de la TWA eran las APIs de voz del WebView; ahora las cubren plugins.
+- **Qué cubre cada pieza:**
+  - Voz del dispositivo (respaldo de la neural, tortuga, cola por frases, voces del perfil): `@capacitor-community/text-to-speech` desde `lib/tts.ts`. La voz neural (`<audio>`) no cambia.
+  - Reconocimiento de voz (dictado, Pronunciación, «Dilo tú», manos libres): plugin PROPIO `ParloSpeechPlugin.java` + `lib/native-speech.ts` (`NativeRecognition`, misma forma que la Web Speech API; `recognitionCtor()` la devuelve en la APK). Errores con los códigos de Web Speech → mismos avisos i18n (el de permiso dice «Ajustes > Apps > Parlo»).
+  - Modo llamada: `getUserMedia` + AudioWorklet funcionan en el WebView; Capacitor concede la captura si la app tiene `RECORD_AUDIO` + `MODIFY_AUDIO_SETTINGS` (probado: conecta, saluda y escucha).
+  - Atrás (navega; en la raíz minimiza), márgenes de las barras y el teclado: `MainActivity.java`. Color de las barras según el tema de la web: `ParloShellPlugin.java`.
+  - Enlaces externos: Capacitor los abre en el navegador (comprobado). Sin conexión: `capacitor/www/offline.html` (`server.errorPath`).
+- **Descartado:** `@capacitor-community/speech-recognition` 7.0.1 (con resultados parciales resuelve `start` al instante y pierde los errores; no distingue final de parcial); `@capacitor/app` para el botón atrás (habría que manejarlo desde la web y no llegaría a la APK hasta desplegar); `insetsHandling: "css"` de SystemBars (varias pantallas no reservan el área de la barra de estado); FCM para recordatorios (cuenta y mantenimiento; fuera de alcance); seguir con la TWA.
+- **Recordatorios:** sin Web Push en el WebView, en la APK no llegan. La tarjeta lo dice (`reminder.unsupported_app`). Pendiente si hace falta: notificaciones locales (`@capacitor/local-notifications`) para la racha.
+- **Versión y firma:** `versionCode` 1100 (> 1000 de la TWA) y la misma debug keystore: se instala encima de la TWA (probado en el emulador, 0.10.0 → 0.11.0 con `adb install -r`). `assetlinks.json` se queda: no estorba.
+- **Estado:** vigente. Ver `flujo-de-trabajo.md` (cómo regenerarla) y `errores-conocidos.md` (APK).
